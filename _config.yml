@@ -24,7 +24,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: gihong's Blog
+title: 기술 & 인문학 블로그
 email: gitul0515@gmail.com
 author: gitul0515
 
@@ -72,7 +72,7 @@ yat:
 # sitemap: false
 
 # If you want to change site language, you can set lang option
-# lang: "en"  # default lang is en
+lang: "ko"  # default lang is en
 
 # Translate languges
 # langs refer to https://cloud.google.com/translate/docs/languages
@@ -153,12 +153,12 @@ yat:
 #   - tags.html
 #   - about.md
 
-# Page default value
-# defaults:
-#   home:
-#     heading: "Your awesome heading"
-#     subheading: "Your awesome subheading"
-#     banner: "Your image url"
+#Page default value
+defaults:
+  home:
+    heading: "인문학을 추구하는 소프트웨어 개발자"
+    subheading: "기홍의 블로그입니다:)"
+    banner: "Your image url"
 
 # Banner default settings
 # These banner settings are for global banner default, but you can also
