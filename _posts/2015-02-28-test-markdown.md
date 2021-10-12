@@ -16,31 +16,19 @@ Markdown 기본 문법을 정리하였다. 출처는 `http://markdowntutorial.co
    예: `**bold**`
 
 ### 3. Headers: `#`
-![Header](./image/markdown3.png)
+![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown3.png?raw=true)
 
-**Here is some bold text**
+Headers one과 six는 sparingly하게 사용하는 것이 좋다고 한다.
 
-## Here is a secondary heading
-
-Here's a useless table:
-
-| Number | Next number | Previous number |
-| :------ |:--- | :--- |
-| Five | Six | Four |
-| Ten | Eleven | Nine |
-| Seven | Eight | Six |
-| Two | Three | One |
+### 4. Links
+ 1. inline link: `[]()`
+    ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-1.png?raw=true)
+ 2. reference link
+    >advantage of the reference link style is that multiple links to the same place only need to be updated once
+    ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-2.png?raw=true)
 
 
-How about a yummy crepe?
 
-![Crepe](https://s3-media3.fl.yelpcdn.com/bphoto/cQ1Yoa75m2yUFFbY2xwuqw/348s.jpg)
-
-It can also be centered!
-
-![Crepe](https://s3-media3.fl.yelpcdn.com/bphoto/cQ1Yoa75m2yUFFbY2xwuqw/348s.jpg){: .center-block :}
-
-Here's a code chunk:
 
 ~~~
 var foo = function(x) {
