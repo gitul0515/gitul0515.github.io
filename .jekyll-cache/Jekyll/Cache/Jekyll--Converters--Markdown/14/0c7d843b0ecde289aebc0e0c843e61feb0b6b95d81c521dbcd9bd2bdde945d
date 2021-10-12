@@ -1,0 +1,78 @@
+I"}<p>Markdown 기본 문법을 정리하였다. 출처는 <code class="language-plaintext highlighter-rouge">http://markdowntutorial.com</code>이다.<br />
+이 게시물도 Markdown 언어로 작성하고 있는데, 앞으로 자주 쓰게 될 것 같다.</p>
+
+<h3 id="1-italic-_">1. italic: _</h3>
+<p>예: <code class="language-plaintext highlighter-rouge">_italic_</code></p>
+
+<h3 id="2-bold-">2. bold: **</h3>
+<p>예: <code class="language-plaintext highlighter-rouge">**bold**</code></p>
+
+<h3 id="3-headers-">3. Headers: <code class="language-plaintext highlighter-rouge">#</code></h3>
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown3.png?raw=true" alt="Header" /></p>
+
+<p>Headers one과 six는 sparingly하게 사용하는 것이 좋다고 한다.</p>
+
+<h3 id="4-links-">4. Links: <code class="language-plaintext highlighter-rouge">[]()</code></h3>
+<p><strong>1) inline link:</strong></p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-1.png?raw=true" alt="Header" /></p>
+
+<p><strong>2) reference link</strong></p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-2.png?raw=true" alt="Header" /></p>
+
+<blockquote>
+  <p>advantage of the reference link style is that multiple links to the same place only need to be updated once.</p>
+</blockquote>
+
+<h3 id="5-images-">5. Images: <code class="language-plaintext highlighter-rouge">![]()</code></h3>
+<p><strong>1) inline style</strong></p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_5-1.png?raw=true" alt="Header" /></p>
+
+<p><strong>2) reference style</strong></p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_5-2.png?raw=true" alt="Header" /></p>
+
+<h3 id="6-blockquotes-">6. Blockquotes: &gt;</h3>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_6-1.png?raw=true" alt="Header" /></p>
+
+<blockquote>
+  <p>Notice that even blank lines must contain the caret character.<br />
+  This ensures that the entire blockquote is grouped together</p>
+</blockquote>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_6-2.png?raw=true" alt="Header" /></p>
+
+<h3 id="7-lists">7. Lists</h3>
+<p><strong>1) unordered list</strong>
+  <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-1.png?raw=true" alt="Header" /></p>
+
+<p><strong>2) ordered list</strong>
+  <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-2.png?raw=true" alt="Header" /></p>
+
+<p>아래와 같이 list를 중첩해서 사용할 수도 있다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-3.png?raw=true" alt="Header" /></p>
+
+<h3 id="8-paragraphs-two-spaces">8. Paragraphs: two spaces</h3>
+<p>You can accomplish this by inserting two spaces after each new line</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_8.png?raw=true" alt="Header" /></p>
+
+<h3 id="출처-httpmarkdowntutorialcom">출처: http://markdowntutorial.com/</h3>
+<h3 id="더보기">더보기:</h3>
+<ul>
+  <li>https://www.markdownguide.org/basic-syntax</li>
+  <li>https://daringfireball.net/projects/markdown/</li>
+  <li>https://spec.commonmark.org/dingus/</li>
+  <li>https://johnmacfarlane.net/babelmark2/faq.html</li>
+  <li>https://www.markdownguide.org</li>
+  <li>https://dave.autonoma.ca/blog/2019/05/22/typesetting-markdown-part-1/</li>
+  <li>http://idratherbewriting.com/2013/06/04/exploring-markdown-in-collaborative-authoring-to-publishing-workflows/</li>
+  <li>https://en.wikipedia.org/wiki/Markdown#Example</li>
+  <li>https://docs.gitlab.com/ee/user/markdown.html
+https://docs.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax</li>
+</ul>
+:ET

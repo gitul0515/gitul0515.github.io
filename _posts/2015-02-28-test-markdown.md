@@ -18,57 +18,69 @@ Markdown 기본 문법을 정리하였다. 출처는 `http://markdowntutorial.co
 ### 3. Headers: `#`
 ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown3.png?raw=true)
 
-Headers one과 six는 sparingly하게 사용하는 것이 좋다고 한다.
+Header one과 six는 sparingly하게 사용하는 것이 좋다고 한다.
 
-### 4. Links
- 1. inline link: `[]()`
-    ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-1.png?raw=true)
- 2. reference link
-    >advantage of the reference link style is that multiple links to the same place only need to be updated once
-    ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-2.png?raw=true)
+### 4. Links: `[]()`
+  **1) inline link:**
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-1.png?raw=true)
+
+  **2) reference link**
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_4-2.png?raw=true)
+
+  >advantage of the reference link style is that multiple links to the same place only need to be updated once.  
 
 
+### 5. Images: `![]()`
+  **1) inline style**  
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_5-1.png?raw=true)
+  
+  
+  **2) reference style**  
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_5-2.png?raw=true)
+
+### 6. Blockquotes: `>`
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_6-1.png?raw=true)
+
+  >Notice that even blank lines must contain the caret character.  
+  This ensures that the entire blockquote is grouped together
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_6-2.png?raw=true)
+
+### 7. Lists: `*과 1,2,3`
+  **1) unordered list**
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-1.png?raw=true)
+
+  **2) ordered list**
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-2.png?raw=true)
+
+  아래와 같이 list를 중첩해서 사용할 수도 있다.
+
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_7-3.png?raw=true)
+
+### 8. Paragraphs: two spaces
+  You can accomplish this by inserting two spaces after each new line.
+  
+  ![Header](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/markdown_8.png?raw=true)
+
+  줄 바꿈으로 paragraph을 구분하는 것은 Hard breaks,  
+  Two spaces로 paragraph을 구분하는 것은 Soft breaks라고 부른다. 
 
 
-~~~
-var foo = function(x) {
-  return(x + 5);
-}
-foo(3)
-~~~
-
-And here is the same code with syntax highlighting:
-
-```javascript
-var foo = function(x) {
-  return(x + 5);
-}
-foo(3)
-```
-
-And here is the same code yet again but with line numbers:
-
-{% highlight javascript linenos %}
-var foo = function(x) {
-  return(x + 5);
-}
-foo(3)
-{% endhighlight %}
-
-## Boxes
-You can add notification, warning and error boxes like this:
-
-### Notification
-
-{: .box-note}
-**Note:** This is a notification box.
-
-### Warning
-
-{: .box-warning}
-**Warning:** This is a warning box.
-
-### Error
-
-{: .box-error}
-**Error:** This is an error box.
+### 출처
+http://markdowntutorial.com/
+### 더 공부하기
+* https://www.markdownguide.org/basic-syntax
+* https://daringfireball.net/projects/markdown/
+* https://spec.commonmark.org/dingus/
+* https://johnmacfarlane.net/babelmark2/faq.html
+* https://www.markdownguide.org
+* https://dave.autonoma.ca/blog/2019/05/22/typesetting-markdown-part-1/
+* http://idratherbewriting.com/2013/06/04/exploring-markdown-in-collaborative-authoring-to-publishing-workflows/
+* https://en.wikipedia.org/wiki/Markdown#Example
+* https://docs.gitlab.com/ee/user/markdown.html
+* https://docs.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax
