@@ -107,7 +107,7 @@ lang: "ko"  # default lang is en
 # spacegrey: #353535
 # snowwhite: #ffffff
 #
-# theme_color: snowwhite
+theme_color: snowwhite
 #
 # Custom color as below:
 # theme_color: "#882250"
@@ -121,7 +121,7 @@ lang: "ko"  # default lang is en
 # brand_color: orangered
 #
 # Custom color as below:
-# brand_color: "#1a8e42"
+brand_color: "#1a8e42"
 
 # Night/Dark mode
 # Default mode is "auto", "auto" is for auto nightshift
@@ -158,7 +158,7 @@ defaults:
   home:
     heading: "인문학을 추구하는 소프트웨어 개발자"
     subheading: "기홍의 블로그입니다:)"
-    banner: "/img/8.png" # 1 or 3
+    banner: "/img/9.png" # 1 or 3
 
 # Banner default settings
 # These banner settings are for global banner default, but you can also

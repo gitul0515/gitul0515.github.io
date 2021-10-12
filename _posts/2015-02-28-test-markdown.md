@@ -1,12 +1,22 @@
 ---
 layout: post
-title: Test markdown
-subtitle: Each post also has a subtitle
+title: Markdown 문법 정리
+subtitle: 
 categories: markdown
 tags: [test]
 ---
 
-You can write regular [markdown](http://markdowntutorial.com/) here and Jekyll will automatically convert it to a nice webpage.  I strongly encourage you to [take 5 minutes to learn how to write in markdown](http://markdowntutorial.com/) - it'll teach you how to transform regular text into bold/italics/headings/tables/etc.
+Markdown 기본 문법을 정리하였다. 출처는 `http://markdowntutorial.com`이다.  
+이 게시물도 Markdown 언어로 작성하고 있는데, 앞으로 자주 쓰게 될 것 같다.
+
+### 1. italic: _  
+   예: `_italic_`
+
+### 2. bold: **  
+   예: `**bold**`
+
+### 3. Headers: `#`
+![Header](./image/markdown3.png)
 
 **Here is some bold text**
 

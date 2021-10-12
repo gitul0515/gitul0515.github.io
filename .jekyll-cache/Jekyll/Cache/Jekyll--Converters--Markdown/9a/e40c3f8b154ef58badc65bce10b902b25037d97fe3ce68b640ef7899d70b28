@@ -1,4 +1,14 @@
-I"�<p>You can write regular <a href="http://markdowntutorial.com/">markdown</a> here and Jekyll will automatically convert it to a nice webpage.  I strongly encourage you to <a href="http://markdowntutorial.com/">take 5 minutes to learn how to write in markdown</a> - it’ll teach you how to transform regular text into bold/italics/headings/tables/etc.</p>
+I"�<p>Markdown 기본 문법을 정리하였다. 출처는 <code class="language-plaintext highlighter-rouge">http://markdowntutorial.com</code>이다.<br />
+이 게시물도 Markdown 언어로 작성하고 있는데, 앞으로 자주 쓰게 될 것 같다.</p>
+
+<h3 id="1-italic-_">1. italic: _</h3>
+<p>예: <code class="language-plaintext highlighter-rouge">_italic_</code></p>
+
+<h3 id="2-bold-">2. bold: **</h3>
+<p>예: <code class="language-plaintext highlighter-rouge">**bold**</code></p>
+
+<h3 id="3-headers-">3. Headers: <code class="language-plaintext highlighter-rouge">#</code></h3>
+<p><img src="./image/pngmarkdown_3.png" alt="" /></p>
 
 <p><strong>Here is some bold text</strong></p>
 
