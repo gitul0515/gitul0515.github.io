@@ -1,4 +1,4 @@
-I"�T<p>Put the math expression within <span>$</span>…$:</p>
+I"vU<p>Put the math expression within <span>$</span>…$:</p>
 
 <p>\(\LaTeX{}\)</p>
 
@@ -130,14 +130,14 @@ Here is a <strong>capture block</strong>.</p>
     <span class="n">particle_counts</span><span class="p">[</span><span class="n">a</span><span class="p">].</span><span class="n">update</span><span class="p">([</span><span class="n">cna_signature</span><span class="p">])</span>
 </pre></td></tr></tbody></table></code></pre></figure>
 
-<div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">insert</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">key</span><span class="p">)</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="n">key</span> <span class="o">==</span> <span class="sc">'\0'</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">finish</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">void</span> <span class="nx">insert</span><span class="p">(</span><span class="kd">const</span> <span class="nx">char</span><span class="o">*</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="nx">key</span> <span class="o">==</span> <span class="dl">'</span><span class="se">\</span><span class="s1">0</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">finish</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
     <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-        <span class="kt">int</span> <span class="n">idx</span> <span class="o">=</span> <span class="o">*</span><span class="n">key</span> <span class="o">-</span> <span class="sc">'A'</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
-            <span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Trie</span><span class="p">();</span>
-        <span class="n">next</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">insert</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="nx">int</span> <span class="nx">idx</span> <span class="o">=</span> <span class="o">*</span><span class="nx">key</span> <span class="o">-</span> <span class="dl">'</span><span class="s1">A</span><span class="dl">'</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">next</span><span class="p">[</span><span class="nx">idx</span><span class="p">])</span>
+            <span class="nx">next</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Trie</span><span class="p">();</span>
+        <span class="nx">next</span><span class="p">[</span><span class="nx">idx</span><span class="p">]</span><span class="o">-&gt;</span><span class="nx">insert</span><span class="p">(</span><span class="nx">key</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></div>

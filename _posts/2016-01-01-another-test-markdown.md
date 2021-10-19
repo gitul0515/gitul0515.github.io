@@ -93,7 +93,7 @@ for (a, b), neighbors in common_neighbors.items():
     particle_counts[a].update([cna_signature])
 {% endhighlight %}
 
-```cpp
+```javascript
 void insert(const char* key) {
     if (*key == '\0') {
         finish = true;
