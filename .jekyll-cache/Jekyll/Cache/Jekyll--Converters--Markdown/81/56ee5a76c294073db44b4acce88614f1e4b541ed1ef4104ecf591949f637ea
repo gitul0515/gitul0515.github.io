@@ -1,0 +1,167 @@
+I"�7<h3 id="1-배경">1. 배경</h3>
+
+<p>이진탐색트리는 최악의 경우,<br />
+즉 트리의 균형이 한쪽으로 치우칠 경우<br />
+O(n)의 시간복잡도를 갖는다.</p>
+
+<p>이러한 단점을 보완하기 위해 제안된<br />
+자가균형(self-balancing) 트리 디자인으로<br />
+레드블랙트리, AVL 트리가 있다.</p>
+
+<p>이번 글에서는 레드블랙트리 알고리즘에 대해 정리해본다.</p>
+
+<h3 id="2-기본-원리">2. 기본 원리</h3>
+
+<p>레드블랙트리는 이진탐색트리의 모든 노드에<br />
+블랙 또는 레드의 색을 칠하되<br />
+다음의 법칙을 만족해야 한다.</p>
+
+<blockquote>
+  <ol>
+    <li>루트는 블랙이다.</li>
+    <li>모든 리프는 블랙이다.</li>
+    <li>레드 노드의 자식은 반드시 블랙이다.
+  (블랙 노드의 자식은 어떤 색이든 상관없다)</li>
+    <li>루트에서 임의의 리프 노드에 이르는 경로에서
+  만나는 블랙 노드의 수는 동일하다. <strong>중요</strong></li>
+  </ol>
+</blockquote>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/1.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>레드블랙트리에서의 리프는 일반적인 리프 노드와 다르다.<br />
+모든 NIL 포인터가 NIL라는 리프 노드를 가리킨다고 가정한다.</p>
+
+<p>*NIL 포인터: 아무것도 가리키지 않는 빈(empty) 포인터</p>
+
+<h3 id="3-레드블랙트리에서의-삽입">3. 레드블랙트리에서의 삽입</h3>
+
+<p>기본적으로 이진탐색트리에서의 삽입과 같다.<br />
+다만, 삽입된 노드(x)를 레드로 칠한다.</p>
+
+<p>이때 만일 x의 부모 노드 p의 색깔이</p>
+<blockquote>
+  <ol>
+    <li>블랙이라면 아무 문제가 없다.</li>
+    <li>레드라면 기본 원리 3에 위배된다.</li>
+  </ol>
+</blockquote>
+
+<p>그러므로 부모 노드인 p가 레드인 경우만 고려하면 된다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/2.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>이때 p2와 x의 형제 노드는 반드시 블랙임을 알 수 있다.<br />
+그리고 s의 색깔에 따라 두 경우로 나뉜다.</p>
+
+<h4 id="1-s가-레드인-경우">1) s가 레드인 경우</h4>
+
+<p>이 경우에는 p2는 레드로, p와 s는 블랙으로 바꾼다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/3.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>기본 원리 4를 충족시킨다는 것에 주목하자.<br />
+즉, 리프 노드에 이르는 경로에서<br />
+만나는 블랙 노드의 수가 전과 동일하다.</p>
+
+<p>한편, p2의 부모 노드도 레드일 수 있다.<br />
+이는 재귀적으로 문제를 해결해야 한다.</p>
+
+<h4 id="2-1-s가-블랙이고-x가-오른쪽-자식인-경우">2-1) s가 블랙이고, x가 오른쪽 자식인 경우</h4>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/4.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>p의 서브트리를 Left-rotation 시킨다.<br />
+(rotation 대해서는 후술하겠다)<br />
+그리고 2-2로 이동한다.</p>
+
+<h4 id="2-2-s가-블랙이고-x가-왼쪽-자식인-경우">2-2) s가 블랙이고, x가 왼쪽 자식인 경우</h4>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/5.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>p2와 p의 색상을 바꾼다.<br />
+그리고 p2의 서브트리를 Right-rotation 시킨다.</p>
+
+<p>기본 원리 4를 충족시킨다는 것에 주목하자.<br />
+즉, 리프 노드에 이르는 경로에서<br />
+만나는 블랙 노드의 수가 전과 동일하다.</p>
+
+<h3 id="4-leftright-rotation">4. Left/Right rotation</h3>
+
+<p>레드블랙트리에는 Left/Right rotation 함수가 필요하다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/6.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>c언어를 기반으로 작성한 코드는 다음과 같다.</p>
+
+<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 기본 세팅</span>
+<span class="k">typedef</span> <span class="kt">int</span> <span class="n">element</span><span class="p">;</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">TreeNode</span> <span class="p">{</span>
+	<span class="n">element</span> <span class="n">key</span><span class="p">;</span>
+	<span class="k">struct</span> <span class="nc">TreeNode</span> <span class="o">*</span><span class="n">left</span><span class="p">,</span> <span class="o">*</span><span class="n">right</span><span class="p">;</span>
+  <span class="k">struct</span> <span class="nc">TreeNode</span> <span class="o">*</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// 수정: 부모 노드를 가리키는 포인터</span>
+  <span class="kt">int</span> <span class="n">color</span><span class="p">;</span> <span class="c1">// 수정: 노드는 색깔을 보유한다</span>
+<span class="p">}</span> <span class="n">TreeNode</span><span class="p">;</span>
+
+<span class="c1">// 레드블랙트리 구조체 선언</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="nc">RBTree</span> <span class="p">{</span>
+  <span class="k">struct</span> <span class="nc">TreeNode</span> <span class="o">*</span> <span class="n">root</span><span class="p">;</span> <span class="c1">// 루트를 가리킨다.</span>
+  <span class="k">struct</span> <span class="nc">TreeNode</span> <span class="o">*</span> <span class="n">nil</span><span class="p">;</span> <span class="c1">// nil 노드를 가리킨다.</span>
+<span class="p">}</span><span class="n">RBTree</span><span class="p">;</span>
+
+<span class="c1">// x 노드를 중심으로 왼쪽으로 회전하는 함수</span>
+<span class="kt">void</span> <span class="nf">left_rotate</span><span class="p">(</span><span class="n">RBTree</span> <span class="o">*</span><span class="n">T</span><span class="p">,</span> <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span> <span class="c1">// x의 오른쪽 노드를 y로 선언한다.</span>
+
+  <span class="n">x</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span> <span class="c1">// x의 오른쪽 노드에 y의 왼쪽 자식을 할당한다.</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">!=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="c1">// y의 왼쪽 자식이 nil 노드가 아니라면</span>
+    <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// y의 왼쪽 자식의 부모를 x로 할당한다.</span>
+
+  <span class="n">y</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// y의 부모에 x의 부모를 할당한다. </span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">==</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="c1">// x가 트리의 루트 노드였다면</span>
+    <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="c1">// y가 새로운 루트다.</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="c1">// x가 부모의 왼쪽 자식 노드였다면</span>
+    <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+  <span class="k">else</span> <span class="c1">// x가 부모의 오른쪽 자식 노드였다면</span>
+    <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+
+  <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// y의 왼쪽 자식으로 x를 할당한다.</span>
+  <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="c1">// x의 부모로 y를 할당한다.</span>
+<span class="p">}</span>
+
+<span class="c1">// x 노드를 중심으로 오른쪽으로 회전하는 함수</span>
+<span class="kt">void</span> <span class="nf">right_rotate</span><span class="p">(</span><span class="n">RBTree</span> <span class="o">*</span><span class="n">T</span><span class="p">,</span> <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span> <span class="c1">// x의 왼쪽 노드를 y로 선언한다.</span>
+
+  <span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span> <span class="c1">// x의 왼쪽 노드에 y의 오른쪽 자식을 할당한다.</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">!=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="c1">// y의 오른쪽 자식이 nil 노드가 아니라면</span>
+    <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// y의 오른쪽 자식의 부모를 x로 할당한다.</span>
+
+  <span class="n">y</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// y의 부모에 x의 부모를 할당한다. </span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">==</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="c1">// x가 트리의 루트 노드였다면</span>
+    <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="c1">// y가 새로운 루트다.</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="c1">// x가 부모의 왼쪽 자식 노드였다면</span>
+    <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+  <span class="k">else</span> <span class="c1">// x가 부모의 오른쪽 자식 노드였다면</span>
+    <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
+
+  <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span> <span class="c1">// y의 오른쪽 자식으로 x를 할당한다.</span>
+  <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="c1">// x의 부모로 y를 할당한다.</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>레드블랙트리 알고리즘은 시간복잡도가 O(1)로, 상수의 시간이 걸린다.<br />
+즉, 오버헤드가 그리 크지 않다.</p>
+
+<p>레드블랙트리 알고리즘을 활용해<br />
+트리의 균형을 유지하는 것은 이득이 된다.</p>
+
+<h3 id="참고문헌">참고문헌</h3>
+
+<h3 id="그-외-알아둘-것들">그 외 알아둘 것들</h3>
+<ul>
+  <li>레드블랙트리보다 AVL 트리가 균형을 더 잘 잡는 편이다.</li>
+</ul>
+:ET

@@ -1,0 +1,112 @@
+I"�A<h3 id="삽입-함수-구현">삽입 함수 구현</h3>
+
+<p>레드블랙트리의 삽입 알고리즘을 구현해보면 다음과 같다.<br />
+아래의 코드에서 BLACK은 1, RED는 0으로 정의되었다.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 레드블랙트리에 z 노드를 삽입하는 함수</span>
+<span class="kt">void</span> <span class="nf">RBT_insert</span><span class="p">(</span><span class="n">RBTree</span> <span class="o">*</span><span class="n">T</span><span class="p">,</span> <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">y</span> <span class="o">=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">;</span> <span class="c1">// y 노드를 선언하여 nil을 할당한다.</span>
+  <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">x</span> <span class="o">=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span><span class="p">;</span> <span class="c1">// x 노드를 선언하여 루트를 할당한다.</span>
+
+  <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// x가 nil이 아니면 반복문을 수행한다.</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>              <span class="c1">// y에 x를 할당한다. (y는 x를 한 레벨 차이로 쫓아내려온다)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">)</span> <span class="c1">// z의 key가 x의 key보다 작으면</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span> <span class="c1">// x에 x의 왼쪽 자식을 할당한다.</span>
+    <span class="k">else</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span> <span class="c1">//z의 key가 x의 key보다 크면, x에 x의 오른쪽 자식을 할당한다.</span>
+  <span class="p">}</span>
+
+  <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span> <span class="c1">// z의 부모를 y로 변경한다.</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">)</span> <span class="c1">// y가 nil이라면</span>
+    <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span> <span class="c1">// z는 트리의 루트다.</span>
+  <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">key</span> <span class="o">&lt;</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">)</span> <span class="c1">// z의 key가 y의 key보다 작으면</span>
+    <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span> <span class="c1">// y의 왼쪽 자식으로 z를 할당한다.</span>
+  <span class="k">else</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span> <span class="c1">// z의 key가 y의 key보다 크면, y의 오른쪽 자식으로 z를 할당한다.</span>
+
+  <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">;</span> <span class="c1">// z의 왼쪽 자식에 nil을 할당한다.</span>
+  <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">nil</span><span class="p">;</span> <span class="c1">// z의 오른쪽 자식에 nil을 할당한다. </span>
+  <span class="n">z</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span> <span class="c1">// z의 색깔을 RED로 할당한다.</span>
+
+  <span class="n">RBT_insert_fixup</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span> <span class="c1">// RBT_insert_fixup 함수를 호출한다.</span>
+<span class="p">}</span>
+
+<span class="c1">// 삽입 후 레드블랙트리의 규칙에 맞게 조정하는 함수</span>
+<span class="kt">void</span> <span class="nf">RBT_insert_fixup</span><span class="p">(</span><span class="n">RBTree</span> <span class="o">*</span> <span class="n">T</span><span class="p">,</span> <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">z</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">while</span><span class="p">(</span><span class="n">z</span> <span class="o">!=</span> <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span> <span class="o">&amp;&amp;</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">==</span> <span class="n">RED</span> <span class="p">){</span> <span class="c1">// z의 부모 노드가 RED 색깔인 경우 반복문을 수행한다.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">==</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// z의 부모가 왼쪽 자식 노드인 경우</span>
+      <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">y</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span> <span class="c1">// z의 조부모의 오른쪽 자식 노드 y를 선언한다.</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">==</span> <span class="n">RED</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// case 1: 삼촌 노드 y의 색깔이 RED인 경우</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// z의 부모 색깔을 BLACK으로 변경</span>
+        <span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// y의 색깔을 BLACK으로 변경</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span> <span class="c1">// z의 조부모의 색깔을 RED로 변경</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// z를 z의 조부모로 변경한다 (z의 조부모에서 같은 문제가 발생할 수 있으므로)</span>
+      <span class="p">}</span> 
+      <span class="k">else</span> <span class="p">{</span> <span class="c1">// 삼촌 노드 y의 색깔이 BLACK인 경우 (nil 노드 포함)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// case 2: z가 부모의 오른쪽 자식 노드인 경우</span>
+          <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// z를 z의 부모로 변경한다.</span>
+          <span class="n">left_rotate</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span> <span class="c1">// left_rotate 함수를 호출</span>
+        <span class="p">}</span> <span class="c1">// case 3: z가 부모의 왼쪽 자식 노드인 경우</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// z의 부모의 색깔을 BLACK으로 변경</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span> <span class="c1">// z의 조부모의 색깔을 RED로 변경</span>
+        <span class="n">right_rotate</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">);</span> <span class="c1">// z의 조부모를 기준으로 right_rotate 함수를 호출</span>
+      <span class="p">}</span>
+    <span class="p">}</span> 
+    <span class="k">else</span> <span class="p">{</span> <span class="c1">// z의 부모가 오른쪽 자식 노드인 경우 (위 경우와 left-right가 대칭된다)</span>
+      <span class="n">TreeNode</span> <span class="o">*</span> <span class="n">y</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span> <span class="c1">// z의 조부모의 왼쪽 자식 노드 y를 선언한다.</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">==</span> <span class="n">RED</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// case 4: 삼촌 노드 y의 색깔이 RED인 경우</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// z의 부모 색깔을 BLACK으로 변경</span>
+        <span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// y의 색깔을 BLACK으로 변경</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span> <span class="c1">// z의 조부모의 색깔을 RED로 변경</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// z를 z의 조부모로 변경한다 (z의 조부모에서 같은 문제가 발생할 수 있으므로)</span>
+      <span class="p">}</span>
+      <span class="k">else</span> <span class="p">{</span> <span class="c1">// 삼촌 노드 y의 색깔이 BLACK인 경우 (nil 노드 포함)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// case 5: z가 부모의 왼쪽 자식 노드인 경우</span>
+          <span class="n">z</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span> <span class="c1">// z를 z의 부모로 변경한다.</span>
+          <span class="n">right_rotate</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="p">);</span> <span class="c1">// right_rotate 함수 호출</span>
+        <span class="p">}</span> <span class="c1">// case 6: z가 부모의 오른쪽 자식 노드인 경우</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span> <span class="c1">// z의 부모의 색깔을 BLACK으로 변경</span>
+        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">RED</span><span class="p">;</span> <span class="c1">// z의 조부모의 색깔을 RED로 변경</span>
+        <span class="n">left_rotate</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">);</span> <span class="c1">// z의 조부모를 기준으로 left_rotate 함수 호출</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="n">T</span><span class="o">-&gt;</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">BLACK</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="레드블랙트리의-블랙높이">레드블랙트리의 블랙높이</h3>
+
+<p>레드블랙트리에는 블랙높이라는 것이 존재한다.<br />
+특정 노드로부터 리프노드까지의 경로상에 있는<br />
+블랙 노드의 개수를 의미한다.</p>
+
+<p>이미지 삽입</p>
+
+<p>시작 노드는 색깔이 블랙이더라도 포함되지 않음에 유의하자.</p>
+
+<pre><code class="language-C">// x 노드의 블랙높이를 계산하는 함수
+int get_black_height(RBTree* T, TreeNode* x) {
+  int black_node_count = 0;
+
+  /* 레드블랙트리의 특성 4에 의하여, 
+  x에서 어떤 경로로 내려가든 블랙높이는 동일하다. */
+  while (x != T-&gt;nil) { // x가 nil 노드가 아니면 반복문을 수행한다.
+    if (x-&gt;left != T-&gt;nil) // x의 왼쪽 자식이 존재한다면
+      x = x-&gt;left; // x를 x의 왼쪽 자식으로 변경한다.
+    else // 그렇지 않다면 (x가 단말 노드이거나 오른쪽 자식만 존재하는 경우)
+      x= x-&gt;right; // x를 x의 오른쪽 자식으로 변경한다.
+
+    // 노드의 색깔이 블랙이면 개수를 1 증가시킨다. (nil 노드 포함)
+    if (x-&gt;color == BLACK)
+      black_node_count++;
+  }
+  return black_node_count; // 블랙 노드의 개수를 반환한다.
+}
+</code></pre>
+
+<h3 id="결과-출력">결과 출력</h3>
+
+<p>```C</p>
+
+:ET

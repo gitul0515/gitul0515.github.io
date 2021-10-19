@@ -1,4 +1,4 @@
-I"�<h3 id="1-배경">1. 배경</h3>
+I"<h3 id="1-배경">1. 배경</h3>
 
 <p>이진탐색트리는 최악의 경우,<br />
 즉 트리의 균형이 한쪽으로 치우칠 경우<br />
@@ -88,15 +88,61 @@ O(n)의 시간복잡도를 갖는다.</p>
 
 <h3 id="4-leftright-rotation">4. Left/Right rotation</h3>
 
+<p>레드블랙트리에는 Left/Right rotation 함수가 필요하다.<br />
+이는 다음과 같다.</p>
+
 <p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/%EB%A0%88%EB%93%9C%EB%B8%94%EB%9E%99%ED%8A%B8%EB%A6%AC/6.png?raw=true" alt="레드블랙트리" /></p>
+
+<p>c언어를 기반으로 작성한 코드는 다음과 같다.</p>
+
+<pre><code class="language-C">// x 노드를 중심으로 왼쪽으로 회전하는 함수
+void left_rotate(RBTree *T, TreeNode * x) {
+  TreeNode * y = x-&gt;right; // x의 오른쪽 노드를 y로 선언한다.
+
+  x-&gt;right = y-&gt;left; // x의 오른쪽 노드에 y의 왼쪽 자식을 할당한다.
+
+  if (y-&gt;left != T-&gt;nil) // y의 왼쪽 자식이 nil 노드가 아니라면
+    y-&gt;left-&gt;parent = x; // y의 왼쪽 자식의 부모를 x로 할당한다.
+
+  y-&gt;parent = x-&gt;parent; // y의 부모에 x의 부모를 할당한다. 
+  if (x-&gt;parent == T-&gt;nil) // x가 트리의 루트 노드였다면
+    T-&gt;root = y; // y가 새로운 루트다.
+  else if (x == x-&gt;parent-&gt;left) // x가 부모의 왼쪽 자식 노드였다면
+    x-&gt;parent-&gt;left = y;
+  else // x가 부모의 오른쪽 자식 노드였다면
+    x-&gt;parent-&gt;right = y;
+
+  y-&gt;left = x; // y의 왼쪽 자식으로 x를 할당한다.
+  x-&gt;parent = y; // x의 부모로 y를 할당한다.
+}
+
+// x 노드를 중심으로 오른쪽으로 회전하는 함수
+void right_rotate(RBTree *T, TreeNode * x) {
+  TreeNode * y = x-&gt;left; // x의 왼쪽 노드를 y로 선언한다.
+
+  x-&gt;left = y-&gt;right; // x의 왼쪽 노드에 y의 오른쪽 자식을 할당한다.
+
+  if (y-&gt;right != T-&gt;nil) // y의 오른쪽 자식이 nil 노드가 아니라면
+    y-&gt;right-&gt;parent = x; // y의 오른쪽 자식의 부모를 x로 할당한다.
+
+  y-&gt;parent = x-&gt;parent; // y의 부모에 x의 부모를 할당한다. 
+  if (x-&gt;parent == T-&gt;nil) // x가 트리의 루트 노드였다면
+    T-&gt;root = y; // y가 새로운 루트다.
+  else if (x == x-&gt;parent-&gt;left) // x가 부모의 왼쪽 자식 노드였다면
+    x-&gt;parent-&gt;left = y;
+  else // x가 부모의 오른쪽 자식 노드였다면
+    x-&gt;parent-&gt;right = y;
+
+  y-&gt;right = x; // y의 오른쪽 자식으로 x를 할당한다.
+  x-&gt;parent = y; // x의 부모로 y를 할당한다.
+}
+</code></pre>
 
 <p>레드블랙트리 알고리즘은 시간복잡도가 O(1)로, 상수의 시간이 걸린다.<br />
 즉, 오버헤드가 그리 크지 않다.</p>
 
 <p>레드블랙트리 알고리즘을 활용해<br />
 트리의 균형을 유지하는 것은 이득이 된다.</p>
-
-<p>To be continued…</p>
 
 <h3 id="참고문헌">참고문헌</h3>
 
