@@ -1,4 +1,4 @@
-I"�<p>배열 array[l…r]의 중앙값을 반환하는 함수를 간단히 구현하였다.</p>
+I"c<p>배열 array[l…r]의 중앙값을 반환하는 함수를 간단히 구현하였다.</p>
 
 <h3 id="작성한-코드">작성한 코드</h3>
 
@@ -42,6 +42,10 @@
 <span class="kd">const</span> <span class="nx">midValue</span> <span class="o">=</span> <span class="nx">arrayMid</span><span class="p">(</span><span class="nx">array</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
 <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">array[4...8]의 중앙값:</span><span class="dl">'</span><span class="p">,</span> <span class="nx">midValue</span><span class="p">);</span>
 </code></pre></div></div>
+
+<h3 id="작성한-코드-1">작성한 코드</h3>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/211019_1.png?raw=true" alt="출력 결과" /></p>
 
 <h3 id="장점">장점</h3>
 <ol>
