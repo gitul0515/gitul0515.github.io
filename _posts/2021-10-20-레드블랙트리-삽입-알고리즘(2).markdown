@@ -11,7 +11,7 @@ tags: [test]
 레드블랙트리의 삽입 알고리즘을 구현해보면 다음과 같다.  
 아래의 코드에서 BLACK은 1, RED는 0으로 정의되었다.
 
-```c
+{% highlight c linenos %}
 // 레드블랙트리에 z 노드를 삽입하는 함수
 void RBT_insert(RBTree *T, TreeNode * z)
 {
@@ -82,7 +82,7 @@ void RBT_insert_fixup(RBTree * T, TreeNode * z)
   }
   T->root->color = BLACK;
 }
-```
+{% endhighlight %}
 
 ### 2. 레드블랙트리의 블랙높이
 
@@ -96,7 +96,7 @@ void RBT_insert_fixup(RBTree * T, TreeNode * z)
 
 시작 노드는 색깔이 블랙이더라도 포함되지 않음에 유의하자.
 
-```C
+{% highlight c linenos %}
 // x 노드의 블랙높이를 계산하는 함수
 int get_black_height(RBTree* T, TreeNode* x) {
   int black_node_count = 0;
@@ -115,11 +115,11 @@ int get_black_height(RBTree* T, TreeNode* x) {
   }
   return black_node_count; // 블랙 노드의 개수를 반환한다.
 }
-```
+{% endhighlight %}
 
 ### 3. 결과 출력
 
-```c
+{% highlight c linenos %}
 int main(void)
 {
   RBTree* T = create_RBTree(); // 레드블랙트리 생성 및 초기화
@@ -160,7 +160,7 @@ int main(void)
 
   return 0;
 }
-```
+{% endhighlight %}
 
 결과 이미지
 
