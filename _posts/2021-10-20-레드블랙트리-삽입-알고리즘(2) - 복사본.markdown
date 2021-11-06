@@ -90,9 +90,7 @@ void RBT_insert_fixup(RBTree * T, TreeNode * z)
 이는 특정한 노드로부터 리프노드까지의 경로상에 있는  
 블랙 노드의 개수를 의미한다.  
 
-
-이미지 삽입
-
+![레드블랙트리](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/211020_1.png?raw=true)
 
 시작 노드는 색깔이 블랙이더라도 포함되지 않음에 유의하자.
 

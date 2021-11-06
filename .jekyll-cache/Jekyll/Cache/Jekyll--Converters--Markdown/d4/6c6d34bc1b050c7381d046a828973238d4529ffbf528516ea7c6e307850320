@@ -1,0 +1,45 @@
+I"[<p>for…in은 ‘객체’를 순환하고, for…of는 ‘배열’을 순환한다.</p>
+
+<h3 id="1-forin은-객체를-순환한다">1. for…in은 객체를 순환한다.</h3>
+<p>객체의 키 값이 순환된다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">object</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="na">b</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+  <span class="na">c</span><span class="p">:</span> <span class="mi">3</span>
+<span class="p">};</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">object</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">object</span><span class="p">,</span> <span class="nx">key</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span> <span class="c1">// a b c </span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>for…of로는 객체를 순환할 수 없다.<br />
+객체가 항상 iterable은 아니기 때문이다.</p>
+
+<h3 id="2-forof는-배열을-순환한다">2. for…of는 배열을 순환한다.</h3>
+
+<p>배열의 ‘값’이 순환된다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">array</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">];</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">iterator</span> <span class="k">of</span> <span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">iterator</span><span class="p">);</span> <span class="c1">// 1 2 3 </span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>for …in으로도 배열을 순환할 수 있다.<br />
+자바스크립트에서 배열은 곧 객체이기 때문.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">key</span> <span class="k">in</span> <span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">array</span><span class="p">,</span> <span class="nx">key</span><span class="p">))</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">key</span><span class="p">);</span> <span class="c1">// 0 1 2</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>다만, 배열의 ‘값’이 아니라 ‘인덱스’가 순환된다.</p>
+
+<h4 id="참고문헌">참고문헌</h4>
+<p>https://velog.io/@eomttt/for-…in-for-…of-%EC%B0%A8%EC%9D%B4</p>
+:ET
