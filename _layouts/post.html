@@ -73,5 +73,11 @@ sidebar:
     </div>
     {%- endif -%}
 
+    {% if page.tags %}
+      {% for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    {% endif %}
+    
   </section>
 </div>

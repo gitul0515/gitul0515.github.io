@@ -1,0 +1,92 @@
+---
+layout: post
+title:  "SQL 문자열 함수 (심화)"
+date:   2021-11-11 01:12:59 +0900
+categories: jekyll update
+tags: [SQL, 데이터베이스]
+---
+SQL 문자열 함수(심화)를 정리하였다.
+
+### 1. INITCAP() : 첫 문자만 대문자로 치환
+   예) INITCAP('SMITH') => 'Smith'  
+
+### 2. LENGTHB() : 글자의 바이트 수를 리턴
+   예) LENGTHB('SMITH') => 5  
+       LENGTHB('철수') => 4  
+       *영어는 1byte, 한글은 2byte
+
+### 3. SUBSTR(): 문자열의 일부 데이터만 추출
+
+    SUBSTR(문자열, 시작위치, 추출개수)  
+    SUBSTR('이진욱', 1, 2) => '이진'  
+
+   * 추출개수 생략 시 끝까지 추출  
+   * 시작위치 < 0 : 뒤에서부터 추출  
+     (단, 추출방향은 오른쪽)  
+   * 날짜 데이터에서 SUBSTR을 사용하는 것은 비추천  
+     (YEAR, MONTH, DAY 함수 추천)  
+     (DB마다 날짜 포맷이 다르므로 반드시 확인)★  
+
+### 4. INSTR(): 찾는 문자열의 인덱스를 반환
+
+   INSTR(문자열, 찾는 문자열, 시작위치, 반복번호)  
+   INSTR('ab@cd@ef', '@', 1, 1) => 3  
+   INSTR('ab@cd@ef', '@', 1, 2) => 6  
+
+   * 찾는 문자열이 없으면 0을 반환  
+   * 시작 위치 생략 시, 처음부터 시작  
+   * 반복번호 생략 시, 최초 위치  
+   * 시작 위치가 음수면, 왼쪽 방향으로 스캔  
+     (SUBSTR은 시작 위치가 음수면, 오른쪽 방향으로 스캔)  
+   * SUBSTR()과 조합하여 자주 사용됨  
+
+### 5. LPAD(), RPAD(): 문자열 앞, 뒤에 특정 문자열을 삽입
+   LPAD는 왼쪽, RPAD는 오른쪽  
+  
+   LPAD(문자열, 최대 자리수, 채울 문자)  
+   LPAD('abcde', 6, '*') => *abcde  
+   LPAD('abcde', 4, '*') => abcd  
+
+### 6. LTRIM(), RTRIM(): 특정 문자를 제거
+   왼쪽 TRIM(), 오른쪽 TRIM()  
+
+   LTRIM(문자열, 제거할 문자)  
+   LTRIM('ABCABC', 'A') => 'BCABC'  
+   
+   *TRIM()은 공백 제거로 사용됨  
+    (공백 때문에 조회가 안 되는 경우가 발생)  
+   *TRIM(), LTRIM(), RTRIM()은 중간에 있는 문자 제거 불가  
+
+### 7. TRANSLATE() : 문자의 1:1 치환 ★
+   REPLACE는 단어 치환, TRANSLATE는 문자 1:1 치환  
+
+   TRANSLATE(문자열, 찾을 문자열, 바꿀 문자열)  
+
+   REPLACE('abcba', 'ab', 'AB') => 'ABcba'  
+   TRANSLATE('abcba', 'ab', 'AB') => 'ABcBA'  
+   a는 A로, b는 B로 1:1 치환  
+
+   *치환함수를 이용한 문자 삭제  
+   REPLACE('abcba', 'a', '') => bcb  
+   TRANSLATE('abcba', 'a', '') => ''  
+   
+   TRANSLATE에서는 바꿀 문자열을 공백으로 두면,  
+   1:1 매칭이 일어나지 않아서 데이터가 전부 삭제  
+
+   꼼수(?)를 사용하면 TRANSLATE도 삭제 가능  
+   TRANSLATE('abcba', '1a', '1') => bcb  
+   (1은 1로, a는 공백으로 치환)  
+  
+   특수문자 등의 제거에는 TRANSLATE 함수가 유용하다  
+   TRANSLATE('a!bc$ba', '1!$', '1') => abcba  
+
+### 기타 
+ 1. dual 테이블: 가상의 테이블. 연습용
+ 2. ORDER BY는 SELECT절의 맨 마지막에 나와야 한다
+ 3. 단일 행 함수(문자열 함수 등), 복수 행 함수(집계 함수 등)
+ 4. 단일 행 함수는 SELECT, WHERE, ORDER BY에서 사용 가능
+ 5. 숫자 데이터가 1,000라는 형식은 ,(컴마) 때문에 문자로 인식한다. 
+ 6. SQL은 인덱스가 1부터 시작
+
+### 참고문헌
+https://data-make.tistory.com/6

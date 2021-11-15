@@ -156,9 +156,9 @@ brand_color: "#1a8e42"
 #Page default value
 defaults:
   home:
-    heading: "인문학을 추구하는 소프트웨어 개발자"
-    subheading: "기홍의 블로그입니다:)"
-    banner: "https://github.com/gitul0515/gitul0515.github.io/blob/main/img/banner/9.png?raw=true"
+    heading: "사람을 어루만지는 기술을 지향합니다"
+    subheading: "프론트엔드 개발자, 기홍의 블로그"
+    banner: "https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/banner/9.png?raw=true"
 
 # Banner default settings
 # These banner settings are for global banner default, but you can also

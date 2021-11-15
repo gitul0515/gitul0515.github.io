@@ -1,0 +1,93 @@
+I".<p>SQL 문자열 함수(심화)를 정리하였다.</p>
+
+<h3 id="1-initcap--첫-문자만-대문자로-치환">1. INITCAP() : 첫 문자만 대문자로 치환</h3>
+<p>예) INITCAP(‘SMITH’) =&gt; ‘Smith’</p>
+
+<h3 id="2-lengthb--글자의-바이트-수를-리턴">2. LENGTHB() : 글자의 바이트 수를 리턴</h3>
+<p>예) LENGTHB(‘SMITH’) =&gt; 5<br />
+       LENGTHB(‘철수’) =&gt; 4<br />
+       *영어는 1byte, 한글은 2byte</p>
+
+<h3 id="3-substr-문자열의-일부-데이터만-추출">3. SUBSTR(): 문자열의 일부 데이터만 추출</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>SUBSTR(문자열, 시작위치, 추출개수)  
+SUBSTR('이진욱', 1, 2) =&gt; '이진'  
+</code></pre></div></div>
+
+<ul>
+  <li>추출개수 생략 시 끝까지 추출</li>
+  <li>시작위치 &lt; 0 : 뒤에서부터 추출<br />
+(단, 추출방향은 오른쪽)</li>
+  <li>날짜 데이터에서 SUBSTR을 사용하는 것은 비추천<br />
+(YEAR, MONTH, DAY 함수 추천)<br />
+(DB마다 날짜 포맷이 다르므로 반드시 확인)★</li>
+</ul>
+
+<h3 id="4-instr-찾는-문자열의-인덱스를-반환">4. INSTR(): 찾는 문자열의 인덱스를 반환</h3>
+
+<p>INSTR(문자열, 찾는 문자열, 시작위치, 반복번호)<br />
+   INSTR(‘ab@cd@ef’, ‘@’, 1, 1) =&gt; 3<br />
+   INSTR(‘ab@cd@ef’, ‘@’, 1, 2) =&gt; 6</p>
+
+<ul>
+  <li>찾는 문자열이 없으면 0을 반환</li>
+  <li>시작 위치 생략 시, 처음부터 시작</li>
+  <li>반복번호 생략 시, 최초 위치</li>
+  <li>시작 위치가 음수면, 왼쪽 방향으로 스캔<br />
+(SUBSTR은 시작 위치가 음수면, 오른쪽 방향으로 스캔)</li>
+  <li>SUBSTR()과 조합하여 자주 사용됨</li>
+</ul>
+
+<h3 id="5-lpad-rpad-문자열-앞-뒤에-특정-문자열을-삽입">5. LPAD(), RPAD(): 문자열 앞, 뒤에 특정 문자열을 삽입</h3>
+<p>LPAD는 왼쪽, RPAD는 오른쪽</p>
+
+<p>LPAD(문자열, 최대 자리수, 채울 문자)<br />
+   LPAD(‘abcde’, 6, ‘<em>’) =&gt; *abcde<br />
+   LPAD(‘abcde’, 4, ‘</em>’) =&gt; abcd</p>
+
+<h3 id="6-ltrim-rtrim-특정-문자를-제거">6. LTRIM(), RTRIM(): 특정 문자를 제거</h3>
+<p>왼쪽 TRIM(), 오른쪽 TRIM()</p>
+
+<p>LTRIM(문자열, 제거할 문자)<br />
+   LTRIM(‘ABCABC’, ‘A’) =&gt; ‘BCABC’</p>
+
+<p>*TRIM()은 공백 제거로 사용됨<br />
+    (공백 때문에 조회가 안 되는 경우가 발생)<br />
+   *TRIM(), LTRIM(), RTRIM()은 중간에 있는 문자 제거 불가</p>
+
+<h3 id="7-translate--문자의-11-치환-">7. TRANSLATE() : 문자의 1:1 치환 ★</h3>
+<p>REPLACE는 단어 치환, TRANSLATE는 문자 1:1 치환</p>
+
+<p>TRANSLATE(문자열, 찾을 문자열, 바꿀 문자열)</p>
+
+<p>REPLACE(‘abcba’, ‘ab’, ‘AB’) =&gt; ‘ABcba’<br />
+   TRANSLATE(‘abcba’, ‘ab’, ‘AB’) =&gt; ‘ABcBA’<br />
+   a는 A로, b는 B로 1:1 치환</p>
+
+<p>*치환함수를 이용한 문자 삭제<br />
+   REPLACE(‘abcba’, ‘a’, ‘’) =&gt; bcb<br />
+   TRANSLATE(‘abcba’, ‘a’, ‘’) =&gt; ‘’</p>
+
+<p>TRANSLATE에서는 바꿀 문자열을 공백으로 두면,<br />
+   1:1 매칭이 일어나지 않아서 데이터가 전부 삭제</p>
+
+<p>꼼수(?)를 사용하면 TRANSLATE도 삭제 가능<br />
+   TRANSLATE(‘abcba’, ‘1a’, ‘1’) =&gt; bcb<br />
+   (1은 1로, a는 공백으로 치환)</p>
+
+<p>특수문자 등의 제거에는 TRANSLATE 함수가 유용하다<br />
+   TRANSLATE(‘a!b#c$ba’, ‘1!#$’, ‘1’) =&gt; abcba</p>
+
+<h3 id="기타">기타</h3>
+<ol>
+  <li>dual 테이블: 가상의 테이블. 연습용</li>
+  <li>ORDER BY는 SELECT절의 맨 마지막에 나와야 한다</li>
+  <li>단일 행 함수(문자열 함수 등), 복수 행 함수(집계 함수 등)</li>
+  <li>단일 행 함수는 SELECT, WHERE, ORDER BY에서 사용 가능</li>
+  <li>숫자 데이터가 1,000라는 형식은 ,(컴마) 때문에 문자로 인식한다.</li>
+  <li>SQL은 인덱스가 1부터 시작</li>
+</ol>
+
+<h3 id="참고문헌">참고문헌</h3>
+<p>https://data-make.tistory.com/6</p>
+:ET
