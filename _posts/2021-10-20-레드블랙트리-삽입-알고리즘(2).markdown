@@ -2,7 +2,7 @@
 layout: post
 title:  "레드블랙트리 삽입 알고리즘(2)"
 date:   2021-10-19 17:32:59 +0900
-categories: jekyll update
+categories: 자료구조&알고리즘
 tags: [C언어, 자료구조, 알고리즘]
 ---
 
