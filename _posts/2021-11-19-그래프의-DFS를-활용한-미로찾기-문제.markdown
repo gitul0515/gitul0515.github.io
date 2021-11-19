@@ -7,13 +7,11 @@ tags: [자바스크립트] [자료구조] [알고리즘] [그래프]
 ---
 그래프의 깊이우선탐색(DFS)를 활용하여 미로찾기 문제를 풀어보자. 
 
-![미로찾기](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/211020_1.png?raw=true)
+![미로찾기](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/21_1120.jpg?raw=true)
 
-
-자료구조_알고리즘/자료구조/7_그래프/미로찾기.jpg
-
-어쨌든, 비교 함수 compare의 반환값에 따라 정렬 방식이 다른데  
+먼저 필요한 것은 미로를 그래프로 표현하는 작업이다.
   
+
 **1. 반환값이 0보다 큰 경우: 오름차순**  
 **2. 반환값이 0보다 작은 경우: 내림차순**  
 **3. 반환값이 0인 경우: 변경 없음**  
