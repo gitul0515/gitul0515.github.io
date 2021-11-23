@@ -1,0 +1,134 @@
+I"�G<p>무방향 그래프에서 간선 (a, b)와 (b, a)는 사실상 동일하다.<br />
+이러한 중복 없이 간선을 추출하는 함수를 작성해보자.</p>
+
+<h2 id="자바스크립트-코드">자바스크립트 코드</h2>
+<p>먼저, 무방향그래프를 인접 리스트를 사용하여 구현해보자.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 무방향 그래프 구현 (인접 리스트 사용)</span>
+<span class="c1">// 생성자 함수</span>
+<span class="kd">function</span> <span class="nx">UndirectedGraph</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">edges</span> <span class="o">=</span> <span class="p">{};</span> <span class="c1">// 간선을 저장하는 객체</span>
+<span class="p">}</span>
+
+<span class="c1">// 정점 삽입 함수</span>
+<span class="nx">UndirectedGraph</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">addVertex</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">vertex</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">vertex</span><span class="p">]</span> <span class="o">=</span> <span class="p">{};</span> <span class="c1">// this.edges 객체 안에 객체 형태로 저장한다.</span>
+<span class="p">};</span>
+
+<span class="c1">// 가중치가 있는 간선 삽입 함수</span>
+<span class="nx">UndirectedGraph</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">addEdge</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">vertex1</span><span class="p">,</span> <span class="nx">vertex2</span><span class="p">,</span> <span class="nx">weight</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 가중치가 유효한 숫자인지 판별한다</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">isNumber</span><span class="p">(</span><span class="nx">weight</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="dl">'</span><span class="s1">weight must be number</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 유효한 정점인지 확인 후, 간선을 삽입</span>
+  <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">vertex1</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="k">this</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">vertex2</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">vertex1</span><span class="p">][</span><span class="nx">vertex2</span><span class="p">]</span> <span class="o">=</span> <span class="nx">weight</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">vertex2</span><span class="p">][</span><span class="nx">vertex1</span><span class="p">]</span> <span class="o">=</span> <span class="nx">weight</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nx">TypeError</span><span class="p">(</span><span class="dl">'</span><span class="s1">invalid vertex</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// 유효한 숫자인지 판별하는 함수</span>
+<span class="nx">UndirectedGraph</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">isNumber</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">value</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">number</span><span class="dl">'</span> <span class="o">&amp;&amp;</span> <span class="nb">Number</span><span class="p">.</span><span class="nb">isFinite</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="c1">// 그래프 생성 및 데이터 삽입</span>
+<span class="kd">const</span> <span class="nx">graph</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">UndirectedGraph</span><span class="p">();</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addVertex</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">88</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+<span class="nx">graph</span><span class="p">.</span><span class="nx">addEdge</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+</code></pre></div></div>
+<p>일단, 무방향 그래프의 간선을 ‘중복을 포함하여’ 추출해본다.<br />
+결과는 배열에 저장하여 반환한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 무방향 그래프의 간선을 중복을 포함하여 저장한다</span>
+<span class="nx">UndirectedGraph</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">AllEdge</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+
+  <span class="c1">// 그래프에서 간선(v1, v2, weight)을 추출한다</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">v1</span> <span class="k">in</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">,</span> <span class="nx">v1</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">v2</span> <span class="k">in</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">],</span> <span class="nx">v2</span><span class="p">))</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">weight</span> <span class="o">=</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">][</span><span class="nx">v2</span><span class="p">];</span>
+          <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">([</span><span class="nx">v1</span><span class="p">,</span> <span class="nx">v2</span><span class="p">,</span> <span class="nx">weight</span><span class="p">]);</span> <span class="c1">// 삽입</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="kd">const</span> <span class="nx">result1</span> <span class="o">=</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">AllEdge</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result1</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>결과는?</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/21_1123_1.png?raw=true" alt="결과1" /></p>
+
+<p>위 결과에서 볼 수 있듯이, 간선이 중복되어 있다.<br />
+예를 들어 [ ‘1’, ‘2’, 1 ]과  [ ‘2’, ‘1’, 1 ]는 동일한 간선인 것이다.</p>
+
+<p>이러한 중복을 제거하는 함수를 작성해보자.</p>
+
+<p>기본적으로 위 코드와 유사하지만,<br />
+redundancyCheck라는 중첩함수를 통해 중복 여부를 검사하였다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 무방향 그래프의 간선을 중복 없이 저장한다</span>
+<span class="nx">UndirectedGraph</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">DistinctEdge</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+
+  <span class="c1">// 중복된 간선을 검사하는 함수</span>
+  <span class="kd">function</span> <span class="nx">redundancyCheck</span><span class="p">(</span><span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="p">[</span><span class="nx">v1</span><span class="p">,</span> <span class="nx">v2</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nx">array</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">array</span><span class="p">[</span><span class="mi">1</span><span class="p">]];</span>
+
+    <span class="c1">// 예: [v1, v2]가 [2, 3]일 때, [2, 3]과 [3, 2]는 중복이다.</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nx">v1</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">===</span> <span class="nx">v2</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">===</span> <span class="nx">v2</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">===</span> <span class="nx">v1</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">array</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 그래프에서 간선(v1, v2, weight)을 추출한다</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">v1</span> <span class="k">in</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">,</span> <span class="nx">v1</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">for</span> <span class="p">(</span><span class="kd">const</span> <span class="nx">v2</span> <span class="k">in</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">Object</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">],</span> <span class="nx">v2</span><span class="p">))</span> <span class="p">{</span>
+          <span class="kd">const</span> <span class="nx">weight</span> <span class="o">=</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">edges</span><span class="p">[</span><span class="nx">v1</span><span class="p">][</span><span class="nx">v2</span><span class="p">];</span>
+          <span class="nx">redundancyCheck</span><span class="p">([</span><span class="nx">v1</span><span class="p">,</span> <span class="nx">v2</span><span class="p">,</span> <span class="nx">weight</span><span class="p">]);</span> <span class="c1">// 중복된 간선을 검사한다</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="kd">const</span> <span class="nx">result2</span> <span class="o">=</span> <span class="nx">graph</span><span class="p">.</span><span class="nx">DistinctEdge</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result2</span><span class="p">);</span>
+</code></pre></div></div>
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/21_1123_2.png?raw=true" alt="결과2" /></p>
+
+<p>간선이 중복 없이 추출되었음을 확인할 수 있다!</p>
+
+<p>만일 방향그래프라면 이러한 함수는 필요없겠지만
+(방향그래프에서 &lt;a, b&gt;와 &lt;b, a&gt;는 명백히 다르므로)<br />
+무방향그래프에서는 유용하게 사용될 수 있을 것이다.</p>
+
+<h2 id="더-고민해보기">더 고민해보기</h2>
+<ul>
+  <li>인접 행렬을 사용한 무방향그래프의 간선도 중복 없이 추출해보자</li>
+  <li>중복된 요소를 제거하는 데는 집합(Set)이 적절하다.
+집합을 사용하는 방식으로도 구현해보자.</li>
+</ul>
+:ET
