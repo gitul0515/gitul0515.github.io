@@ -1,0 +1,56 @@
+I"@<p>자바스크립트에서 정규표현식에 <strong>‘변수’</strong>를 사용하려면,<br />
+<strong>‘생성자 함수’</strong>로 RegExp 객체를 생성해야 한다.</p>
+
+<p>정규표현식을 생성하는 방법에는 ‘리터럴 표기법’과 ‘생성자 함수’ 방식이 있다.</p>
+
+<h3 id="1-리터럴-표기법">1. 리터럴 표기법</h3>
+<ul>
+  <li>new RegExp(/ab+c/, ‘i’)</li>
+  <li>매개변수를 두 빗금으로 감싼다.</li>
+  <li>표현식이 평가될 때 컴파일된다.</li>
+  <li>표현식이 ‘상수’라면 리터럴 표기법을 사용해야 한다.</li>
+</ul>
+
+<h3 id="2-생성자-함수">2. 생성자 함수</h3>
+<ul>
+  <li>new RegExp(‘ab+c’, ‘i’)</li>
+  <li>매개변수를 따옴표로 감싼다.</li>
+  <li>런타임(실행 시점)에 컴파일된다.</li>
+  <li>표현식이 ‘변수’이거나, 사용자 입력과 같은 외부 출처로부터 표현식을 가져올 때 사용한다.</li>
+</ul>
+
+<h3 id="코드-실습">코드 실습</h3>
+<p>다음의 코드를 보자.<br />
+문자열에 특정 문자가 몇 개 존재하는지 알아내는 간단한 코드다.<br />
+정규식을 사용해서 이를 구현하려고 한다.<br />
+(물론 정규식을 사용하지 않아도 구현할 수 있다)</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">charCount</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">t</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">result</span><span class="p">;</span>
+  <span class="nx">result</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/${t}/g</span><span class="p">).</span><span class="nx">length</span><span class="p">;</span> <span class="c1">// 리터럴 표기법: 오류 발생</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kd">let</span> <span class="nx">str</span><span class="o">=</span><span class="dl">"</span><span class="s2">PROGRAMMING</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">charCount</span><span class="p">(</span><span class="nx">str</span><span class="p">,</span> <span class="dl">'</span><span class="s1">R</span><span class="dl">'</span><span class="p">));</span>
+</code></pre></div></div>
+
+<p>위의 코드는 오류가 발생한다. 
+리터럴 표기법에는 변수(t)를 사용할 수 없기 때문이다.<br />
+다음은 생성자 함수를 사용한 방식이다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">charCount</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="nx">t</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">result</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">regexp</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">RegExp</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">t</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span> <span class="dl">'</span><span class="s1">g</span><span class="dl">'</span><span class="p">);</span> <span class="c1">// 생성자 함수: 오류 없음</span>
+  <span class="nx">result</span> <span class="o">=</span> <span class="nx">s</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">regexp</span><span class="p">).</span><span class="nx">length</span><span class="p">;</span> 
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="kd">let</span> <span class="nx">str</span><span class="o">=</span><span class="dl">"</span><span class="s2">PROGRAMMING</span><span class="dl">"</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">charCount</span><span class="p">(</span><span class="nx">str</span><span class="p">,</span> <span class="dl">'</span><span class="s1">R</span><span class="dl">'</span><span class="p">));</span> <span class="c1">// 2</span>
+</code></pre></div></div>
+
+<p>이와 같이, 정규표현식에 상수가 아닌 <strong>‘변수’</strong>를 사용하려면<br />
+<strong>‘생성자 함수’</strong> 방식을 사용해야 한다.</p>
+
+<h2 id="참고자료">참고자료</h2>
+<p>RegExp - JavaScript | MDN</p>
+:ET

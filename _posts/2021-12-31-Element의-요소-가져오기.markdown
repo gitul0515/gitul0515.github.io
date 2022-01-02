@@ -23,29 +23,27 @@ Element의 크기를 구하는 방법은 4가지가 있다. 각 속성 및 메�
 ### 3. scrollWidth/Height
   clientWidth, clientHeight와 거의 같다.  
   그러나 보여지는 것이 아닌, 실제 콘텐츠의 크기를 구할 때 사용한다.  
-  전체 스크롤바에서 밑에 있는 영역까지 포함한다.  
+  전체 스크롤바에서 보이지 않는 영역까지 포함한다.  
 
 ![이미지](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0102_3.png?raw=true){: width="70%" height="70%"}
 
 ### 4. getBoundingClientRect
-   : 일반적으로 offsetWidth, offsetHeight와 거의 동일하다.  
-     그러나 offsetWidth, offsetHeight는 요소의 **레이아웃 크기**를 반환하고,  
-     getBoundingClientRect()는 **최종 렌더링된 크기**를 반환한다.  
+  일반적으로 offsetWidth/Height와 거의 동일하다.  
+  그러나 offsetWidth/Height는 요소의 **레이아웃 크기**를 반환하고,  
+  getBoundingClientRect()는 **최종 렌더링된 크기**를 반환한다.  
 
-     element에 다음과 같은 css 속성이 적용된 경우,  
-     
-     width: 10px;  
-     height: 10px;  
-     transform: scale(0.3);  
-
-     offsetWidth, offsetHeight의 값은 10이다.  
-     getBoundingClientRect()의 값은 3이다.  
-     
-     이처럼 offsetWidth, offsetHeight는 요소의 레이아웃 크기를,  
-     getBoundingClientRect()는 렌더링된 크기를 반환함에 유의해야 한다.  
+  element에 다음과 같은 css 속성이 적용된 경우,  
+  ```
+  width: 10px;  
+  transform: scale(0.3);  
+  ```
+  offsetWidth의 값은 10인 반면에, getBoundingClientRect()의 값은 3이다.  
+    
+  이처럼 offsetWidth, offsetHeight는 요소의 레이아웃 크기를,  
+  getBoundingClientRect()는 렌더링된 크기를 반환함에 유의해야 한다.  
 
 ## 참고자료
-offsetWidth - JavaScript | MDN
-clientWidth - JavaScript | MDN
-scrollWidth - JavaScript | MDN
-꿀벌 개발일지: https://ohgyun.com
+offsetWidth - JavaScript | MDN  
+clientWidth - JavaScript | MDN  
+scrollWidth - JavaScript | MDN  
+꿀벌 개발일지: https://ohgyun.com  

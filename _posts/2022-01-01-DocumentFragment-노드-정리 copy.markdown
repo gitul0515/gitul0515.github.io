@@ -9,7 +9,7 @@ tags: [자바스크립트]
 DOM을 변경하는 것은 높은 비용이 드는 작업이므로 횟수를 줄이는 것이 유리하다.  
 그러므로 여러 요소를 DOM에 추가할 때는 **Document Fragment 노드**를 사용하는 것이 좋다.  
 
-## Document Fragment 노드
+### Document Fragment 노드
 Document Fragment 노드는 별도의 서브 DOM을 구성하여 기존 DOM에 추가할 때 사용한다.  다음과 같은 주요 특징이 있다.  
 
 1. 부모 노드가 없어서 **기존 DOM과는 별도로 존재**한다.  
@@ -26,7 +26,7 @@ Document Fragment 노드는 별도의 서브 DOM을 구성하여 기존 DOM에 �
 Document Fragment 노드를 생성하는 메서드는 **createDocumentFragment**이다.  
 다음의 코드를 보자.  
 
-## 코드 실습
+### 코드 실습
 ```HTML
 <!DOCTYPE html>
 <html lang="ko">

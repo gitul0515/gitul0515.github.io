@@ -1,0 +1,62 @@
+---
+layout: post
+title: "정규표현식에 변수를 사용하는 방법"
+date: 2021-12-30 12:12:52 +0900
+categories: 자바스크립트
+tags: [자바스크립트]
+---
+
+자바스크립트에서 정규표현식에 **'변수'**를 사용하려면,  
+**'생성자 함수'**로 RegExp 객체를 생성해야 한다.  
+  
+정규표현식을 생성하는 방법에는 '리터럴 표기법'과 '생성자 함수' 방식이 있다.
+
+### 1. 리터럴 표기법
+  - new RegExp(/ab+c/, 'i')  
+  - 매개변수를 두 빗금으로 감싼다.  
+  - 표현식이 평가될 때 컴파일된다.  
+  - 표현식이 '상수'라면 리터럴 표기법을 사용해야 한다.  
+
+### 2. 생성자 함수
+  - new RegExp('ab+c', 'i')  
+  - 매개변수를 따옴표로 감싼다. (혹은 템플릿 리터럴의 `로 감싼다)
+  - 런타임(실행 시점)에 컴파일된다.  
+  - 표현식이 '변수'이거나, 사용자 입력과 같은 외부 출처로부터 표현식을 가져올 때 사용한다. 
+
+### 코드 실습
+다음의 코드를 보자.  
+문자열에 특정 문자가 몇 개 존재하는지 알아내는 간단한 코드다.  
+정규식을 사용해서 이를 구현하려고 한다.  
+(물론 정규식을 사용하지 않아도 구현할 수 있다)  
+
+```javascript
+function charCount(s, t) {
+  let result;
+  result = s.match(/${t}/g).length; // 리터럴 표기법: 오류 발생
+  return result;
+}
+let str="PROGRAMMING";
+console.log(charCount(str, 'R'));
+```
+
+위의 코드는 오류가 발생한다. 
+리터럴 표기법에는 변수(t)를 사용할 수 없기 때문이다.  
+<br>
+다음은 생성자 함수를 사용한 방식이다.  
+추가적으로 ES6의 템플릿 리터럴(`)을 사용하였다.  
+
+```javascript
+function charCount(s, t) {
+  let result;
+  const regexp = new RegExp(`${t}`, 'g'); // 생성자 함수: 오류 없음
+  result = s.match(regexp).length; 
+  return result;
+}
+let str="PROGRAMMING";
+console.log(charCount(str, 'R')); // 2
+```
+
+이와 같이, 정규표현식에 상수가 아닌 **'변수'**를 사용하려면 **'생성자 함수'** 방식을 사용해야 한다.  
+
+## 참고자료
+RegExp - JavaScript | MDN  
