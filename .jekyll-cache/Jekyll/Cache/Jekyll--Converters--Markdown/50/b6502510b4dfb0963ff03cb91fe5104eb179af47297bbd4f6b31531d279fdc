@@ -1,0 +1,44 @@
+I"�<p>Element의 크기를 구하는 방법은 4가지가 있다. 각 속성 및 메서드의 차이를 정리해보았다.</p>
+
+<h2 id="1-offsetwidthheight">1. offsetWidth/Height</h2>
+<p>일반적으로 Element의 전체 크기를 구할 때 사용한다.<br />
+  아래 그림과 같이 콘텐츠, 패딩, 보더, 스크롤바의 크기를 포함한다.</p>
+
+<p>![이미지)[https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0102_1.png?raw=true]</p>
+
+<h2 id="2-clientwidthheight">2. clientWidth/Height</h2>
+<p>실제 보여지는 콘텐츠의 크기를 구할 때 사용한다.<br />
+  아래 그림과 같이 콘텐츠, 패딩의 크기를 포함한다.<br />
+  보더, 스크롤바의 크기는 제외한다.</p>
+
+<p>!(이미지)[https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0102_2.png?raw=true]</p>
+
+<h2 id="3-scrollwidthheight">3. scrollWidth/Height</h2>
+<p>clientWidth, clientHeight와 거의 같다.<br />
+  그러나 보여지는 것이 아닌, 실제 콘텐츠의 크기를 구할 때 사용한다.<br />
+  전체 스크롤바에서 밑에 있는 영역까지 포함한다.</p>
+
+<h2 id="4-getboundingclientrect">4. getBoundingClientRect</h2>
+<p>: 일반적으로 offsetWidth, offsetHeight와 거의 동일하다.<br />
+     그러나 offsetWidth, offsetHeight는 요소의 <strong>레이아웃 크기</strong>를 반환하고,<br />
+     getBoundingClientRect()는 <strong>최종 렌더링된 크기</strong>를 반환한다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> element에 다음과 같은 css 속성이 적용된 경우,  
+ 
+ width: 10px;  
+ height: 10px;  
+ transform: scale(0.3);  
+
+ offsetWidth, offsetHeight의 값은 10이다.  
+ getBoundingClientRect()의 값은 3이다.  
+ 
+ 이처럼 offsetWidth, offsetHeight는 요소의 레이아웃 크기를,  
+ getBoundingClientRect()는 렌더링된 크기를 반환함에 유의해야 한다.  
+</code></pre></div></div>
+
+<h2 id="참고자료">참고자료</h2>
+<p>offsetWidth - JavaScript | MDN
+clientWidth - JavaScript | MDN
+scrollWidth - JavaScript | MDN
+꿀벌 개발일지: https://ohgyun.com</p>
+:ET
