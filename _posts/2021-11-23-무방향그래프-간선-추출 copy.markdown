@@ -1,0 +1,147 @@
+---
+layout: post
+title:  "무방향 그래프의 간선을 중복 없이 추출"
+date:   2021-11-23 09:12:59 +0900
+categories: 자료구조
+tags: [자료구조&알고리즘, 그래프, 자바스크립트]
+---
+
+무방향 그래프에서 간선 (a, b)와 (b, a)는 사실상 동일하다.  
+이러한 중복 없이 간선을 추출하는 함수를 작성해보자.  
+
+## 자바스크립트 코드
+먼저, 무방향그래프를 인접 리스트를 사용하여 구현해보자.  
+
+```javascript
+// 무방향 그래프 구현 (인접 리스트 사용)
+// 생성자 함수
+function UndirectedGraph() {
+  this.edges = {}; // 간선을 저장하는 객체
+}
+
+// 정점 삽입 함수
+UndirectedGraph.prototype.addVertex = function (vertex) {
+  this.edges[vertex] = {}; // this.edges 객체 안에 객체 형태로 저장한다.
+};
+
+// 가중치가 있는 간선 삽입 함수
+UndirectedGraph.prototype.addEdge = function (vertex1, vertex2, weight) {
+  // 가중치가 유효한 숫자인지 판별한다
+  if (!this.isNumber(weight)) {
+    throw new TypeError('weight must be number');
+  }
+
+  // 유효한 정점인지 확인 후, 간선을 삽입
+  if (this.edges[vertex1] && this.edges[vertex2]) {
+    this.edges[vertex1][vertex2] = weight;
+    this.edges[vertex2][vertex1] = weight;
+  } else {
+    throw new TypeError('invalid vertex');
+  }
+};
+
+// 유효한 숫자인지 판별하는 함수
+UndirectedGraph.prototype.isNumber = function (value) {
+  return typeof value === 'number' && Number.isFinite(value);
+};
+
+// 그래프 생성 및 데이터 삽입
+const graph = new UndirectedGraph();
+graph.addVertex(1); graph.addVertex(2);
+graph.addVertex(3); graph.addVertex(4);
+graph.addVertex(5);
+graph.addEdge(1, 2, 1);
+graph.addEdge(1, 5, 88);
+graph.addEdge(2, 3, 8);
+graph.addEdge(3, 4, 10);
+graph.addEdge(4, 2, 100);
+graph.addEdge(5, 2, 100);
+```
+일단, 무방향 그래프의 간선을 '중복을 포함하여' 추출해본다.  
+결과는 배열에 저장하여 반환한다.  
+
+```javascript
+// 무방향 그래프의 간선을 중복을 포함하여 저장한다
+UndirectedGraph.prototype.AllEdge = function () {
+  const result = [];
+
+  // 그래프에서 간선(v1, v2, weight)을 추출한다
+  for (const v1 in graph.edges) {
+    if (Object.hasOwnProperty.call(graph.edges, v1)) {
+      for (const v2 in graph.edges[v1]) {
+        if (Object.hasOwnProperty.call(graph.edges[v1], v2)) {
+          const weight = graph.edges[v1][v2];
+          result.push([v1, v2, weight]); // 삽입
+        }
+      }
+    }
+  }
+  return result;
+};
+const result1 = graph.AllEdge();
+console.log(result1);
+console.log();
+```
+
+결과는?  
+
+![결과1](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/21_1123_1.png?raw=true)
+
+위 결과에서 볼 수 있듯이, 간선이 중복되어 있다.  
+예를 들어 [ '1', '2', 1 ]과  [ '2', '1', 1 ]는 동일한 간선인 것이다.  
+
+
+이러한 중복을 제거하는 함수를 작성해보자.  
+
+
+기본적으로 위 코드와 유사하지만,  
+redundancyCheck라는 중첩함수를 통해 중복 여부를 검사하였다.  
+
+```javascript
+// 무방향 그래프의 간선을 중복 없이 저장한다
+UndirectedGraph.prototype.DistinctEdge = function () {
+  const result = [];
+
+  // 중복된 간선을 검사하는 함수
+  function redundancyCheck(array) {
+    const [v1, v2] = [array[0], array[1]];
+
+    // 예: [v1, v2]가 [2, 3]일 때, [2, 3]과 [3, 2]는 중복이다.
+    for (let i = 0; i < result.length; i++) {
+      if (result[i][0] === v1 && result[i][1] === v2) return;
+      if (result[i][0] === v2 && result[i][1] === v1) return;
+    }
+    result.push(array);
+  }
+
+  // 그래프에서 간선(v1, v2, weight)을 추출한다
+  for (const v1 in graph.edges) {
+    if (Object.hasOwnProperty.call(graph.edges, v1)) {
+      for (const v2 in graph.edges[v1]) {
+        if (Object.hasOwnProperty.call(graph.edges[v1], v2)) {
+          const weight = graph.edges[v1][v2];
+          redundancyCheck([v1, v2, weight]); // 중복된 간선을 검사한다
+        }
+      }
+    }
+  }
+  return result;
+};
+const result2 = graph.DistinctEdge();
+console.log(result2);
+```
+결과는?  
+
+![결과2](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/21_1123_2.png?raw=true)
+
+간선이 중복 없이 추출되었음을 확인할 수 있다!  
+
+
+만일 방향그래프라면 이러한 함수는 필요없겠지만
+(방향그래프에서 <a, b>와 <b, a>는 명백히 다르므로)  
+무방향그래프에서는 유용하게 사용될 수 있을 것이다.
+
+## 더 고민해보기
+- 인접 행렬을 사용한 무방향그래프의 간선도 중복 없이 추출해보자.
+- 중복된 요소를 제거하는 데는 집합(Set)이 적절하다.
+  집합을 사용하는 방식으로도 구현해보자.

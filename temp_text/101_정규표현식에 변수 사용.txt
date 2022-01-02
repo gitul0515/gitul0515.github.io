@@ -1,0 +1,88 @@
+[자바스크립트] 정규표현식에 변수를 사용하고자 한다면 (01-01)
+
+자바스크립트에서 정규표현식에 '변수'를 사용하려면,  
+**생성자 함수** 방식으로 RegExp 객체를 생성해야 한다.  
+
+## 정규표현식 생성  
+  
+먼저, 정규표현식을 생성하는 방법에는 다음의 두 가지가 있다.  
+
+1. 리터럴 표기법  
+   : /ab+c/i 또는 new RegExp(/ab+c/, 'i')  
+2. 생성자 함수  
+   : new RegExp('ab+c', 'i')  
+
+- 리터럴 표기법의 매개변수는 두 빗금으로 감싼다.  
+- 표현식이 평가될 때 컴파일된다.  
+- 표현식이 '상수'라면 리터럴 표기법을 사용해야 한다.  
+
+- 생성자 함수의 매개변수는 따옴표를 사용한다.  
+- 런타임(실행 시점)에 컴파일된다.  
+- 표현식이 '변수'이거나, 사용자 입력과 같은 외부 출처로부터  
+  표현식을 가져올 때 사용한다. 
+
+## 코드
+
+다음의 코드를 보자.  
+문자열에 특정 문자가 몇 개 존재하는지 알아내는 간단한 코드다.  
+정규식을 사용해서 이를 구현하려고 한다.  
+(물론 정규식을 사용하지 않아도 구현할 수 있다)  
+
+```javascript
+            // 정규표현식 리터럴 표기법
+            function solution(s, t) {
+              let result;
+              result = s.match(/${t}/).length; // 오류 발생
+              return result;
+            }
+            let str="COMPUTERPROGRAMMING";
+            console.log(solution(str, 'R'));
+```
+
+
+위의 코드는 오류가 발생한다. 
+리터럴 표기법에는 변수(t)를 사용할 수 없기 때문이다. 
+다음이 올바른 코드다.
+
+```javascript
+            // 정규표현식 생성자 함수
+            function solution(s, t) {
+              let result;
+              const regexp = new RegExp(`${t}`, 'g'); // 오류 없음
+              result = s.match(regexp).length; 
+              return result;
+            }
+            let str="COMPUTERPROGRAMMING";
+            console.log(solution(str, 'R')); // 3
+```
+
+이와 같이, 정규표현식에 상수가 아닌 변수를 사용하려면  
+생성자 함수 방식을 사용해야 한다.  
+
+## 참고 자료
+RegExp - JavaScript | MDN
+
+
+https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/RegExp
+
+
+
+
+리터럴 표기법을 사용하면 
+
+
+
+이때, 정규표현식을 
+
+
+
+
+
+
+
+
+자바스크립트의 변수에서 정규식을 작성하려면 
+
+
+
+RegExp 객체는 정규표현식을 구현한 자바스크립트 표준 내장 객체
