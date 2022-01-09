@@ -1,4 +1,0 @@
-자바스크립트 책 정리
-타입스크립트 개념 정리
-요소의 수직 정렬 vertical-align
-clientWidth 등 정리

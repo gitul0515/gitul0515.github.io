@@ -1,0 +1,114 @@
+자바스크립트 JSON 개념 및 메서드 정리
+
+### AJAX와 XML
+
+1. AJAX
+  Asynchronous JavaScript And XML.  
+  자바스크립트를 사용하여 브라우저가 서버에게 비동기 방식으로 데이터를 요청하고,  
+  서버가 응답한 데이터를 수신하여 웹페이지를 동적으로 갱신하는 프로그래밍 방식.
+  브라우저에서 제공하는 Web API인 XMLHttpRequest(XHR) 객체를 기반으로 동작한다.
+
+2. XML
+   eXtensible Markup Language.
+   HTML과 같은 마크업 언어 중에 하나이다. 
+   인터넷에 연결된 시스템끼리 데이터를 쉽게 주고 받을 수 있게 하여
+   HTML의 한계를 극복할 목적으로 만들어졌다. 
+
+  다만, 최근에는 XML보다는 JSON을 널리 사용하는 추세다. 
+
+### JSON
+  클라이언트와 서버 간의 HTTP 통신을 위한 텍스트 데이터 포맷이다.
+  언어 독립형 데이터 포맷으로, 대부분의 프로그래밍 언어에서 사용 가능.
+  key: value로 이루어진 텍스트다.
+
+  특징
+  > simplest data interchange format
+  > lightweight text-based structure
+  > easy to read
+  > key-value pairs
+  > used for serialization and transmission of data between the network the network connection
+  > independent programming language and platform
+
+### JSON 메서드
+  1. JSON.stringify
+  객체를 JSON 포맷의 문자열로 변환한다. 직렬화(serializaing).
+  선택적으로, replacer를 함수로 전달하면 변환 전 값을 변형할 수 있고,
+  배열로 전달할 경우 지정한 속성만 결과에 포함한다.
+
+```Javascript
+const person = {
+  name: 'gihong',
+  age: 28,
+  address: 'Seoul',
+  birthDate: new Date(),
+  sayHi: () => {
+    console.log('Hi!');
+  }
+}
+
+const json = JSON.stringify(person);
+console.log(json);
+// {"name":"gihong","age":28,"address":"Seoul","birthDate":"2022-01-06T09:07:13.255Z"}
+```
+
+  주의! 객체 안의 메서드는 JSON으로 변환이 불가. 
+  메서드는 객체의 데이터가 아니기 때문.
+  symbol과 같은 자바스크립트 고유의 타입도 JSON으로 변환 불가.
+  
+  이를 명확히 정리하면 다음과 같다. 
+- JSON이 지원하는 데이터 타입: string, number, object, array, boolean, null
+- JSON이 지원하지 않는 데이터 타입: function, date, undefined
+
+  2. JSON.parse
+  JSON 포맷의 문자열을 객체로 변환한다. 역직렬화(deserializaing)
+
+```Javascript
+const before = JSON.parse(json);
+console.log(before) // 객체 출력
+```
+
+주의! 변환된 객체에는 메서드가 포함되어 있지 않다.
+즉, 변환 전 객체인 person에는 sayHi 메서드가 들어있으나,
+변환이 완료된 before에는 포함되어 있지 않다.
+
+// 변환 전 객체
+person.sayHi(); // Hi!
+// 변환 후 객체
+before.sayHi(); // error
+
+
+### JSON 관련 유용한 사이트
+1. JSON DIFF
+   JSON 데이터 간에 차이를 비교해준다. 디버깅 시 유용.
+   http://www.jsondiff.com
+
+2. JSON Beautifier
+   JSON 파일의 포맷을 정리해준다.
+   https://codebeautify.org/jsonviewer
+
+3. JSON Validator
+   문법 오류 검사. 디버깅 시 유용.
+   https://jsonformatter.curiousconcept.com/#
+
+
+
+
+### 기타
+
+- HTTP는 Hypertext Transfer Protocol의 약자.
+  Hypertext는 링크만을 가리키는 것이 아니라, 전반적인 리소스를 모두 포함한다. 
+- 오버로딩(overloading)은 같은 이름의 메서드를 매개변수의 개수나 타입을 다르게 지정하여
+  2개 이상 정의하는 것을 의미한다.
+
+  
+
+## 참고자료
+XML - 위키백과
+이웅모
+유튜브
+
+
+
+
+
+

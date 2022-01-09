@@ -1,0 +1,41 @@
+---
+layout: post
+title: "[네트워크] URI와 URL의 차이"
+date: 2022-01-02 12:12:52 +0900
+categories: 네트워크
+tags: [네트워크]
+---
+
+웹 개발 공부를 하다가 URI란 용어를 알게 되어 찾아보았다.  
+익히 자주 사용하는 URL과는 어떤 차이가 있을까?  
+
+결론부터 말하면 URI은 URL의 상위 집합이다.  
+URI는 리소스의 식별자(identifier)이고, URL은 리소스의 위치(locator)를 가리킨다.  
+
+![](?raw=true)
+
+### URI
+URI는 **통합 자원 식별자(Uniform Resource Identifier)**로서 인터넷에 있는 자원을 나타내는 유일한 주소다. 인터넷에서 사용되는 논리적 및 물리적 리소스를 식별하는 고유한 문자열 시퀀스다. URI의 하위 집합으로 URL, URN이 있다.  
+
+### URL
+URL(Uniform Resource Locator)은 네트워크 상에서 자원이 어디 있는지를 알려주기 위한 규약이다. 즉, 컴퓨터 네트워크와 검색 메커니즘에서의 **위치**를 지정하는, 웹 리소스에 대한 참조이다. 쉽게 말해서, 웹 페이지를 찾기위한 주소이며, 컴퓨터 네트워크상의 자원도 나타낼 수 있다.  
+
+### URI과 URL의 표현
+
+URI의 표현 방법은 다음과 같다.  
+
+> scheme:[//[user[:password]@]host[:port]][/path][?query][#fragment]
+
+- scheme: 프로토콜을 의미. 웹에서는 http나 https를 사용한다.
+- user와 password: 서버의 데이터에 접근하기 위한 사용자의 이름과 비밀번호
+- host와 port: 접근할 대상(서버)의 호스트명과 포트 번호
+- path: 접근할 대상(서버)의 경로에 대한 상세 정보
+- query: 접근할 대상에 전달하는 추가 정보
+- fragment: 메인 리소스 내에 서브 리소스에 접근할 때 이를 식별하기 위한 정보 
+
+이때 URL은 fragment를 포함하지 않으며, query까지만 포함한다.  
+이처럼 표현 방법을 통해서도 URI와 URL을 구별할 수 있다. 
+
+### 참고자료
+URI, URL | 위키백과
+찰스의 안드로이드: www.charlezz.com
