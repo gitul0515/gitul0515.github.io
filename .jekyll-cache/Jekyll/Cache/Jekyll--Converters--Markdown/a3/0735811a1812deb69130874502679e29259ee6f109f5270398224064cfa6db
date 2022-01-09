@@ -1,0 +1,46 @@
+I"�<h3 id="클래스를-유연하게-만들기">클래스를 유연하게 만들기</h3>
+
+<p>클래스를 하나의 목적만을 수행하는, 너무 딱딱한 형태로 만들면<br />
+다양한 상황에 활용하기가 어려워진다.</p>
+
+<p>사용자(프로그래머)가 원하는 기능을 추가하여 재사용이 가능하도록<br />
+<strong><u>클래스를 유연하게 만드는 것이 필요</u></strong>하다.</p>
+
+<p>예컨대 사용자가 정의한 함수를 ‘콜백 함수’로 클래스에 전달하게 하면,<br />
+클래스를 다양한 방식으로 사용할 수 있다.</p>
+
+<h3 id="코드-실습">코드 실습</h3>
+
+<p>다음의 간단한 코드를 보자.<br />
+Animal라는 클래스는 콜백 함수를 인자로 전달받으며,<br />
+move라는 메서드를 통해 이를 실행한다.</p>
+
+<pre><code class="language-Javascript">class Animal {
+  constructor(callback) {
+    this.callback = callback;
+  }
+
+  move (){
+    this.callback &amp;&amp; this.callback();
+  }
+}
+</code></pre>
+
+<p>사용자(프로그래머)는 콜백 함수를 전달함으로써<br />
+이 하나의 클래스를 다양한 방식으로 사용할 수 있다.</p>
+
+<pre><code class="language-Javascript">const human = new Animal(() =&gt; console.log('running!'));
+const bird = new Animal(() =&gt; console.log('flying!'));
+const fish = new Animal(() =&gt; console.log('swimming!'));
+
+human.move(); // running!
+bird.move(); // flying!
+fish.move(); // swimming!
+</code></pre>
+<p><br />
+이처럼 human 객체, bird 객체, fish 객체에 따라 결과가 달라졌다.</p>
+
+<p>이와 같이, 사용자(프로그래머)가 원하는 기능을 추가하여 재사용이 가능하도록
+클래스를 유연하게 만드는 것이 필요하다.</p>
+
+:ET

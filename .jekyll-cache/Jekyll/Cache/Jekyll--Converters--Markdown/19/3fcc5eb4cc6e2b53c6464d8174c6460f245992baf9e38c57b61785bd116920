@@ -1,0 +1,79 @@
+I"<p>img 태그에 관하여 알아야 할 것들을 정리해보았다.</p>
+
+<ul>
+  <li>
+    <p>src 특성은 필수이며, 포함하고자 하는 이미지의 경로를 지정한다.</p>
+  </li>
+  <li>
+    <p>내부 리소스 이미지: 프로젝트 안에 있는 이미지의 경로를 참조<br />
+외부 리소스 이미지: 외부 경로에 있는 이미지의 경로를 참조</p>
+  </li>
+  <li>
+    <p>alt 특성은 이미지의 텍스트 설명이며 필수는 아니지만,<br />
+스크린 리더가 alt의 값을 읽어 사용자에게 이미지를 설명하므로,<br />
+접근성 차원에서 필요하다.</p>
+  </li>
+  <li>
+    <p>img 태그는 기본적으로 inline 요소이나,<br />
+기본 크기는 내장한 이미지의 고유 크기로 정해지므로 <strong><u>inline-block</u></strong> 처럼 보인다.<br />
+width, height, padding, border/border-radius, margin 등을 지정할 수 있다.</p>
+  </li>
+  <li>
+    <p>width: 이미지의 픽셀 기준 고유 너비. 단위 없는 정수.<br />
+height: 이미지의 픽셀 기준 고유 크기. 단위 없는 정수.</p>
+  </li>
+  <li>
+    <p>width와 height를 모두 쓰면 비율이 깨질 수 있다.<br />
+둘 중 하나만 쓰면 나머지는 비율에 맞게 조정된다.</p>
+  </li>
+  <li>
+    <p>%를 쓰면 원본 이미지 대비 크기가 조정된다.</p>
+  </li>
+  <li>
+    <p>이미지 링크: img 태그를 a 태그로 감싼다.<br />
+a 태그에 <code class="language-plaintext highlighter-rouge">target = "_blank"</code> 속성을 주면 새 탭으로 열린다.</p>
+  </li>
+  <li>
+    <p><b>이미지와 이미지가 인접하면 기본적인 margin이 생긴다.</b><br />
+이는 <code class="language-plaintext highlighter-rouge">font-size: 0</code>을 주어 해결할 수 있다.</p>
+  </li>
+  <li>
+    <p>원본 이미지를 불러오는 데 실패했을 때</p>
+
+    <ol>
+      <li>
+        <p>대체 이미지를 미리 적용하는 방법<br />
+<code class="language-plaintext highlighter-rouge">&lt;img src="기본 이미지" onerror="this.src='기본 이미지 없을 때 대체 이미지'"&gt;</code></p>
+      </li>
+      <li>
+        <p>엑박 이미지를 제거하는 방법<br />
+<code class="language-plaintext highlighter-rouge">&lt;img src="기본이미지" onerror="this.style.display='none'"&gt;</code></p>
+      </li>
+    </ol>
+  </li>
+  <li>
+    <p>object-fit
+width와 height를 사용하면 모든 픽셀이 보이는 상태에서 변경된다.
+object-fit을 사용하면 픽셀의 일부를 보이지 않게 하거나 꽉 채울 수 있다. 
+쉽게 말해, <strong>img를 배경이미지처럼 사용할 수 있다</strong>.</p>
+
+    <p>fill: 기본값.
+contain: 요소의 콘텐츠 박스 내부에 들어가도록 크기를 맞춤 조절. 비율 유지.
+cover: 요소의 콘텐츠 박스를 가득 채운다. 비율 유지. 이미지 일부가 잘린다.
+none: 원본 사이즈로 돌아간다.
+scale-down: contain과 none 중 이미지의 크기가 더 작아지는 것을 선택.</p>
+
+    <p>IE에서는 지원되지 않는다ㅠ<br />
+크로스 브라우징을 할 때 주의할 것.</p>
+  </li>
+  <li>
+    <p>object-position
+콘텐츠 박스 내부에서 이미지의 위치를 지정한다.</p>
+
+    <p>object-position: x축 위치, y축 위치
+x축: left, center, right, px, %
+y축: top, center, bottom, px, %</p>
+  </li>
+</ul>
+
+:ET

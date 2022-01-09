@@ -33,20 +33,57 @@ CSS img 태그 개념 정리     01_07
 - 원본 이미지를 불러오는 데 실패했을 때
 
   1. 대체 이미지를 미리 적용하는 방법 
-  <img src="기본 이미지" onerror="this.src='기본 이미지 없을 때 대체 이미지'">
+  `<img src="기본 이미지" onerror="this.src='기본 이미지 없을 때 대체 이미지'">`
 
   2. 엑박 이미지를 제거하는 방법
-  <img src="기본이미지" onerror="this.style.display='none'"> 
+  `<img src="기본이미지" onerror="this.style.display='none'">`
+
+
 
 - object-fit
+  width와 height를 사용하면 모든 픽셀이 보이는 상태에서 변경된다.
+  object-fit을 사용하면 픽셀의 일부를 보이지 않게 하거나 꽉 채울 수 있다. 
+  쉽게 말해, **img를 배경이미지처럼 사용할 수 있다**. 
+
+  fill: 기본값.
+  contain: 요소의 콘텐츠 박스 내부에 들어가도록 크기를 맞춤 조절. 비율 유지.
+  cover: 요소의 콘텐츠 박스를 가득 채운다. 비율 유지. 이미지 일부가 잘린다.
+  none: 원본 사이즈로 돌아간다.
+  scale-down: contain과 none 중 이미지의 크기가 더 작아지는 것을 선택.
+
+  IE에서는 지원되지 않는다ㅠ  
+  크로스 브라우징을 할 때 주의할 것.
+
+- object-position
+  콘텐츠 박스 내부에서 이미지의 위치를 지정한다. 
+
+  object-position: x축 위치, y축 위치
+  x축: left, center, right, px, %
+  y축: top, center, bottom, px, %
+
+
+
+
+
+
+비율은 고정.
+  
+
+
+
+
+
+
 
 img 태그에 콘테이너를 덮어서 사용하기
 
 개발 스케치
 
+img 태그를 배경이미지와 같이 사용할 수 있는 방법. 
 
 
 
+대체 요소
   
 
 
