@@ -1,8 +1,17 @@
 HTML 시멘틱 태그
-브루트포스 알고리즘 (완전탐색)
 MVC 패턴 정리
 자바스크립트 책 정리
 타입스크립트 개념 정리
 
-대체 요소
-  
+대체 요소란
+input의 type 정리
+사용자 정의 변수
+Nan
+BEM
+flex-grow vs flex-shrink vs flex-basis
+max-height, min-height
+display: none에 애니메이션 추가하기
+css 우선순위
+
+
+순열과 조합 알고리즘

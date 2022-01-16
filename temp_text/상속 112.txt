@@ -1,0 +1,36 @@
+CSS 상속(Inheritance)
+
+상속이란 상위 요소의 속성을 하위 요소가 물려받는 것을 뜻한다.  
+상속이 되는 속성이 있고, 상속이 되지 않는 속성이 있다.  
+이를 정리하면 다음과 같다.  
+
+상속 Yes
+: **font, color**, line-height, text-align, visibility, opacity 등
+
+상속 No
+: width, height, margin, padding, border, display, box-sizing, position 등
+
+
+상속을 받지 않는 경우도 존재한다. button이 대표적인 케이스다. 
+
+상속받지 않는 요소 또는 프로퍼티라도, **inherit**을 사용하면 상속받을 수 있다. 
+
+
+## 참고자료
+https://poiemaweb.com
+
+
+
+
+
+
+10으로 나눈 나머지는 일의 자리가 되고, 
+
+10으로 나눈 몫은 앞의 숫자가 된다. 
+
+어떤 숫자든지, 자신을 제외하고 최대 약수는 
+
+자신의 절반이다. 
+
+
+
