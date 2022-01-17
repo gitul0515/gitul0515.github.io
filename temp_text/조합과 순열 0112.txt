@@ -154,6 +154,28 @@ https://gorakgarak.tistory.com/523
 순열 알고리즘
 
 
+지난 조합 알고리즘에 이어서,   
+이번 글에서는 순열 알고리즘에 대해서 정리해본다.
+
+순열
+
+
+
+- Permutation
+- 
+
+
+조합이 처음 요소부터 선택하면서 선택한 요소 뒤의 요소들을 나머지 배열로 구한다면, 
+순열은 선택한 요소를 제외한 모든 요소를 나머지 배열로 구한다.
+
+즉, 조합과 다른 유일한 점은 다음이다.
+
+// 조합: 선택한 요소 뒤의 요소들이 나머지 배열
+const rest = array.slice(index+1);
+
+// 순열: 선택한 요소(fixed)를 제외한 나머지 배열
+const rest = [...array.slice(0, index), ...array.slice(index+1)];
+
 
 
 nCr = n-1Cr-1 + n-1Cr
