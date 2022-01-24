@@ -5,13 +5,11 @@ MVC 패턴 정리
 
 대체 요소란
 input의 type 정리
-사용자 정의 변수
+css img 처리
 Nan
-BEM
 flex-grow vs flex-shrink vs flex-basis
 max-height, min-height
 display: none에 애니메이션 추가하기
-css 우선순위
-
-
-순열과 조합 알고리즘
+css 우선순위 Cascading
+innerHTML, textContent, innerText
+반응형 시 크기 조절

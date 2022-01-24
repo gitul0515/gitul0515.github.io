@@ -67,7 +67,8 @@ function permutation(arr = [], r) {
 console.log(permutation([0, 1, 2, 3], 3));
 ```
 
-![순열 결과](https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_102_1.png?raw=true){: width="40%" height="40%"}
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0112.png?raw=true" alt="순열 결과" width="200" style="margin-left: 0;">
+
 
 순열 역시 데이터를 처리할 때 유용하므로, 함수를 잘 숙지해두면 큰 도움이 된다.
 
