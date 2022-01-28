@@ -1,0 +1,95 @@
+I"�<h3 id="문제-설명">문제 설명</h3>
+
+<p>프로그래머스의 ‘소수 찾기’ 문제를 풀어보았다. 문제는 다음과 같다.</p>
+
+<blockquote>
+  <p>1부터 숫자 n 사이에 있는 소수의 개수를 반환하는 함수를 만들어 보세요.<br />
+소수는 1과 자기 자신으로만 나누어지는 수를 의미합니다.<br />
+n은 2이상 1000000이하의 자연수입니다.</p>
+</blockquote>
+
+<p><br />
+처음엔 매우 쉬운 문제라고 생각했었다. 소수를 찾는 방법은 잘 알고 있었기 때문이다. 예를 들어 11이 소수이려면, 11을 2~10까지로 나누었을 때 나누어 떨어지지 않아야 한다. 그런데 웬걸, 이 방식은 효율성 테스트에서 낙제하고 말았다. 내가 작성한 코드는 비효율적인 탐색 방법이었고, 더 효율적인 방법이 있다는 뜻이었다.</p>
+
+<p><br />
+<strong>“어떻게 하면 가장 효율적으로 소수를 찾을 수 있을까?”</strong><br />
+이를 생각하느라 골치가 조금 아팠던 게 사실이다.</p>
+
+<h3 id="문제-풀이">문제 풀이</h3>
+<p>이 문제를 해결하려면 정수론에 대한 지식이 약간 필요하다. 다음을 보자.</p>
+
+<p><strong>1. 자연수 n은 소수의 곱으로 이루어진다. (n &gt;= 2)</strong><br />
+  정수론에 대한 가장 기본적인 정리이다. 1보다 큰 자연수는 언제나 소수의 곱으로 이루어진다. 6은 2 * 3, 10은 2 * 5로 이루어지는 식이다. 이 규칙으로부터 무엇을 알 수 있을까?<br />
+  <br />
+  바로 <strong><u>어떤 수가 소수인지 알려면 그보다 작은 소수로만 나누면 된다</u></strong>는 것이다.<br />
+  예컨대, 11이 소수인지 알기 위해서 2~10까지로 나누어 볼 필요가 없다. 11보다 작은 소수인 2, 3, 5, 7로만 나누어보면 된다. 이것이 더 효율적인 방법이다.</p>
+
+<p><strong>2. 자연수 n이 √n 이하의 수들로 나누어 떨어지지 않으면 n은 소수다. (n &gt;= 2)</strong><br />
+  이것이 가능한 이유는, n의 약수들의 곱셈은 √n을 기준으로 대칭적으로 나열되기 때문이다.</p>
+
+<p>예를 들어, 12를 기준으로 한다면<br />
+  1 * 12 | 2 * 6 | 3 * 4 | √12 * √12 | 4 * 3 | 6 * 2 | 12 * 1 임을 알 수 있다. (√12 = 3.46…)</p>
+
+<p>이때 12가 소수인지 알려면 2와 3만을 검사해보면 된다.<br />
+  (1은 소수의 정의에 따라 제외되고, 4와 6은 볼 필요가 없다.<br />
+   4로 나누어 떨어질 값이라면, 3으로 이미 나누어 떨어지기 때문이다. 6도 마찬가지다)</p>
+
+<p>따라서 <strong><u>n이 소수인지 판별하려면 √n 이하의 수까지만 검사하면 된다.</u></strong><br />
+  검사할 데이터가 제곱근 개 이하로 감소하므로, 더 효율적인 방법이다.</p>
+
+<hr />
+
+<p>결론적으로, 1번과 2번을 종합하면 다음과 같은 결론이 내려진다.<br />
+  <strong><u>n이 소수인지 판별하려면 √n 이하의 소수들만 검사하면 된다.</u></strong></p>
+
+<p>이를 바탕으로 코드를 개선해 보았다.</p>
+
+<h3 id="코드">코드</h3>
+<p>다시 문제를 살펴보면 다음과 같았다.</p>
+<blockquote>
+  <p>1부터 숫자 n 사이에 있는 소수의 개수를 반환하는 함수를 만들어 보세요.<br />
+소수는 1과 자기 자신으로만 나누어지는 수를 의미합니다.<br />
+n은 2이상 1000000이하의 자연수입니다.</p>
+</blockquote>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">solution</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">let</span> <span class="nx">answer</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">prime</span> <span class="o">=</span> <span class="p">[];</span> <span class="c1">// 1</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">num</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="nx">num</span> <span class="o">&lt;=</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">num</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 2</span>
+        <span class="nx">prime</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span> <span class="c1">// 3</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">prime</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sqrt</span><span class="p">(</span><span class="nx">num</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 4</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">num</span> <span class="o">%</span> <span class="nx">prime</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">===</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 5</span>
+                <span class="nx">prime</span><span class="p">.</span><span class="nx">pop</span><span class="p">();</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="nx">answer</span> <span class="o">=</span> <span class="nx">prime</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="c1">// 6</span>
+    <span class="k">return</span> <span class="nx">answer</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<코드 해설="">
+1. prime은 소수를 저장하는 배열이다. 
+2. 소수가 될 수 있는 수들을 num으로 지정하였다. num은 2부터 시작하는데, 
+   1은 소수가 아니므로 자동으로 제외
+   
+
+
+문제에서는 n이 2이상의 자연수라고 하였으므로, 2는 
+
+
+어떤 자연수 n이 있을 때, √n 보다 작은 모든 소수들로 나누어 떨어지지 않으면 n은 소수입니다.
+
+
+
+
+'소수를 찾되, 최대한 효율적으로 찾아야 한다'. 이것이 해결해야 할 과제였다.
+
+
+
+
+생각보다 골치를 썩였다.
+
+
+</코드>
+:ET
