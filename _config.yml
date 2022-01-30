@@ -156,7 +156,7 @@ brand_color: "#1a8e42"
 #Page default value
 defaults:
   home:
-    heading: "사람을 어루만지는 기술을 지향합니다"
+    heading: "좋은 사람들과 지식을 나누고 싶습니다"
     subheading: "프론트엔드 개발자, 기홍의 블로그"
     banner: "https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/banner/9.png?raw=true"
 

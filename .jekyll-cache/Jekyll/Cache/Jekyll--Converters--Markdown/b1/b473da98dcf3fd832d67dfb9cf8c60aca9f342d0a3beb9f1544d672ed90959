@@ -1,0 +1,89 @@
+I"<h3 id="개요">개요</h3>
+<p>웹 프로젝트의 입문이라고 할 수 있는 ‘쇼핑리스트 앱’ 프로젝트를 완성하였다. 기간은 하루 정도 걸렸던 것 같다. 아직은 프로젝트 경험이 부족해서 조금 헤메었지만 크게 어렵지는 않았다. 그 동안 공부해왔던 DOM, 이벤트, 스크롤 제어 등의 기술을 적용해볼 수 있던 좋은 경험이었다.</p>
+
+<h3 id="결과물">결과물</h3>
+<h4 id="1-초기-화면">1. 초기 화면</h4>
+<p>사용자가 데이터를 입력하기 전 초기 화면이다. 가능한 직관적으로 느껴지도록 디자인하였다. 상단의 헤더 부분에서는 오늘의 날짜를 표시해준다. 구매하려는 ‘물건 이름’과 ‘예상 가격’을 작성한 뒤에, 하단의 버튼을 클릭하여 입력할 수 있다. Enter key를 쳐서 데이터를 입력할 수도 있다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0112_1.png?raw=true" alt="쇼핑리스트 화면" width="60%" style="margin-left: 0;" />
+<br /></p>
+
+<h4 id="2-사용-화면">2. 사용 화면</h4>
+<p>사용자가 데이터를 입력하면 표시되는 화면이다. ‘체크 아이콘’을 클릭하여 구매 여부를 관리할 수 있다. 그리고 ‘휴지통 아이콘’을 클릭하여 목록을 삭제할 수 있다. 또한, 예상 금액을 합산하여 밑 부분에 표시해주었다. 한편, ‘Check all’은 모든 목록을 체크하는 버튼이며, ‘Delete all’은 모든 목록을 삭제하는 버튼이다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0112_2.png?raw=true" alt="쇼핑리스트 화면" width="60%" style="margin-left: 0;" /></p>
+
+<h4 id="3-데모-영상">3. 데모 영상</h4>
+<video width="60%" height="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0112_3.mp4?raw=true" type="video/mp4" />
+</video>
+
+<p>(혹시 영상이 정상적으로 플레이 되지 않는다면 
+ 저의 github에서 시청해보실 수 있어요)</p>
+
+<p>github</p>
+
+<h3 id="코드-리뷰">코드 리뷰</h3>
+<p>중요하다고 생각한 코드를 리뷰해 보겠다.</p>
+
+<ol>
+  <li>숫자만 입력받기</li>
+</ol>
+
+<pre><code class="language-Javascript">  // before
+  const priceValue = estimatedPrice.value; 
+</code></pre>
+
+<p>input 태그를 통해 ‘예상 가격’을 입력받아 저장하는 코드이다. 나는 숫자만으로 이루어진 문자열(예: ‘2000’)을 입력받기를 기대하고 있다. 그런데 문제는, 사용자가 숫자와 문자가 혼용된 값(예: ‘2,000원’)을 입력할 수도 있다는 것이다. 이렇게 되면 입력값을 처리하는 것이 곤란해진다. 그래서 다음과 같은 코드를 추가하였다.</p>
+
+<pre><code class="language-Javascript">  // after
+  const priceValue = estimatedPrice.value.replace(/[^0-9]/g, '');
+</code></pre>
+
+<p>입력값 중에서 숫자가 아닌 문자들을 모두 제거하는 것이다. 정규표현식과 replace 메서드를 조합하였다. 이 경우 기대와 어긋나는 값을 입력받더라도, 내가 원하는 데이터(숫자로 이루어진 부분)을 추출할 수 있다. 물론, 이와는 달리 사용자에게 명시적인 경고를 줄 수도 있다. 하지만 이렇게 내부적으로 처리하는 것이 사용성 측면에서 더 좋다고 생각한다.</p>
+
+<ol>
+  <li>checkAll 버튼 구현
+checkAll 버튼은</li>
+</ol>
+
+<p>목록을 모두 구매 체크하는 버튼이다.</p>
+
+<p>아이템을 모두 체크하는 기능을</p>
+
+<pre><code class="language-Javascript">checkAll.addEventListener('click', () =&gt; {
+  // checked 되지 않은 iconCheck
+  let icons = [...document.querySelectorAll('.item__icon--check')];
+  icons = icons.filter(icon =&gt; !icon.className.includes('checked'));
+
+  icons.forEach(icon =&gt; {
+    icon.dispatchEvent(new Event('click'));
+  });
+});
+</code></pre>
+
+<p>사용자에게 경고를 주어 행동을 강제하는 것보다, 이것이 사용성 측면에서 더 좋은 방법이라고 생각한다.</p>
+
+<p>사용자에게</p>
+
+<p>기대와 어긋나는 값을 입받을 경우 사용자에게 경고를 줄 수도 있다. 그러나 사용자</p>
+
+<p>이렇게 내부적으로 처리하는 것이</p>
+
+<p>입력한 값 중에서</p>
+
+<p>2000원 =&gt; 2000</p>
+
+<p>2,000 =&gt; 2000</p>
+
+<p>사용자에게</p>
+
+<p>2000 또는 3000</p>
+
+<p>예상 가격’을 작성한 뒤에</p>
+
+<h3 id="오류-해결">오류 해결</h3>
+
+<p>틀린 점이 있다면 지적해주세요.</p>
+
+:ET
