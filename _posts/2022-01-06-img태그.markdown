@@ -2,8 +2,8 @@
 layout: post
 title: "CSS img 태그 정리"
 date: 2022-01-07 12:12:52 +0900
-categories: HTML/CSS
-tags: [HTML/CSS]
+categories: HTML&CSS
+tags: [HTML&CSS]
 ---
 
 img 태그에 관하여 알아야 할 것들을 정리해보았다.  

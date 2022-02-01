@@ -2,8 +2,8 @@
 layout: post
 title: "CSS 중앙 정렬 정리"
 date: 2022-01-05 12:12:52 +0900
-categories: HTML/CSS
-tags: [HTML/CSS]
+categories: HTML&CSS
+tags: [HTML&CSS]
 ---
 
 CSS의 중앙 정렬 방법이 자주 헷갈린다.  

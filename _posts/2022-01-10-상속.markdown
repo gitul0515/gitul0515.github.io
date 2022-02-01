@@ -2,8 +2,8 @@
 layout: post
 title: "CSS 상속"
 date: 2022-01-10 12:12:52 +0900
-categories: CSS&HTML
-tags: [CSS&HTML]
+categories: HTML&CSS
+tags: [HTML&CSS]
 ---
 
 상속(Inheritance)이란 상위 요소의 속성을 하위 요소가 물려받는 것을 뜻한다.  
