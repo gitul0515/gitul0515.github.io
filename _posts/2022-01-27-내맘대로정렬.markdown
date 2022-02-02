@@ -1,0 +1,20 @@
+---
+layout: post
+title: "sort와 localeCompare에 관하여"
+date: 2022-01-27 12:12:52 +0900
+categories: 자바스크립트
+tags: [자바스크립트]
+---
+
+자바스크립트를 계속 공부하면 할수록, 편리하고 유용한 내장 메서드들이 정말 많다는 것을 느낀다. 그 중에서 localeCompare라는 상당히 재미있는(?) 녀석이 있는데, 이번 글에서는 이 녀석에 관한 이야기를 해보고 싶다. 또한, 이 localeCompare을 기존의 sort 메서드에 활용하는 방안을 서술해 보겠다.  
+
+
+
+(제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
+
+### 참고자료
+예제로 이해하는 BEM : https://naradesign.github.io/bem-by-example.html  
+https://nykim.work/15  
+
+
+
