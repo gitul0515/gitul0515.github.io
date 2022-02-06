@@ -1,4 +1,4 @@
-I":<p>자바스크립트를 공부할수록 유용하고 편리한 내장 메서드들이 정말 많다는 것을 느낀다. 그 중에서 localeCompare라는 상당히 재미있는(?) 녀석이 있는데, 이번 글에서는 이 녀석에 관한 이야기를 해보고 싶다. 또한, 이 localeCompare을 기존의 sort 메서드에 활용하는 방안을 서술해 보겠다.</p>
+I"C<p>자바스크립트를 공부할수록 유용하고 편리한 내장 메서드들이 정말 많다는 것을 느낀다. 그 중에서 localeCompare라는 상당히 재미있는(?) 녀석이 있는데, 이번 글에서는 이 녀석에 관한 이야기를 해보고 싶다. 또한, 이 localeCompare을 기존의 sort 메서드에 활용하는 방안을 서술해 보겠다.</p>
 
 <h3 id="localecompare">localeCompare</h3>
 
@@ -59,7 +59,7 @@ array.sort((a, b) =&gt; a[2] - b[2]); // ['banana', 'apple', 'orange'] 오답
 array.sort((a ,b) =&gt; a[2].localeCompare(b[2])); // ['orange', 'banana', 'apple'] 정답
 </code></pre>
 
-<p>한편, charCodeAt을 사용해서 정렬하는 것도 가능은 하다. charCodeAt은 인덱스에 해당하는 문자의 unicode 값을 리턴하는 메서드다.</p>
+<p>한편, charCodeAt을 사용해서 정렬하는 것도 가능하다. charCodeAt은 인덱스에 해당하는 문자의 unicode 값을 리턴하는 메서드다.</p>
 
 <pre><code class="language-Javascript">const array = ['banana', 'apple', 'orange'];
 array.sort((a ,b) =&gt; a.charCodeAt(2) - b.charCodeAt(2)); // ['orange', 'banana', 'apple'] 정답
@@ -67,9 +67,17 @@ array.sort((a ,b) =&gt; a.charCodeAt(2) - b.charCodeAt(2)); // ['orange', 'banan
 
 <p>둘 중 무엇을 사용해도 상관없지만, 개인적으로 localeCompare이 더 깔끔해보이기는 하다. 그리고 정렬에 더 특화된 메서드라는 생각도 든다. 아무튼, <strong><u>String 배열을 디테일하게 정렬하고 싶다면</u></strong>, 두 메서드를 사용할 것을 추천한다.</p>
 
-<p>localeCompare과 charCodeAt의 브라우저 지원은 다음과 같다.</p>
+<p>브라우저 지원은 다음과 같다. (이미지 클릭 시 caniuse 사이트로 이동)</p>
 
-<p><img src="" /></p>
+<p>(1) localeCompare<br />
+<a href="https://caniuse.com/?search=localecompare" target="_blank">
+  <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0127_1.png?raw=true" alt="localeCompare 브라우저 지원 이미지" />
+</a></p>
+
+<p>(2) charCodeAt<br />
+<a href="https://caniuse.com/?search=charCodeAt" target="_blank">
+  <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0127_1.png?raw=true" alt="localeCompare 브라우저 지원 이미지" />
+</a></p>
 
 <h3 id="마치며">마치며</h3>
 
