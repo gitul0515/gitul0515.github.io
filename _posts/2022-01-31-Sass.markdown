@@ -11,6 +11,8 @@ tags: [HTML&CSS]
 바야흐로, CSS의 전처리기 **<u>Sass</u>**를 도입할 필요가 있다고 생각한다! 그래서 Sass의 기본 개념을 정리하면서 공부하는 시간을 가져보고자 한다. 
 
 ### Sass 개요
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0131_1.png?raw=true" alt="Sass 로고 이미지" style="backgound-color: grey">
+
 Sass(Syntactically Awesome StyleSheets)는 CSS의 전처리기(pre-processor)이다. CSS의 단점을 보완하여 가독성이 뛰어나고 재사용이 높은 CSS를 작성하기 위한 CSS의 확장이다. 
 
 상술하였듯이, CSS는 프로젝트의 규모가 커질수록 쉽게 지저분해지고 유지보수가 어려워진다. 이에 Sass는 변수, 조건문, 반복문, Nesting, Mixin 등의 문법을 제공하여 CSS의 한계를 보완한다. Sass는 다음과 같은 장점이 있다. 
