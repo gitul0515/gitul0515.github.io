@@ -1,0 +1,9 @@
+I"8<p>React에서 페이지를 이동할 때는 a태그가 아닌 Link를 사용한다.</p>
+
+<h3 id="참고자료">참고자료</h3>
+<p>localeCompare - MDN Web Docs<br />
+sort - MDN Web Docs<br />
+caniuse.com</p>
+
+<p>(제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)</p>
+:ET
