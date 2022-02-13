@@ -19,16 +19,14 @@ React Router에서 화면을 전환할 때는 a 태그가 아니라 Link를 사�
 <br>
 세 번째 특성이 중요하다. Link는 페이지를 새로고침하지 않는다. 반면에, a 태그는 브라우저의 주소를 바꾸면서 페이지를 새로고침한다.  
 
-페이지의 새로고침은 React에서 가급적 자제해야 한다. 페이지가 새로고침되면 현재 렌더링 된 컴포넌트가 사라지고 새로운 렌더링이 발생하기 때문이다. 즉, <u>기존 컴포넌트에 설정된 state도 모두 소멸해버린다.</u>  
+페이지의 새로고침은 React에서 가급적 자제해야 한다. 페이지가 새로고침되면 현재 렌더링 된 컴포넌트가 사라지고 새로운 렌더링이 발생하기 때문이다. 즉, <u>기존 컴포넌트에 설정된 state가 모두 소멸해버린다.</u>  
 
 그러므로, <u>새로고침이 특별히 필요한 경우가 아니면 Link를 사용해야 한다.</u> Link는 HTML5 History API를 사용하여 브라우저의 주소만 바꿀 뿐, 페이지를 새로고침하지 않는다. 필요한 컴포넌트와 state를 유지한 채로 화면이 전환된다. React가 Single Page Application으로 동작하는 데 아무런 문제가 발생하지 않는다. 
 
 ### 사용 방법
-Link를 사용하려면 React-Router-Dom을 설치하고 해당 문서에서 import해 주어야 한다.  
+Link를 사용하려면 React-Router-Dom을 설치하고 해당 문서에서 import해 주어야 한다. PowerShell에 다음의 명령어를 적으면 된다.
 
 `npm i react-router-dom`
-
-`import { Link } from 'react-router-dom'`
 
 ```JSX
 import React from "react";
