@@ -24,9 +24,41 @@ React Router에서 화면을 전환할 때는 a 태그가 아니라 Link를 사�
 그러므로, <u>새로고침이 특별히 필요한 경우가 아니면 Link를 사용해야 한다.</u> Link는 HTML5 History API를 사용하여 브라우저의 주소만 바꿀 뿐, 페이지를 새로고침하지 않는다. 필요한 컴포넌트와 state를 유지한 채로 화면이 전환된다. React가 Single Page Application으로 동작하는 데 아무런 문제가 발생하지 않는다. 
 
 ### 사용 방법
-Link를 사용하려면 React-Router-Dom을 설치하고 해당 문서에서 import해 주어야 한다. PowerShell에 다음의 명령어를 적으면 된다.
+Link를 사용하려면 우선 React-Router-Dom을 설치해야 한다. PowerShell에서 다음의 명령어를 적으면 된다.  
 
 `npm i react-router-dom`
+
+시연 코드를 작성해보았다. li 태그인 Home, LogIn, LogOut에 Link를 적용하였다. 클릭하면 각각 화면이 전환된다. 
+
+```jsx
+import React from "react";
+import { Link } from "react-router-dom";
+const Nav = () => {
+  return (
+    <nav>
+      <h3>목차</h3>
+      <ol>
+        <Link to='/'>
+          <li>Home</li>
+        </Link>
+        <Link to='/login'>
+          <li>LogIn</li>
+        </Link>
+        <Link to='/logout'>
+          <li>LogOut</li>
+        </Link>
+      </ol>
+    </nav>
+  )
+};
+export default Nav;
+```
+
+<video width="60%" height="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0202_1.mp4?raw=true" type="video/mp4">
+</video>
+<br />
+아래는 상위 컴포넌트이다. BrowserRouter, Routes, Route 태그를 함께 사용해야 한다. 
 
 ```JSX
 import React from "react";
@@ -41,8 +73,8 @@ const App2 = () => {
       <BrowserRouter>
         <Nav />
         <Routes>
-          <Route path="/home" element={<Login />} />
-          <Route path="/login" element={<Logout />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
         </Routes>
       </BrowserRouter>
     </div>
@@ -52,9 +84,11 @@ const App2 = () => {
 export default App2;
 ```
 
-
-
+사용 방법은 간단히만 다루었다. v6 업데이트 등 기술이 빠르게 변화하므로 React Router의 공식문서를 참조하는 것을 추천한다.  
+<a href="https://reactrouter.com/docs/en/v6">React Router 공식문서</a>
 
 ### 참고자료
+https://reactrouter.com/docs/en/v6  
+https://gomgomkim.tistory.com  
 
 (제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
