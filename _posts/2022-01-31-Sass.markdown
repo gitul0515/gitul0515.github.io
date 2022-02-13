@@ -6,14 +6,14 @@ categories: HTML&CSS
 tags: [HTML&CSS]
 ---
 
-요즘 개인 프로젝트를 하면서 절실히 느끼는 것인데, 프로젝트를 진행할수록 CSS 코드가 알아보기 힘들 정도로 난잡해진다. 전체 코드의 길이는 너무 길고, 중복되는 코드가 난무하며, 수정 시 고쳐야할 부분이 한 두 군데가 아니다. 뭔가 잘못되고 있다는 불안감이 마음을 짓누른다. "어떻게 하면 CSS를 더 효율적으로 작성하고 관리할 수 있을까?"라는 고민이 들었다.  
+요즘 개인 프로젝트를 하면서 절실히 느끼는 것인데, 프로젝트를 진행할수록 CSS 코드가 알아보기 힘들 정도로 난잡해진다. 전체 코드의 길이는 너무 길고, 중복되는 코드가 난무하며, 수정 시 고쳐야할 부분이 한 두 군데가 아니다. 뭔가 잘못되고 있다는 불안감이 마음을 짓누른다. "어떻게 하면 CSS를 더 효과적으로 작성하고 관리할 수 있을까?"라는 고민이 든다.  
 
-바야흐로, CSS의 전처리기 **<u>Sass</u>**를 도입할 필요가 있다고 생각한다! 그래서 이번 글에서는 Sass의 기본 개념을 정리해보도록 하겠다. 
+바야흐로, CSS의 전처리기 **<u>Sass</u>**를 도입할 적기라고 생각한다! 그래서 이번 글에서는 Sass의 기본 개념을 정리해보도록 하겠다. 
 
 ### Sass 개요
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0131_1.png?raw=true" alt="Sass 로고 이미지" width="80%" style="margin-left: 0">
 
-("초능력을 가진 CSS"라는 슬로건이 인상적이다)
+..."초능력을 가진 CSS"라는 슬로건이 인상적이다
 
 Sass(Syntactically Awesome StyleSheets)는 CSS의 전처리기(pre-processor)이다. CSS의 단점을 보완하여 가독성이 뛰어나고 재사용이 높은 CSS를 작성하기 위한 CSS의 확장이다. 
 
@@ -69,10 +69,61 @@ box {
 }
 ```
 
+!default를 사용하면 할당되지 않은 변수의 디폴트 값을 설정할 수 있다. 이미 할당된 변수에는 !default를 사용해도 적용되지 않는다.  
+
+```scss
+$content: null;
+$content: "hello" !default;
+$font_size: 20px;
+$font_size: 16px !default; 
+
+#main {
+  content: $content; // "hello"
+  font-size: $font_size; // 20px
+}
+```
+
+#### 3. Nesting  
+Nesting은 선언을 중첩하는 것을 말한다. CSS의 후손 셀렉터의 경우, 부모 요소를 매번 작성해야하는 번거로움이 있는데 Nesting을 사용하면 이를 간단히 작성할 수 있다. 또한, HTML의 구조와 유사한 CSS의 작성이 가능해진다. 
+
+```scss
+header {
+  width: 200px;
+  height: 50px;
+
+  ul {
+    list-style-type: none;
+  }
+
+  li {
+    display: inline-block;
+    a {
+      padding: 5px;
+    }
+  }
+}
+```
+
+부모 요소를 참조하는 연산자로 &을 사용할 수 있다. 특히, 가상 클래스 선택자를 지정할 경우 부모 요소의 참조가 필요하다.  
+
+```scss
+button {
+  background-color: #fff;
+
+  &:hover {
+    background-color: red;
+  }
+
+  &.home {
+    text-decoration: underline;
+  }
+```
+
+nesting은 프로퍼티에도 사용이 가능하다. 
 
 (글 미완성입니다)
 
 ### 참고자료
+https://poiemaweb.com
 
-
-(제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
+(글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
