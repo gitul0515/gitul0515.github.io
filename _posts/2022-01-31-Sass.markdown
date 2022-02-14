@@ -121,7 +121,22 @@ button {
 
 nesting은 프로퍼티에도 사용이 가능하다. 
 
-(글 미완성입니다)
+```scss
+body {
+  font: {
+    family: 'Roboto';
+    size: 1.2rem;
+    weight: bold;
+  }
+}
+```
+```css
+body {
+  font-family: 'Roboto';
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+```
 
 ### 참고자료
 https://poiemaweb.com
