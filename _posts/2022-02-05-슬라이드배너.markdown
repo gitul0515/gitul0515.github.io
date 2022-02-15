@@ -27,37 +27,130 @@ tags: [프로젝트리뷰, HTML&CSS, 자바스크립트]
 ### HTML & CSS
 우선 다음과 같은 구조로 동작함을 주지할 필요가 있다.  
 
-<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_3.png?raw=true" alt="수평 슬라이드 배너" height="80%" style="margin-left: 0">
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_3.png?raw=true" alt="슬라이드 구조" height="70%" style="margin-left: 0; background-color: white">
 
-상위 요소인 slide-container의 위치를 고정하고, overflow:hidden을 통해 영역을 벗어난 자식 요소를 감춘다. 결국 세 개의 slide 중 하나만 보이게 된다. 한편, slide들을 담은 slide-inner의 Y축 위치를 이동시킨다. 그러면 하나의 slide에서 다음 slide로 전환된다. 
+상위 요소인 slide-container의 위치를 고정하고, overflow:hidden을 통해 영역을 벗어난 자식 요소를 감춘다. 결국 세 개의 slide 중 하나만 보이게 된다. 한편, slide들을 담은 slide-inner의 Y축 위치를 이동시킨다. 그러면 하나의 slide에서 다음 slide로 전환되는 것이다.  
+그리고 slide를 수동으로 제어할 수 있는 button도 만들어 준다.  
 
+```HTML
+  <body>    
+    <div class="buttons">
+      <button class="button1" data-order="0">01</button>
+      <button class="button2" data-order="1">02</button>
+      <button class="button3" data-order="2">03</button>
+    </div>
+    
+    <div class="slide-container">
+      <div class="slide-inner">
+        <div class="slide" data-order="0">
+          <h1>Slide1</h1>
+        </div>
+        <div class="slide" data-order="1">
+          <h1>Slide2</h1>
+        </div>
+        <div class="slide" data-order="2">
+          <h1>Slide3</h1>
+        </div>
+      </div>
+    </div>
+  </body>
+```
+```CSS
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+button {
+  /* 초기화 */
+  border: none;
+  outline: none;
+  background-color: transparent;
 
+  font-size: 1.8rem;
+  font-weight: bold;
+  display: block;
+  margin: 80px 40px;
+  cursor: pointer;
+}
 
+.slide-container {
+  width: 500px;
+  height: 500px;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  overflow: hidden; /* 중요 */
+}
 
+.slide-inner {
+  transition: 2s ease;
+}
 
+.slide {
+  padding: 40px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
+.slide:nth-child(3n + 1) {
+  background-color: rgb(233, 32, 32);
+}
+.slide:nth-child(3n + 2) {
+  background-color: rgb(250, 162, 0);
+}
+.slide:nth-child(3n + 3) {
+  background-color: rgb(14, 151, 14);
+}
+```
 
+현재까지 만든 결과물은 다음과 같다.
 
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_4.png?raw=true" alt="html과 css 결과물" height="70%" style="margin-left: 0; background-color: white">
 
+slide1 밑에 slide2, slide3이 존재한다. 보이지 않는 까닭은 말했다시피, 상위 요소인 slide-container에 overflow:hidden을 적용했기 때문이다. 
 
-
- 전환되는 것이다. 
-
-
-position을 변경시키는 것이다. 
-
-
-
+첫 번째 요구사항인 `3개의 슬라이드를 만든다`를 충족하였다. 
 
 ### 자바스크립트 
-이제 자바스크립트를 통해 흑마법(?)을 부려보겠다.  
+자 이제 자바스크립트를 통해 흑마법(?)을 부려보자. 두 번째 요구사항은 다음과 같다.  
 
+`슬라이드는 2초 간격으로, 위에서 아래로 전환된다.`  
+
+이는 setInterval을 통해 쉽게 구현할 수 있다. 2초 간격으로 slideInner의 y축을 500px씩 위로 올리면 된다. 다만, 세 번째 요구사항은 살짝 까다롭다. 
+
+`마지막 슬라이드 이후 다시 첫 번째 슬라이드로 전환된다. 이를 반복한다.`
+
+결국 무한정 반복되는 슬라이드를 만들어야 하는 것이다. 핵심은, 해당 슬라이드를 위로 올리면서 그것을 마지막 순서로 복사하는 것이다. Node.clonenode(true)를 사용하여 복사한 뒤, appendChild를 사용하여 slideInner의 마지막 자식으로 복사한다. 코드를 보자.  
+
+```Javascript
+const slideInner = document.querySelector('.slide-inner');
+let curSlide = slideInner.children[0];
+let curSlideIndex = 0;
+let offSetY;
+
+let timeId = setInterval(() => {
+  moveSlideInner();
+}, 2000);
+
+function moveSlideInner() {
+  // 현재 슬라이드를 slideInner의 마지막 자식으로 복사한다.
+  curSlide = slideInner.children[curSlideIndex];
+  slideInner.appendChild(curSlide.cloneNode(true));
+
+  // slideInner를 offSetY만큼 이동한다.
+  offSetY = -500 * (++curSlideIndex);
+  slideInner.style.transform = `translateY(${offSetY}px)`;
+}
+```
 
 (글 미완성입니다)
 
 ### 참고자료
-https://reactrouter.com/docs/en/v6  
-https://gomgomkim.tistory.com  
+
 
 (제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  

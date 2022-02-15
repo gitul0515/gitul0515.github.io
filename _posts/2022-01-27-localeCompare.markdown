@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "수직형 슬라이드 배너 만들기"
+title: "localeCompare에 관하여"
 date: 2022-01-27 12:12:52 +0900
 categories: 자바스크립트
 tags: [자바스크립트]
