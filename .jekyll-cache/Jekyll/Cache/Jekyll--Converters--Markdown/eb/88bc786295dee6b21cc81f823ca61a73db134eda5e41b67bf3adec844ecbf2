@@ -1,4 +1,4 @@
-I"�<p>자주 사용되는 UI 중 하나는 슬라이드 배너이다. 대부분의 사이트에서 아래와 같이 수평으로 움직이는 슬라이드 배너를 봤을 것이다. 슬라이드가 자동으로 전환되기도 하고, 탭을 누르면 바뀌기도 한다.</p>
+I"�<p>자주 사용되는 UI 중 하나는 슬라이드 배너이다. 대부분의 사이트에서 아래와 같이 수평으로 움직이는 슬라이드 배너를 봤을 것이다. 슬라이드가 자동으로 전환되기도 하고, 탭을 누르면 바뀌기도 한다.</p>
 
 <p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_1.png?raw=true" alt="수평 슬라이드 배너" width="80%" style="margin-left: 0" /></p>
 
@@ -102,7 +102,7 @@ button {
 
 <p>현재까지 만든 결과물은 다음과 같다.</p>
 
-<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_4.png?raw=true" alt="html과 css 결과물" height="70%" style="margin-left: 0; background-color: white" /></p>
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_4.png?raw=true" alt="html과 css 결과물" width="50%" style="margin-left: 0; background-color: white" /></p>
 
 <p>slide1 밑에 slide2, slide3이 존재한다. 보이지 않는 까닭은 말했다시피, 상위 요소인 slide-container에 overflow:hidden을 적용했기 때문이다.</p>
 
@@ -117,13 +117,31 @@ button {
 
 <p><code class="language-plaintext highlighter-rouge">마지막 슬라이드 이후 다시 첫 번째 슬라이드로 전환된다. 이를 반복한다.</code></p>
 
-<p>결국 무한정 반복되는 슬라이드를 만들어야 하는 것이다. 핵심은, 해당 슬라이드를 위로 올리면서 그것을 마지막 순서로 복사하는 것이다. Node.clonenode(true)를 사용하여 복사한 뒤, appendChild를 사용하여 slideInner의 마지막 자식으로 복사한다.</p>
+<p>결국 무한정 반복되는 슬라이드를 만들어야 하는 것이다. 핵심은, 해당 슬라이드를 위로 올리면서 그것을 마지막 순서로 복사하는 것이다. Node.clonenode(true)를 사용하여 복사한 뒤, appendChild를 사용하여 slideInner의 마지막 자식으로 복사한다. 코드를 보자.</p>
+
+<pre><code class="language-Javascript">const slideInner = document.querySelector('.slide-inner');
+let curSlide = slideInner.children[0];
+let curSlideIndex = 0;
+let offSetY;
+
+let timeId = setInterval(() =&gt; {
+  moveSlideInner();
+}, 2000);
+
+function moveSlideInner() {
+  // 현재 슬라이드를 slideInner의 마지막 자식으로 복사한다.
+  curSlide = slideInner.children[curSlideIndex];
+  slideInner.appendChild(curSlide.cloneNode(true));
+
+  // slideInner를 offSetY만큼 이동한다.
+  offSetY = -500 * (++curSlideIndex);
+  slideInner.style.transform = `translateY(${offSetY}px)`;
+}
+</code></pre>
 
 <p>(글 미완성입니다)</p>
 
 <h3 id="참고자료">참고자료</h3>
-<p>https://reactrouter.com/docs/en/v6<br />
-https://gomgomkim.tistory.com</p>
 
 <p>(제 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)</p>
 :ET

@@ -110,7 +110,7 @@ button {
 
 현재까지 만든 결과물은 다음과 같다.
 
-<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_4.png?raw=true" alt="html과 css 결과물" height="70%" style="margin-left: 0; background-color: white">
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0205_4.png?raw=true" alt="html과 css 결과물" width="50%" style="margin-left: 0; background-color: white">
 
 slide1 밑에 slide2, slide3이 존재한다. 보이지 않는 까닭은 말했다시피, 상위 요소인 slide-container에 overflow:hidden을 적용했기 때문이다. 
 
