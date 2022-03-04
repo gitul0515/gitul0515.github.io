@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "프로미스의 정적 메서드"
-date: 2022-02-12 12:12:52 +0900
+date: 2022-02-17 12:12:52 +0900
 categories: 자바스크립트
 tags: [자바스크립트]
 ---
@@ -16,7 +16,7 @@ Promise.resolve와 Promise.reject는 전달받은 값을 래핑하여 Promise를
 const promise = Promise.resolve(100);
 promise.then(console.log); // 100
 ```
-이는 다음 코드와 동일하다. 
+이는 아래 코드와 동일하다. 
 ```Javascript
 const promise = new Promise((resolve) => resolve(100));
 promise.then(console.log); // 100
@@ -28,14 +28,14 @@ Promise.reject는 전달받은 값을 reject하는 Promise를 생성한다.
 const promise = Promise.reject(new Error('error'));
 promise.catch(console.log); // Error: error
 ```
-이는 다음 코드와 동일하다. 
+이는 아래 코드와 동일하다. 
 ```Javascript
 const promise = new Promise((resolve, reject) => reject(new Error('error')));
 promise.catch(console.log); // Error: error
 ```
 
 #### 2. Promise.all
-Promise.all은 여러 비동기 처리를 모두 **병렬 처리**한다. 
+Promise.all은 여러 비동기 처리를 모두 **<u>병렬 처리</u>**한다. 
 
 <span style="font-size: 1.2rem">Promise.all(iterable)</span>
 
@@ -59,7 +59,6 @@ const promise1 = new Promise((_, reject) => setTimeout(() => reject(new Error('o
 const promise2 = new Promise((_, reject) => setTimeout(() => reject(new Error('two')), 3000));
 const promise3 = new Promise((_, reject) => setTimeout(() => reject(new Error('three')), 1000));
 
-// 병렬 처리 (약 5초 소요됨)
 const resultPromise = Promise.all([promise1, promise2, promise3]);
 resultPromise.catch(console.log); // Error: three
 ```
@@ -72,11 +71,54 @@ const resultPromise = Promise.all(['a', 'b', 'c']);
 resultPromise.then(console.log); // ['a', 'b', 'c']
 ```
 
+#### 3. Promise.race
+<span style="font-size: 1.2rem">Promise.race(iterable)</span>
 
+Promise.race도 Promise를 요소로 갖는 배열 등의 이터러블을 전달받는다. 가장 먼저 fulfilled가 된 Promise의 처리 결과를 resolve하는 새로운 Promise를 리턴한다. 
 
+```Javascript
+const promise1 = new Promise(resolve => setTimeout(() => resolve(1), 5000));
+const promise2 = new Promise(resolve => setTimeout(() => resolve(3), 3000));
+const promise3 = new Promise(resolve => setTimeout(() => resolve(5), 1000));
 
+const resultPromise = Promise.race([promise1, promise2, promise3]);
+resultPromise.then(console.log); // 5
+```
+가장 먼저 fulfilled가 된 것은 promise3이다. promise3의 resolve 처리 결과는 5이다. 따라서 
+Promise.race는 5를 resolve하는 새로운 Promise를 반환한다.  
+
+한편, 전달받은 배열의 Promise 중 하나라도 rejected 상태가 되면, 그 즉시 처리를 종료하고 Promise를 반환한다. 이는 Promise.all과 동일하다. 
+
+```Javascript
+const promise1 = new Promise((_, reject) => setTimeout(() => reject(new Error('one')), 5000));
+const promise2 = new Promise((_, reject) => setTimeout(() => reject(new Error('two')), 3000));
+const promise3 = new Promise((_, reject) => setTimeout(() => reject(new Error('three')), 1000));
+
+const resultPromise = Promise.race([promise1, promise2, promise3]);
+resultPromise.catch(console.log); // Error: three
+```
+
+#### 4. Promise.allSettled
+<span style="font-size: 1.2rem">Promise.allSettled(iterable)</span>
+
+Promise.allSettled는 Promise를 요소로 갖는 배열 등의 이터러블을 전달받는다. 전달된 Promise가 모두 settled 상태(fulfilled or rejected)가 되면 결과를 배열로 리턴한다. 
+```Javascript
+const promise1 = new Promise(resolve => setTimeout(() => resolve(1), 3000));
+const promise2 = new Promise((_, reject) => setTimeout(() => reject(new Error('error')), 2000));
+
+const resultPromise = Promise.allSettled([promise1, promise2]);
+resultPromise.then(console.log);
+/* 
+[
+  {status: 'fulfilled', value: 1},
+  {status: 'rejected', reason: Error: error at <anonymous>:2:69}
+] 
+*/
+```
+Promise.allSettled가 리턴한 배열에는 fulfilled나 rejected 상태와는 관계없이 모든 Promise의 결과가 저장되어 있다. 
 
 ### 참고자료
-https://poiemaweb.com
+"모던 자바스크립트 Deep Dive", 이웅모, 위키북스, 2020.09.25, pp.858-863
 
-(글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
+(정리한 글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)  
+

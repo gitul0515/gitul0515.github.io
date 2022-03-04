@@ -1,0 +1,11 @@
+I"�<h3 id="얕은-복사-vs-깊은-복사">얕은 복사 vs 깊은 복사</h3>
+<p>얕은 복사(Shallow Copy)와 깊은 복사(Deep Copy)는 과연 무엇일까? 다음과 같이 객체 안에 중첩된 객체(Nested object)가 있다고 해 보자.</p>
+<pre><code class="language-Javascript">const obj1 = { obj2 : { a: 1 }};
+</code></pre>
+<p>이 때 <strong>얕은 복사</strong>는 <strong>한 단계까지만 복사하는 것</strong>을 말하고, <strong>깊은 복사</strong>는 <strong>객체에 중첩된 객체까지 모두 복사하는 것</strong>을 말한다. 다음 코드를 보자.
+```Javascript
+// 얕은 복사
+const c1 = Object.assign({}, obj1);
+console.log(c1 === obj1); // false
+console.log(c1.obj2 === obj1.obj2) // true</p>
+:ET

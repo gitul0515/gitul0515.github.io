@@ -1,0 +1,60 @@
+I"�<h4 id="4-import">4. @import</h4>
+<p>기능에 따라 코드를 파일로 분리하는 것은 재사용 및 유지보수에 유리하다. CSS 파일도 예외는 아니다. Sass는 @import를 통해 여러 CSS 파일을 import 할 수 있다. 기존의 CSS @import보다 편리하다.</p>
+
+<pre><code class="language-Scss">@import "style1.scss";
+
+// 확장자는 생략할 수 있다. 
+@import "style1";
+
+// 다수의 파일을 한 번에 import할 수 있다. 
+@import "style2", "style3";
+</code></pre>
+
+<p>여러 개로 분할된 파일을 partial이라 하는데, partial된 Sass 파일명의 앞에는 언더스코어(_)를 붙여야 한다(예: _header.scss, _footer.scss). 언더스코어의 의미는 import는 실행하되 CSS로의 트랜스파일링은 하지 말라는 의미이다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_0212_1.png?raw=true" alt="sass 파일의 import" width="50%" style="margin-left: 0; background-color: white" /></p>
+
+<p>partial된 Sass 파일명 선두에 언더스코어를 붙이지 않으면 에러가 발생한다. (단, 최신 버전에서는 언더스코어를 붙이지 않아도 에러가 발생하지 않는다)</p>
+
+<h4 id="5-extend">5. @extend</h4>
+<p>기존 스타일을 상속하려면 @extend를 사용할 수 있다. 상속되는 속성은 그대로 상속받고 다른 속성만 별도로 선언한다.</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.box</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+  <span class="nl">background-color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.roundBox</span> <span class="p">{</span>
+  <span class="k">@extend</span> <span class="nc">.box</span><span class="p">;</span>
+
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">50%</span><span class="p">;</span>
+  <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="no">black</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.box</span><span class="o">,</span> <span class="nc">.roundBox</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">100px</span><span class="p">;</span>
+  <span class="nl">background-color</span><span class="p">:</span> <span class="no">red</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.roundBox</span> <span class="p">{</span>
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">50%</span><span class="p">;</span>
+  <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="no">black</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>단, @extend는 트랜스파일링 후 예상하지 못한 부작용이 발생할 수 있다. 그러므로, @extend 보다는 후술할 Mixin을 사용하는 것이 좋다.</p>
+
+<h4 id="6-mixin">6. Mixin</h4>
+<p>Mixin은 사용 빈도가 높은 마크업을 미리 정의한 뒤, 필요한 때에 include하여 사용하는 방법이다. @mixin을 선언한 뒤, @include로 불러들이면 된다.</p>
+
+<div class="language-scss highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+
+
+</code></pre></div></div>
+
+<h3 id="참고자료">참고자료</h3>
+<p>https://poiemaweb.com</p>
+
+<p>(글에서 틀린 것이 있다면 꼭 지적해 주세요. 감사히 배우겠습니다)</p>
+:ET
