@@ -75,7 +75,4 @@ person['name']은 string 타입이다. 이는 기본형 변수 타입이며, 캡
 person.name 변수로의 접근과 갱신이 잘 이루어진다. 이처럼 Proxify Type을 활용하면 변수 캡슐화를 간단하게 완성할 수 있다.  
 
 ### 참고자료
-"모던 자바스크립트 Deep Dive", 이웅모, 위키북스, 2020.09.25, pp.858-863
-
-
-
+https://www.typescriptlang.org/docs/handbook/advanced-types.html
