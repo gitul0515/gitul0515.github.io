@@ -66,7 +66,7 @@ Proxify의 제네릭 T로 Person 타입을 넘겨주었다. 그렇다면...
 ```
 person.name 변수로의 접근과 갱신이 잘 이루어진다. 이처럼 Proxify Type을 활용하면 변수 캡슐화를 간단하게 완성할 수 있다.  
 
-(학습 중 작성한 글이며, 내용이 잘못되었을 수 있습니다. 참고만 하시길 권장드립니다.)
+(학습 중 작성한 글이며, 내용이 잘못되었을 수 있습니다. 참고만 하시기를 권장드립니다.)
 
 ### 참고자료
 https://www.typescriptlang.org/docs/handbook/advanced-types.html
