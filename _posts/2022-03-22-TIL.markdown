@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "[2일차 TIL] 자바스크립트 & 네트워크"
+title: "[1주차 TIL] 자바스크립트 & 네트워크"
 date: 2022-03-22 12:12:52 +0900
 categories: 데브코스
 tags: [자바스크립트, 네트워크, 데브코스, TIL]
 ---
+
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지">
 
 #### 1. 자바스크립트 - 모듈
   * 코드를 모듈화해서 작성하는 것을 말한다.  

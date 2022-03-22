@@ -1,4 +1,6 @@
-I"<h4 id="1-자바스크립트---모듈">1. 자바스크립트 - 모듈</h4>
+I"E<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지" style="margin-left: 0" /></p>
+
+<h4 id="1-자바스크립트---모듈">1. 자바스크립트 - 모듈</h4>
 <ul>
   <li>코드를 모듈화해서 작성하는 것을 말한다.<br />
 <br /></li>
@@ -12,12 +14,12 @@
 <br /></li>
   <li>html을 통해 모듈을 결합하여야 한다. 
 모듈은 로컬 파일에서 동작하지 않는다.<br />
-<strong><u>HTTP 또는 HTTPS 프로토콜을 통해서만 동작한다.</u></strong><br />
+<strong>HTTP 또는 HTTPS 프로토콜을 통해서만 동작한다.</strong><br />
 <br /></li>
   <li>
     <p>모듈과 컴포넌트는 자주 혼용된다.<br />
-<strong>모듈은 설계 시점에 의미있는 요소이며,
-컴포넌트는 런타임(실행) 시점에 의미있는 요소이다.</strong></p>
+<strong><u>모듈은 설계 시점에 의미있는 요소이며,
+컴포넌트는 런타임(실행) 시점에 의미있는 요소이다.</u></strong></p>
   </li>
   <li>모듈의 특징
     <ol>
@@ -54,7 +56,6 @@ type=”module”을 사용하는 경우는 많지 않다.</li>
   <li>쿠키<br />
   클라이언트에서 저장, 관리하는 데이터.<br />
   브라우저를 닫아도 데이터를 유지할 수 있다.<br />
-  서버에서 Set-Cookie를 응답 헤더로 내려주면 클라이언트는 받아서 저장한다. 
   각 상태에 수명을 정할 수 있다.<br />
 <br /></li>
   <li>쿠키의 취약점<br />
