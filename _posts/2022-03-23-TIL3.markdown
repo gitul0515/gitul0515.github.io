@@ -1,0 +1,51 @@
+---
+layout: post
+title: "[3일차 TIL] 자료구조 기초"
+date: 2022-03-23 12:12:52 +0900
+categories: 데브코스
+tags: [자바스크립트, 자료구조, 알고리즘, 데브코스, TIL]
+---
+
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지">
+
+### 자료구조 기초  
+#### 1. 기본  
+  * "자료구조와 알고리즘이 반드시 필요한 순간이 온다."    
+  * 선형 구조: 한 원소 뒤에 하나의 원소    
+    비선형 구조: 원소 간 다대다 관계    
+<br>
+
+#### 2. 배열  
+  * 탐색 O(1), 삽입 O(n), 삭제 O(n)  
+    <U>삽입과 삭제가 빈번하다면 배열을 사용하지 않는 것이 좋다.</U>  
+<br>
+  * 자바스크립트의 배열    
+    - 동적으로 크기가 변화한다.    
+    - 해쉬맵(HashMap)과 유사하다.  
+    - <U>length가 내부적으로 관리되는 객체이다.</U>  
+    - <U>인덱스로 string, boolean을 사용할 수 있다.</U>    
+      이 경우 배열의 length가 변화하지 않는다.   
+<br>
+  
+```Javascript
+const array = [1, 2, 3, 4, 5];
+array['key'] = 'value';
+array[true] = true;
+console.log(array); // [1, 2, 3, 4, 5, key: 'value', true: true]
+console.log(array.length) // 5 (length가 변화하지 않는다)
+```
+이렇게 배열을 사용하는 것은 좋지 않다.
+
+#### 3. 연결 리스트  
+  * 탐색 O(n), 삽입 O(1), 삭제 O(1).  
+    다만 삽입/삭제하려면 원하는 노드를 탐색해야 하므로,  
+    <U>현실적으로 삽입 O(n + 1), 삭제 O(n + 1)이다.</U>  
+<br>
+  * 배열과 달리, 메모리가 비순차적으로 저장된다.  
+
+#### 4. 기타
+  * for...of 문은 중간에 탈출할 수 있다. (break나 return을 사용하여)  
+  * value만이 필요하다면 for...of 문을 사용하라.  
+
+### 참고자료
+데브코스 3일차 강의 
