@@ -1,0 +1,76 @@
+I"�
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지" /></p>
+
+<h3 id="자바스크립트-주요-문법">자바스크립트 주요 문법</h3>
+<h4 id="this">this</h4>
+<ul>
+  <li>메서드 내부의 this는 ‘메서드를 호출한 객체’를 가리킨다.<br />
+이때 다음과 같은 중첩 객체에 주의할 필요가 있다.
+    <pre><code class="language-Javascript">const grandparent = {
+whoAmI: function () {
+  console.log(this);
+},
+parent: {
+  whoAmI: function() {
+    console.log(this);
+  }
+}
+}
+grandparent.whoAmI(); 
+grandparent.parent.whoAmI();
+</code></pre>
+    <p>grandparent.whoAmI 내부의 this는 grandparent를 가리킨다. 반면에, grandparent.parent.whoAmI 내부의 this는 parent를 가리킨다. <br />
+<br /></p>
+  </li>
+</ul>
+
+<p>한편, 다음 코드를 실행하면 오류가 발생한다. 어째서일까?</p>
+<pre><code class="language-Javascript">function RockBand(members) {
+  this.members = members;
+  this.perform = function() {
+    setTimeout(function() {
+      this.members.forEach(function(member) { // this.members는 undefined
+        member.perform();
+      })
+    }, 1000);
+  }
+}
+
+const rockBand = new RockBand([
+  {
+    name: 'takuya',
+    perform: function() {
+      console.log('Sing: a e u i a e u i');
+    }
+  }
+]);
+rockBand.perform();
+</code></pre>
+<p>setTimeout의 콜백 함수에서 사용된 this.members가 undefined이기 때문이다. 여기서 this는 전역 객체를 가리키고, 전역 객체에는 members 프로퍼티가 없으므로 undefined이다. 이는 전형적인 this 바인딩 문제이다. ES6 문법이라면 ‘화살표 함수’를 사용해 이를 해결할 수 있다.</p>
+
+<pre><code class="language-Javascript">function RockBand(members) {
+  this.members = members;
+  this.perform = function() {
+    setTimeout(() =&gt; { // 수정한 부분
+      this.members.forEach(function(member) { // this.members는 undefined
+        member.perform();
+      })
+    }, 1000);
+  }
+}
+
+const rockBand = new RockBand([
+  {
+    name: 'takuya',
+    perform: function() {
+      console.log('Sing: a e u i a e u i');
+    }
+  }
+]);
+rockBand.perform(); // Sing: a e u i a e u i
+</code></pre>
+<p>화살표 함수 내부의 this는 상위 스코프의 this를 그대로 참조한다. 좀 더 엄격히 말하면, 스코프 체인 상에서 가장 가까운 상위 함수 중 화살표 함수가 아닌 함수의 this를 참조한다. 따라서 RockBand 함수의 this와 콜백 함수 내부의 this가 일치된다. 결과가 정상적으로 출력되는 것을 확인할 수 있다.</p>
+
+<h3 id="참고자료">참고자료</h3>
+<p>데브코스 9일차 강의</p>
+:ET
