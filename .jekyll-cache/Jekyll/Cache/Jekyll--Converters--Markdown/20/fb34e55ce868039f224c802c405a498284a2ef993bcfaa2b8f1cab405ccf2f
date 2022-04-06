@@ -1,0 +1,89 @@
+I"+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지" /></p>
+
+<h3 id="선언형-프로그래밍">선언형 프로그래밍</h3>
+<h4 id="1-명령형-프로그래밍">1. 명령형 프로그래밍</h4>
+<ul>
+  <li>컴퓨터가 수행할 명령들을 순서대로 써 놓은 것이다.</li>
+  <li>어떻게 구현하는가를 디테일하게 기술</li>
+</ul>
+
+<h4 id="2-선언형-프로그래밍">2. 선언형 프로그래밍</h4>
+<ul>
+  <li>HTML, SQL 등</li>
+  <li><u>어떻게 보다는 "무엇"에 초점이 있다.</u><br />
+목표를 명시하고 알고리즘을 명시하지 않는다.</li>
+  <li><u>선언형으로 작성하는 것이 좋다.</u> 특히 UI 개발에서.</li>
+</ul>
+
+<h3 id="컴포넌트-개발">컴포넌트 개발</h3>
+<ul>
+  <li>컴포넌트? 독립적이고 재사용이 가능한 단위. <br />
+유지보수가 쉬워진다는 장점.</li>
+  <li>$: Dom 객체를 담은 변수임을 표시 (개인적인 컨벤션)</li>
+  <li>객체 디스트럭처링을 할 때는 ()로 감싸야 한다.</li>
+  <li>index.html은 src 폴더 외부에 둔다.</li>
+  <li>form 내부의 button은 type=”submit”이 기본값이다.</li>
+  <li>&lt;&gt;컴포넌트 내부에서 다른 컴포넌트를 생성하면 두 컴포넌트 간에 의존성이 높아진다.  active
+이는 지양해야 한다.<br />
+콜백 함수를 통해 이를 해결할 수 있다.</li>
+</ul>
+
+<h3 id="웹-스토리지">웹 스토리지</h3>
+<h4 id="1-쿠키">1. 쿠키</h4>
+<ul>
+  <li>브라우저에 저장되는 작은 문자열</li>
+  <li>가장 오래된 방식</li>
+  <li>document.cookie</li>
+  <li>유효기간을 적지 않으면, 브라우저 종료 시 사라진다.</li>
+  <li>사이즈 제한, 보안 취약점 등</li>
+</ul>
+
+<h4 id="2-로컬-스토리지">2. 로컬 스토리지</h4>
+<ul>
+  <li>key, value 기반으로 Local에 데이터 저장</li>
+  <li>도메인 기반으로 스토리지 생성<br />
+(도메인이 같으면 여러 탭에서 스토리지 공유)</li>
+  <li>명시적으로 삭제하지 않는 한 유지된다.</li>
+  <li>값을 저장하는 방법 3가지</li>
+</ul>
+
+<pre><code class="language-Javascript">window.localStorage.name = 'gihong';
+window.localStorage['name'] = 'gihong';
+window.localStorage.setItem('name', 'gihong');
+</code></pre>
+<p>setItem을 사용하는 것을 권장한다.</p>
+
+<ul>
+  <li>조회 <br />
+getItem()</li>
+  <li>삭제 <br />
+removeItem(), clear()</li>
+  <li>string만 저장할 수 있기 때문에, <br />
+JSON.stringify로 넣고 꺼낸 값을 JSON.parse하는 것이 좋다.</li>
+  <li>try~catch문과 함께 사용하는 것이 좋다.</li>
+  <li>스토리지를 관리하는 파일을 따로 만드는 것이 좋다.</li>
+</ul>
+
+<pre><code class="language-Javascript">const user = {
+  name: 'gihong',
+  position: 'vocal',
+  songs: ['Singing in the rain']
+};
+
+// 저장
+localStorage.setItem('user', JSON.stringify(user));
+
+// 불러오기
+const storedName = JSON.parse(localStorage.getItem('name'));
+</code></pre>
+
+<h4 id="3-세션-스토리지">3. 세션 스토리지</h4>
+<ul>
+  <li>전반적으로 로컬 스토리지와 같다.</li>
+  <li>현재 사이트의 모든 탭이 닫히거나, 브라우저가 종료되면<br />
+저장된 내용 초기화</li>
+</ul>
+
+<h3 id="참고자료">참고자료</h3>
+<p>데브코스 11일차 강의</p>
+:ET
