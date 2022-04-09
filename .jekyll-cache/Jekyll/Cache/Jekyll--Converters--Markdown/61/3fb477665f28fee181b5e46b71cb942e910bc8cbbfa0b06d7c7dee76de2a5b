@@ -1,0 +1,13 @@
+I"�<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지" /></p>
+
+<h3 id="1-fetch">1. fetch</h3>
+<ul>
+  <li>Response 객체를 얻은 후에는 <br />
+응답을 json으로 바꾸거나 text로 바꾸는 등의 처리가 필요하다.</li>
+  <li>Blob은 이미지를 처리하는데 사용할 수 있다.</li>
+  <li><u>fetch는 HTTP error가 발생하더라도 reject되지 않는다</u>.<br />
+네트워크 에러나 요청이 완료되지 못한 경우에만 reject된다. <br />
+따라서 <u>response의 ok 프로퍼티가 true인지 확인해야 한다</u>. <br />
+ok는 status가 2xx인 경우만 true가 된다.</li>
+</ul>
+:ET

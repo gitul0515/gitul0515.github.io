@@ -1,0 +1,33 @@
+---
+layout: post
+title: "[13일차 TIL] fetch 및 DOM"
+date: 2022-04-07 12:12:52 +0900
+categories: 데브코스
+tags: [자바스크립트, 데브코스, TIL]
+---
+
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지">
+  
+### 1. fetch  
+* Response 객체를 얻은 후에는   
+  응답을 json으로 바꾸거나 text로 바꾸는 등의 처리가 필요하다.  
+* Blob은 이미지를 처리하는데 사용할 수 있다.   
+* <u>fetch는 HTTP error가 발생하더라도 reject되지 않는다</u>.  
+  네트워크 에러나 요청이 완료되지 못한 경우에만 reject된다.   
+  따라서 <u>response의 ok 프로퍼티가 true인지 확인해야 한다</u>.   
+  ok는 status가 2xx인 경우만 true이다.   
+
+### 2. DOM 사용 시 주의할 것들  
+* <u>dataset 및 getAttribute를 사용해 가져오는 값은 string이다.</u>   
+  숫자는 string이 되고, 불리언도 string이 된다.   
+  이러한 타입 변화를 주의해야 한다.   
+* innerHTML을 사용하여 기존 노드를 삭제 혹은 대체하면   
+  기존 노드에 바인딩된 이벤트도 사라진다.  
+  이벤트를 다시 바인딩 해 주어야 한다.  
+* innerHTML은 성능이 좋지 않지만,    
+  1초에 수십 번 호출되는 수준이 아니라면 괜찮다. 웬만하면 큰 문제가 없다.    
+  (물론 XXS는 예외이므로 주의해야 한다)
+* `return;`은 반환값이 없는 게 아니다. undefined를 반환한다.    
+
+### 참고자료  
+데브코스 13일차 강의  
