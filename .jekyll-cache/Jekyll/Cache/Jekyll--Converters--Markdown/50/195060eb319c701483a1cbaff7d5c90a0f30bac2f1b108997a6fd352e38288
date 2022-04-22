@@ -1,0 +1,189 @@
+I"�.<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지" /></p>
+
+<h2 id="1-바닐라-js와-spa">1. 바닐라 JS와 SPA</h2>
+<p>바닐라 JS로 SPA를 구현하는 프로젝트를 진행해보려고 한다. 이번 포스팅을 시작으로 개발 진행 상황을 기록하는 글을 꾸준히 올릴 계획이다. SPA 개발에 관심이 있는 독자인 당신에게, 이 글이 조금이나마 도움이 되기를 바란다.</p>
+
+<p>먼저 SPA에 관하여 간략히 얘기해 보도록 하자.</p>
+
+<h3 id="1-spa">1) SPA</h3>
+
+<p>단일 페이지 애플리케이션(Single Page Application, SPA)은 모던 웹의 패러다임이다. <u>SPA의 특징은 단일 페이지(html 문서)로 구성된다는 것이다.</u> 또한, 기존의 서버 사이드 렌더링(SSR)이 아닌 <u>클라이언트 사이드 렌더링(CSR) 방식으로 동작한다</u>는 것이다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_1.png?raw=true" alt="독서관리 앱 목록" /></p>
+
+<p>출처 : <a href="https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg" target="_blank">
+https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg</a></p>
+
+<p>클라이언트 사이드 렌더링 방식은 기본적으로 웹 애플리케이션에 필요한 모든 정적 리소스를 최초 접근 시 단 한 번만 다운로드 한다. 이후 새로운 페이지 요청 시, 페이지 갱신에 필요한 데이터만을 JSON으로 전달받아 페이지를 부분적으로 갱신한다. <u>변경되는 부분만을 갱신하므로 새로고침이 발생하지 않고 속도가 빠르다</u>. 이에 네이티브 앱과 유사한 사용자 경험을 제공할 수 있다는 장점을 가지고 있다.</p>
+
+<p>이러한 장점들에 힘입어 SPA는 모던 웹의 패러다임으로 급부상하였다. 자바스크립트 라이브러리인 React, Vue 등은 SPA 개발에 특화되어 있으며, 더 나아가 이들은 사실상 SPA라는 목적을 위해 탄생하였다 말해도 과언은 아닐 것이다.</p>
+
+<h3 id="2-왜-바닐라-js인가">2) 왜 바닐라 JS인가</h3>
+
+<p>이처럼 SPA는 모던 웹 개발에서 매우 중요한 이슈이며, 이를 개발할 수 있는 프레임워크 및 라이브러리가 여럿 존재한다. 하지만 <u>그러한 도구들만을 사용하다 보면, SPA를 깊이 있는 수준으로는 이해할 수 없게 된다</u>. 그러한 도구들은 개발자가 SPA를 쉽게 개발할 수 있도록 여러 기능들을 미리 제공해주기 때문이다.</p>
+
+<p>그렇다면 SPA를 깊이 있는 수준으로 이해하려면 어떻게 해야 할까?<br />
+누군가 “컴포넌트, 라우팅, historyAPI에 대해서 설명해보세요”라고 물을 때,<br />
+자신있게 대답할 수 있으려면 어떻게 해야 할까?</p>
+
+<p>나는 그것이 기본으로 돌아가, 즉<br />
+<u>바닐라 자바스크립트만으로 SPA를 직접 한땀한땀 만들어 봄으로써 터득할 수 있다고 믿는다</u>.</p>
+
+<p>만일 당신이 내 생각에 동의한다면, 진심으로 환영한다.<br />
+지금부터 함께 SPA를 만들면서 그 정수를 이해해보도록 하자.</p>
+
+<p><img style="width: 400px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_4.jpg?raw=true" alt="표지판 이미지" /></p>
+
+<h2 id="2-무엇을-만들-것인가">2. 무엇을 만들 것인가</h2>
+
+<p>서론이 꽤 길었다. 이제 구체적으로 무엇을 만들 것인가를 이야기해 보자.</p>
+
+<p><u>내가 만들고자 하는 것은 '독서관리 앱'이다</u>. 읽고 있는 책을 등록할 수 있고, 책의 글귀들을 노트로 기록하는 등 독서를 전반적으로 관리할 수 있는 앱을 만들 것이다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_2.png?raw=true" alt="독서관리 앱 목록" /></p>
+
+<p>사실 이러한 주제의 앱은 꽤 흔한 편이다. 구글 플레이 스토어만 검색해봐도 리드그라피, 북적북적, 북플립, 북모리 등 다양한 앱들을 볼 수 있다.
+하지만 학습을 위한 개발이므로, 너무 어렵지 않은 수준의 괜찮은 주제라고 생각한다.</p>
+
+<p><u>나의 독서관리 앱 타이틀은 '북레스트'라고 짓겠다</u>. 북레스트는 꽤나 다양한 의미를 가지고 있다.</p>
+
+<ol>
+  <li>사전적 의미: 책꽂이(bookrest)</li>
+  <li>합성어: 책(book) + 휴식(rest)</li>
+  <li>합성어: 책(book) + 숲(forest)</li>
+</ol>
+
+<p>20분만에 떠올린 것 치고는 아주 좋은 이름인 것 같다….</p>
+
+<p>아무튼, 나는 관련 앱들을 조사하면서 필요한 기능 및 디자인을 정리하였다.<br />
+특히 ‘북모리’라는 앱을 많이 참고하였음을 여기서 밝혀둔다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_3.png?raw=true" alt="북모리 앱" /></p>
+
+<p>기능이 심플하면서도 뛰어나고, 디자인이 매우 예쁘기 때문에 참고하고 싶은 마음이 절로 들었다.</p>
+
+<p>아래는 내가 정리한 기본 화면 구획이다.</p>
+
+<h3 id="1-홈-화면">1) 홈 화면</h3>
+
+<p><img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_6.png?raw=true" alt="홈 화면" /></p>
+
+<p>앱의 홈 화면으로, 3개의 카드형 탭으로 구성된다.</p>
+
+<p>첫 번째는 현재 읽고 있는 책에 대한 정보가 표시되는 카드이다. 책의 타이틀, 언제부터 읽었는지, 몇 일째 읽고 있는지, 몇 페이지까지 읽었는지 등을 표시한다. 해당 탭을 누르면 더 자세한 정보 화면으로 이동한다.</p>
+
+<p>두 번째는 책을 추가할 수 있는 카드 탭이다. 해당 탭을 누르면 검색 폼이 있는 화면으로 이동하며, 책을 검색하여 추가할 수 있다.</p>
+
+<p>세 번째는 독서 달력에 관한 탭이다. 해당 탭을 누르면 달력이 있는 화면으로 이동한다. 한 달 동안 책을 몇 권이나 읽었는가를 달력으로 표시한다.</p>
+
+<h3 id="2-서재-화면">2) 서재 화면</h3>
+
+<p><img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_7.png?raw=true" alt="서재 화면" /></p>
+
+<p>서재 화면이다. 다 읽은 책을 리스트로 나열하여 보여주며, 책을 검색할 수 있는 검색 폼 및 정렬 버튼이 존재한다.</p>
+
+<p>책을 클릭하면, 해당 책을 읽으면서 작성한 노트를 볼 수 있는 화면으로 이동한다.</p>
+
+<h3 id="3-노트-화면">3) 노트 화면</h3>
+
+<p><img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_8.png?raw=true" alt="노트 화면" /></p>
+
+<p>노트 화면이다. 책을 읽으면서 작성한 노트를 볼 수 있는 화면이다. 해당 노트를 클릭하면 노트의 내용을 수정할 수 있다.</p>
+
+<p>상단의 ‘랜덤 노트’ 버튼을 클릭하면 노트들이 랜덤으로 정렬된다. ‘좋아하는 노트’를 클릭하면 ‘좋아요’ 표시를 한 노트들만이 정렬된다.</p>
+
+<h3 id="4-설정-화면">4) 설정 화면</h3>
+
+<p>(미완성입니다.)</p>
+
+<h2 id="3-어떻게-만들-것인가">3. 어떻게 만들 것인가</h2>
+
+<p>어떻게 만들 것이냐구?<br />
+바닐라 JS로 만들 것이므로 별도의 프레임워크나 라이브러리는 사용하지 않는다.
+<br />
+다만 나는 <u>MVC 디자인 패턴에 따라 앱을 설계하고 구현할 것</u>이다.<br />
+MVC 패턴을 잘 모르는 분도 계실 테니, 이것을 먼저 이야기해보도록 하자.</p>
+
+<h3 id="1-mvc-패턴">1) MVC 패턴</h3>
+
+<p>MVC는 모델-뷰-컨트롤러(Model–View–Controller)의 약자로, 소프트웨어의 디자인 패턴이다. 소프트웨어의 비즈니스 로직과 화면을 구분하는데 중점을 두고 있다.</p>
+
+<p>MVC 디자인 패턴의 세 가지 부분은 다음과 같이 설명할 수 있다.</p>
+
+<blockquote>
+  <ul>
+    <li>모델: 데이터와 비즈니스 로직을 관리합니다.</li>
+    <li>뷰: 레이아웃과 화면을 처리합니다.</li>
+    <li>컨트롤러: 명령을 모델과 뷰 부분으로 라우팅합니다.</li>
+  </ul>
+</blockquote>
+
+<p><br /></p>
+
+<p><img style="background-color: #fff; width: 600px;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_5.png?raw=true" alt="MVC 패턴 이미지" /></p>
+
+<p>출처: MDN Web docs - MVC</p>
+
+<p>내가 만들려고 하는 ‘독서관리 앱’을 예시로 더 구체적으로 설명해보겠다.</p>
+
+<h4 id="모델">모델</h4>
+
+<p><u>모델은 앱이 포함해야 할 데이터가 무엇인가를 정의한다</u>.<br />
+데이터의 상태가 변경되면 모델을 일반적으로 뷰에게 알리며, 가끔 컨트롤러에게 알리기도 한다.</p>
+
+<p>나의 앱이 포함해야 할 데이터는 아래와 같다.</p>
+
+<ul>
+  <li>도서 데이터(제목, 저자, 출판사 등)</li>
+  <li>노트 데이터(내용, 작성 일자 등)</li>
+</ul>
+
+<p>나는 이것을 각각 ‘Book Model’, ‘Note Model’로 정의하고 관리할 것이다.<br />
+‘Book Model’은 ‘Note Model’의 상위 집합이라는 것도 언급해 둘 필요가 있다.</p>
+
+<h4 id="뷰">뷰</h4>
+
+<p><u>뷰는 앱의 데이터를 보여주는 방식을 정의하며, 표시할 데이터를 모델로부터 받는다</u>.<br />
+쉽게 말해, 모든 UI 요소들이 뷰에 해당한다.</p>
+
+<p>나는 앱을 크게 4개의 페이지뷰,<br />
+즉 ‘HomePageView’, ‘BookPageView’, ‘NotePageView’, ‘SettingPageView’로 나눌 것이다.<br />
+필요에 따라 특정 UI 요소는 View 컴포넌트로 만들어 관리할 것이다.<br />
+설계에 관한 내용은 아래에서 구체적으로 설명하겠다.</p>
+
+<h4 id="컨트롤러">컨트롤러</h4>
+
+<p><u>컨트롤러는 사용자로부터의 입력에 대한 응답으로 모델 및 뷰를 업데이트한다</u>.</p>
+
+<p>예를 들어, 나의 앱에는 사용자가 책을 검색하고 등록할 수 있는 폼과 버튼이 포함된다.
+사용자의 입력은 컨트롤러에게 전송되고, 모델을 처리한 뒤, 업데이트된 데이터를 다시 뷰로 전송할 것이다.
+이러한 흐름을 중간에서 제어하는 것이 컨트롤러의 역할이라고 볼 수 있다.</p>
+
+<h3 id="2-앱-구조-설계">2) 앱 구조 설계</h3>
+
+<p>MVC 패턴을 적용하여 나는 앱을 다음과 같이 설계하였다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_10.png?raw=true" alt="애플리케이션 구조 이미지" /></p>
+
+<p>먼저 설명해야 할 것은 NavigationView와 MainController이다.<br />
+NavigationView는 하단의 내비게이션 탭 바를 가리킨다.<br />
+사용자가 NavigationView를 클릭하면 ainController는 라우팅(Routing)을 수행한다.<br />
+즉, 앱의 URL을 변경하고 Ajax 방식으로 페이지를 렌더링하는 것이다.</p>
+
+<p>Home 버튼이 클릭되면 HomePageView를 렌더링,<br />
+Book 버튼이 클릭되면 BookPageView를 렌더링,<br />
+Note 버튼이 클릭되면 NotePageView를 렌더링,<br />
+Setting 버튼이 클릭되면 SettingPageView를 렌더링한다.</p>
+
+<p>한편, 각각의 PageView는 자신을 전담하는 Controller를 가지고 있다.<br />
+예를 들어, BookPageView에서 사용자의 입력이 발생하면<br />
+BookController가 처리하는 식이다.</p>
+
+<p>또한, Controller는 BookModel 및 NoteModel과도 연결되어 있으며<br />
+데이터를 요청 및 갱신하여 뷰를 새롭게 렌더링한다.</p>
+
+<h2 id="참고자료">참고자료</h2>
+
+<p>SPA &amp; Routing - poiemaweb.com<br />
+MDN Web docs - MVC</p>
+:ET
