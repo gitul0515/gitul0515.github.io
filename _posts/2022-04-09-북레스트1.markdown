@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "바닐라 JS로 SPA 만들기1"
+title: '바닐라 JS로 SPA 만들기1'
 date: 2022-04-09 12:12:52 +0900
 categories: 프로젝트리뷰
 tags: [자바스크립트, 프로젝트리뷰]
@@ -70,7 +70,13 @@ https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg</a>
 
 아래는 내가 정리한 기본 화면 구획이다.
 
-### 1) 홈 화면
+### 1) 하단 네비게이션
+
+<img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_11.png?raw=true" alt="하단 네비게이션 이미지">
+
+하단 내비게이션 탭이다. 각각의 탭을 클릭하면 '홈 화면', '서재 화면', '노트 화면', '설정 화면'으로 이동한다.
+
+### 2) 홈 화면
 
 <img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_6.png?raw=true" alt="홈 화면">
 
@@ -82,7 +88,7 @@ https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg</a>
 
 세 번째는 독서 달력에 관한 탭이다. 해당 탭을 누르면 달력이 있는 화면으로 이동한다. 한 달 동안 책을 몇 권이나 읽었는가를 달력으로 표시한다.
 
-### 2) 서재 화면
+### 3) 서재 화면
 
 <img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_7.png?raw=true" alt="서재 화면">
 
@@ -90,7 +96,7 @@ https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg</a>
 
 책을 클릭하면, 해당 책을 읽으면서 작성한 노트를 볼 수 있는 화면으로 이동한다.
 
-### 3) 노트 화면
+### 4) 노트 화면
 
 <img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_8.png?raw=true" alt="노트 화면">
 
@@ -98,13 +104,9 @@ https://scand.com/wp-content/uploads/2019/05/bp062-difference.jpg</a>
 
 상단의 '랜덤 노트' 버튼을 클릭하면 노트들이 랜덤으로 정렬된다. '좋아하는 노트'를 클릭하면 '좋아요' 표시를 한 노트들만이 정렬된다.
 
-### 4) 설정 화면
+### 5) 설정 화면
 
 (미완성입니다.)
-
-### 5) 하단 네비게이션
-
-<img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_11.png?raw=true" alt="하단 네비게이션 이미지">
 
 ## 3. 어떻게 만들 것인가
 
