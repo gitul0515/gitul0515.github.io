@@ -1,0 +1,225 @@
+---
+layout: post
+title: '바닐라 JS로 SPA 만들기2'
+date: 2022-04-16 12:12:52 +0900
+categories: 프로젝트리뷰
+tags: [자바스크립트, 프로젝트리뷰]
+---
+
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지">
+  
+## 1. 폴더 구조
+
+이번 포스팅부터 본격적으로 개발을 진행해보겠다. 우선 폴더 구조는 아래와 같다.
+
+<img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_1.png?raw=true" alt="폴더 구조 이미지">
+
+중요한 것은 index.html과 src 폴더이다.
+
+1.  index.html  
+    루트 폴더에 위치한다. SPA이므로 단 하나의 html이 존재한다.
+
+2.  src 폴더  
+     scripts 폴더, styles 폴더, asset 폴더로 구성된다.
+
+    scripts 폴더는 자바스크립트 파일을 저장하는 폴더이다.  
+    index.html에서 임포트 하는 app.js 파일이 들어있고,  
+    model, view, controller 파일들을 저장하는 main 폴더가 있으며,  
+    그 외에도 service 및 utils 폴더가 있다.
+
+    styles 폴더는 CSS 및 SCSS 파일을 저장하는 폴더이다.
+
+    asset 폴더는 아이콘 및 이미지 등의 파일을 저장하는 폴더이다.
+
+## 2. html 문서
+
+index.html의 body는 다음과 같이 간단하다.
+
+```HTML
+<body>
+  <main id="app">
+    <div id="page"></div>
+    <nav id="navigation"></nav>
+  </main>
+</body>
+```
+
+### 1) #app
+
+id가 "app"인 main 태그이다.  
+이 태그 안쪽에는 앱의 모든 콘텐츠, UI, 내비게이션이 들어간다.  
+다시 말해, SPA의 최상위 태그라고 말할 수 있다.
+
+### 2) #page
+
+id가 "page"인 div 태그이다.  
+이 태그는 앱의 페이지를 담당한다.
+각 페이지에 해당하는 html이 이 태그의 하위로 들어간다.
+
+즉, 현재 페이지에 따라서 #page의 하위 html이 바뀐다.  
+BookPage일 경우, BookPage의 html이 #page에 appendChild 되면서 렌더링되는 식이다.
+
+### 3) #navigation
+
+id가 "navigation"인 nav 태그이다.  
+이 태그는 하단 네비게이션 탭을 담당한다.  
+#page와는 달리, 한 번 렌더링된 이후 html이 바뀌지 않는다. 그럴 필요가 없기 때문이다.
+
+index.html의 전체 텍스트는 아래와 같다.  
+상술한 태그들 외에도 meta 태그, link 태그, script 태그 등이 존재한다.
+
+```HTML
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bookrest App</title>
+
+    <meta name="description" content="북레스트 - 독서 관리 애플리케이션입니다." />
+    <meta name="keywords" content="북레스트, 독서, 노트" />
+    <meta name="author" content="권기홍" />
+    <!-- Fonts -->
+    <link href="https://webfontworld.github.io/woowahan/BMDoHyeon.css" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="//cdn.jsdelivr.net/font-iropke-batang/1.2/font-iropke-batang.css"
+      rel="stylesheet"
+    />
+    <!-- CSS -->
+    <link href="/src/styles/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <main id="app">
+      <div id="page"></div>
+      <nav id="navigation"></nav>
+    </main>
+    <!-- Fontawesome -->
+    <script src="https://kit.fontawesome.com/fb9a82cb4a.js" crossorigin="anonymous"></script>
+    <!-- Javascript -->
+    <script type="module" src="/src/scripts/app.js"></script>
+  </body>
+</html>
+```
+
+## 3. app
+
+index.html에서는 app.js를 모듈 스크립트로 불러온다. app.js는 다음과 같다.
+
+```Javascript
+import MainController from './main/controllers/MainController.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+  MainController.init();
+});
+```
+
+우선 MainController를 불러온다.  
+그리고 DOMContentLoaded 이벤트가 발생했을 때,  
+즉 초기 HTML 문서를 완전히 불러왔을 때, MainController의 init 메서드를 호출한다.
+
+사실 app.js는 모듈 스크립트이므로 HTML 문서가 완전히 만들어진 이후 실행된다.  
+따라서 DOMContentLoaded 이벤트는 굳이 필요하지 않다.  
+하지만 안정성을 더 높이기 위하여 추가하였다.
+
+## 4. MainController
+
+MainController는 다소 복잡하므로 구체적인 설명이 필요하다.  
+이쯤에서 다시 한 번 설계도를 보도록 하자. 현재 단계는 빨간색 화살표 지점이다.
+
+<img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_2.png?raw=true" alt="앱 설계도 이미지">
+
+그림에서 알 수 있듯이, MainController의 주 역할은  
+<U>각각의 페이지를 동적으로 라우팅(Routing)하는 것</U>이다.
+
+애플리케이션에서 <U>라우팅</U>이란, 어떤 화면에서 다른 화면으로  
+화면을 전환하는 내비게이션을 관리하기 위한 기능을 의미한다.
+
+나는 <U>HTML5의 History API인 pushState와 popstate를 사용하여 라우팅을 구현할 것</U>이다.  
+이를 pjax 방식이라고 한다.
+
+pjax를 사용하면 history 관리가 가능하다는 장점이 있다.  
+(쉽게 말해, 뒤로 가기-앞으로 가기 버튼이 정상적으로 동작한다)  
+또한, hash를 사용하지 않기 때문에 SEO에도 큰 문제가 없다.
+
+<img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_3.png?raw=true" alt="pjax 이미지">
+
+출처 : jquery-plugins.net
+
+다시 본론으로 돌아와서, MainController의 코드를 하나씩 설명하겠다.
+
+```Javascript
+import NavigationView from '../views/NavigationView.js';
+import HomePageView from '../views/HomePageView.js';
+import HomeController from './HomeController.js';
+import BookPageView from '../views/BookPageView.js';
+import BookController from './BookController.js';
+import NotePageView from '../views/NotePageView.js';
+import NoteController from './NoteController.js';
+import SettingView from '../views/SettingView.js';
+import SettingController from './SettingController.js';
+```
+
+NavigationView 파일 및 각 화면을 담당하는 View와 Controller 파일을 불러온다.
+
+```Javascript
+const page = document.getElementById('page');
+const navigation = document.getElementById('navigation');
+```
+
+상단 태그인 #page 및 #navigation 태그를 변수에 바인딩한다.
+
+```Javascript
+export default {
+  init() {
+    NavigationView.setup(navigation)
+      .addCustomEvent('@click', (e) => this.onClick(e.detail.page));
+
+    this.bindEvent();
+    this.route();
+  },
+```
+
+MainController는 하나의 객체이며, 그 안에 여러 메서드를 가지고 있는 형태이다.  
+첫 번째 메서드는 init으로, 이름에서 알 수 있듯이 초기화를 담당한다.  
+상술했던 app.js에서 호출하는 메서드가 바로 이 녀석이다.
+
+우선 init 메서드는 NavigationView에 navigation 변수를 전달하면서 setup한다.  
+그러면 NavigationView는 하단 내비게이션 바를 구성하는데 필요한 로직을 차례로 실행한다.  
+(이에 관한 구체적인 설명은 다음 포스팅에서 할 예정이다)
+
+다음으로, addCustomEvent라는 메서드를 볼 수 있다.
+이것은 내가 임의로 만든 메서드로,  
+NavigationView와 관련된 '커스텀 이벤트를 설정하는 기능'을 수행한다.  
+사용자가 NavigationView를 클릭하면 @click이라는 커스텀 이벤트가 발생하고,  
+이것을 MainController로 가져와 onClick이라는 메서드로 처리한다.
+
+"왜 NavigationView가 아니라 MainController에서 처리하지?"라고 물을지도 모르겠다.  
+그것은, <U>사용자의 입력에 대한 처리는 Controller에서 담당하는 것이 원칙</U>이기 때문이다.  
+<U>View는 단지 담당하는 UI(네비게이션 등)를 화면에 그리는 역할을 수행할 뿐</U>이다.
+
+하나 더, "왜 addEventListener를 사용하지 않고 임의의 메서드를 만든거지?"라고 물을지도 모르겠다.
+그것은 '빌더 패턴'을 사용하기 위함이다.
+
+다음으로, bindEvent와 route 메서드를 호출하면서 init은 종료된다.
+
+```Javascript
+  onClick(page) {
+    history.pushState(null, null, page);
+    this.route();
+  },
+
+  bindEvent() {
+    window.addEventListener('popstate', () => this.route());
+  },
+```
+
+(미완성입니다.)
+
+## 4. 라우팅
+
+## 참고자료
