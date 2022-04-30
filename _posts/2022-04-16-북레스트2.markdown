@@ -189,37 +189,109 @@ MainController는 하나의 객체이며, 그 안에 여러 메서드를 가지�
 상술했던 app.js에서 호출하는 메서드가 바로 이 녀석이다.
 
 우선 init 메서드는 NavigationView에 navigation 변수를 전달하면서 setup한다.  
-그러면 NavigationView는 하단 내비게이션 바를 구성하는데 필요한 로직을 차례로 실행한다.  
+그러면 NavigationView는 하단 내비게이션 바를 구성하는데 필요한 로직을 실행한다.  
 (이에 관한 구체적인 설명은 다음 포스팅에서 할 예정이다)
 
-다음으로, addCustomEvent라는 메서드를 볼 수 있다.
+다음으로, addCustomEvent라는 메서드를 볼 수 있다.  
 이것은 내가 임의로 만든 메서드로,  
 NavigationView와 관련된 '커스텀 이벤트를 설정하는 기능'을 수행한다.  
 사용자가 NavigationView를 클릭하면 @click이라는 커스텀 이벤트가 발생하고,  
 이것을 MainController로 가져와 onClick이라는 메서드로 처리한다.
 
-"왜 NavigationView가 아니라 MainController에서 처리하지?"라고 물을지도 모르겠다.  
+"왜 NavigationView가 아니라 MainController에서 처리하지?"  
 그것은, <U>사용자의 입력에 대한 처리는 Controller에서 담당하는 것이 원칙</U>이기 때문이다.  
 <U>View는 단지 담당하는 UI(네비게이션 등)를 화면에 그리는 역할을 수행할 뿐</U>이다.
 
-하나 더, "왜 addEventListener를 사용하지 않고 임의의 메서드를 만든거지?"라고 물을지도 모르겠다.
-그것은 '빌더 패턴'을 사용하기 위함이다.
+하나 더, "왜 addEventListener를 사용하지 않고 임의의 메서드를 만든거지?"  
+그것은 '빌더 패턴'을 사용하기 위함이다.  
+빌더 패턴에 관해서는 다음 포스팅에서 더 구체적으로 설명하겠다.
 
-다음으로, bindEvent와 route 메서드를 호출하면서 init은 종료된다.
+다시 본론으로 돌아와, bindEvent와 route 메서드를 호출하면서 init은 종료된다.
 
 ```Javascript
   onClick(page) {
     history.pushState(null, null, page);
     this.route();
   },
+```
 
+상술하였듯, onClick 메서드는 @click 커스텀 이벤트를 담당하는 메서드다.  
+파라미터로 page를 전달받으며,  
+이것을 History API인 pushState에 전달하여 URL을 변경한다.
+
+예를 들어, 루트 URL이 'http://127.0.0.1:4000'이었고 page가 '/note'라고 해 보자.  
+`history.pushState(null, null, '/note')` 이렇게 호출될 것이다.  
+그러면 URL은 'http://127.0.0.1:4000/note', 이렇게 변경될 것이다.
+
+이후, onClick 메서드는 route 메서드를 호출한다.
+
+```Javascript
+  route() {
+    const path = window.location.pathname;
+
+    if (path === '/' || path === '/home') {
+      HomePageView.setup(page);
+      HomeController.init();
+      return;
+    }
+    if (path === '/book') {
+      BookPageView.setup(page);
+      BookController.init();
+      return;
+    }
+    if (path === '/note') {
+      NotePageView.setup(page);
+      NoteController.init();
+      return;
+    }
+    if (path === '/setting') {
+      SettingView.setup(page);
+      SettingController.init();
+      return;
+    }
+    throw new Error('invalid page');
+  },
+```
+
+route 메서드는 이름에서 알 수 있듯이, 라우팅에서 가장 중요한 함수다.  
+<U>현재 URL을 읽어들여서 화면을 전환하는 기능</U>을 수행한다.
+
+location 객체에서 pathname을 가져온 뒤, 그 pathname에 따라 분기를 나눈다.
+
+예를 들어 pathname이 '/'이거나 '/home'인 경우,  
+home 화면을 렌더링하는 것이 필요하다.  
+따라서 HomePageView와 HomeController를 셋업 및 초기화 한다.
+그 외 'book', 'note', 'setting' 화면의 렌더링도 동일하게 동작한다.
+
+다시 설계도를 보도록 하자. 우리는 바로 이 부분을 구현한 것이다.
+
+<img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_4.png?raw=true" alt="라우팅">
+
+과연 라우팅이 정상적으로 동작할까?  
+아래는 시연 영상이다.  
+상단에 있는 URL의 변화도 주목해서 봐 주시길 바란다.
+
+<video width="60%" height="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_5.mp4?raw=true" type="video/mp4">
+</video>
+
+라우팅이 성공적으로 구현되었다!! 🎉🎉🎉
+
+그렇지만 다만, 약간 의문이 드는 점이 있다.  
+영상에서는 '뒤로가기' 버튼을 눌렀을 때도 URL이 변경되면서 라우팅이 수행되었다.
+어떻게 그것이 가능했을까?
+바로 History API인 popstate 덕분이다.
+
+```Javascript
   bindEvent() {
     window.addEventListener('popstate', () => this.route());
   },
 ```
 
-(미완성입니다.)
+MainController에는 bindEvent 메서드가 존재하고,
+이 메서드에서 window에 'popstate' 이벤트를 설정한다.
+popstate 이벤트는...
 
-## 4. 라우팅
+(미완성입니다.)
 
 ## 참고자료
