@@ -7,8 +7,10 @@ tags: [자바스크립트, 프로젝트리뷰]
 ---
 
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지">
-  
-## 1. 폴더 구조
+
+## 프로젝트 셋업 & 라우팅
+
+### 1. 폴더 구조
 
 이번 포스팅부터 본격적으로 개발을 진행해보겠다. 우선 폴더 구조는 아래와 같다.
 
@@ -31,7 +33,7 @@ tags: [자바스크립트, 프로젝트리뷰]
 
     asset 폴더는 아이콘 및 이미지 등의 파일을 저장하는 폴더이다.
 
-## 2. html 문서
+### 2. html 문서
 
 index.html의 body는 다음과 같이 간단하다.
 
@@ -44,13 +46,13 @@ index.html의 body는 다음과 같이 간단하다.
 </body>
 ```
 
-### 1) #app
+#### 1) #app
 
 id가 "app"인 main 태그이다.  
 이 태그 안쪽에는 앱의 모든 콘텐츠, UI, 내비게이션이 들어간다.  
 다시 말해, SPA의 최상위 태그라고 말할 수 있다.
 
-### 2) #page
+#### 2) #page
 
 id가 "page"인 div 태그이다.  
 이 태그는 앱의 페이지를 담당한다.
@@ -59,7 +61,7 @@ id가 "page"인 div 태그이다.
 즉, 현재 페이지에 따라서 #page의 하위 html이 바뀐다.  
 BookPage일 경우, BookPage의 html이 #page에 appendChild 되면서 렌더링되는 식이다.
 
-### 3) #navigation
+#### 3) #navigation
 
 id가 "navigation"인 nav 태그이다.  
 이 태그는 하단 네비게이션 탭을 담당한다.  
@@ -106,7 +108,7 @@ index.html의 전체 텍스트는 아래와 같다.
 </html>
 ```
 
-## 3. app
+### 3. app
 
 index.html에서는 app.js를 모듈 스크립트로 불러온다. app.js는 다음과 같다.
 
@@ -126,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 따라서 DOMContentLoaded 이벤트는 굳이 필요하지 않다.  
 하지만 안정성을 더 높이기 위하여 추가하였다.
 
-## 4. MainController
+### 4. MainController
 
 MainController는 다소 복잡하므로 구체적인 설명이 필요하다.  
 이쯤에서 다시 한 번 설계도를 보도록 하자. 현재 단계는 빨간색 화살표 지점이다.
@@ -258,9 +260,8 @@ route 메서드는 이름에서 알 수 있듯이, 라우팅에서 가장 중요
 
 location 객체에서 pathname을 가져온 뒤, 그 pathname에 따라 분기를 나눈다.
 
-예를 들어 pathname이 '/'이거나 '/home'인 경우,  
-home 화면을 렌더링하는 것이 필요하다.  
-따라서 HomePageView와 HomeController를 셋업 및 초기화 한다.
+예를 들어 pathname이 '/'이거나 '/home'인 경우, home 화면을 렌더링하는 것이 필요하다.  
+따라서 HomePageView와 HomeController를 셋업 및 초기화 한다.  
 그 외 'book', 'note', 'setting' 화면의 렌더링도 동일하게 동작한다.
 
 다시 설계도를 보도록 하자. 우리는 바로 이 부분을 구현한 것이다.
@@ -275,11 +276,11 @@ home 화면을 렌더링하는 것이 필요하다.
   <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_5.mp4?raw=true" type="video/mp4">
 </video>
 
-라우팅이 성공적으로 구현되었다!! 🎉🎉🎉
+<p style="font-size:1.4rem; font-weight: bold;">라우팅이 성공적으로 구현되었다!! 🎉🎉🎉</p>
 
-그렇지만 다만, 약간 의문이 드는 점이 있다.  
-영상에서는 '뒤로가기' 버튼을 눌렀을 때도 URL이 변경되면서 라우팅이 수행되었다.
-어떻게 그것이 가능했을까?
+그러나 잠깐! 영상의 내용은 조금 이상하다.  
+내비게이션이 아닌 <U>'뒤로가기' 버튼을 눌렀을 때에도 URL이 변경되면서 라우팅이 수행</U>되었다.  
+어떻게 그것이 가능했을까?  
 바로 History API인 popstate 덕분이다.
 
 ```Javascript
@@ -288,10 +289,27 @@ home 화면을 렌더링하는 것이 필요하다.
   },
 ```
 
-MainController에는 bindEvent 메서드가 존재하고,
-이 메서드에서 window에 'popstate' 이벤트를 설정한다.
-popstate 이벤트는...
+아직 언급하지 않았으나 MainController에는 bindEvent 메서드가 존재하고,  
+여기서 window에 'popstate' 이벤트에 대한 핸들러를 등록한다.
 
-(미완성입니다.)
+popstate 이벤트는 사용자의 세션 기록 탐색(뒤로 및 앞으로 가기 등)  
+으로 인해 현재 URL이 변경될 때 발생한다.
+
+즉, 현재 URL이 변경될때마다 다시 route 메서드를 호출하고,  
+route 메서드는 변경된 URL을 읽어들여 화면을 성공적으로 전환한다.
+
+<hr/>
+
+지금까지 앱의 기본 폴더 및 파일을 소개하고, 라우팅의 구현에 대해 설명하였다.  
+다음 포스팅에서는 각각의 화면 View 및 Controller에 대해 다룰 예정이다.  
+많은 기대해주시길 바란다.
+
+<br>
+
+ㅡ 부족한 글 읽어주셔서 감사합니다.
 
 ## 참고자료
+
+SPA & Routing - poiemaweb.com
+History.pushState() - MDN web docs
+popstate - MDN web docs
