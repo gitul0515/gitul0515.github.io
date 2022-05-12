@@ -1,0 +1,309 @@
+I"&6<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지" /></p>
+
+<h2 id="프로젝트-셋업--라우팅">프로젝트 셋업 &amp; 라우팅</h2>
+
+<h3 id="1-폴더-구조">1. 폴더 구조</h3>
+
+<p>이번 포스팅부터 본격적으로 개발을 진행해보겠다. 우선 폴더 구조는 아래와 같다.</p>
+
+<p><img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_1.png?raw=true" alt="폴더 구조 이미지" /></p>
+
+<p>중요한 것은 index.html과 src 폴더이다.</p>
+
+<ol>
+  <li>
+    <p>index.html<br />
+루트 폴더에 위치한다. SPA이므로 단 하나의 html이 존재한다.</p>
+  </li>
+  <li>
+    <p>src 폴더<br />
+ scripts 폴더, styles 폴더, asset 폴더로 구성된다.</p>
+
+    <p>scripts 폴더는 자바스크립트 파일을 저장하는 폴더이다.<br />
+index.html에서 임포트 하는 app.js 파일이 들어있고,<br />
+model, view, controller 파일들을 저장하는 main 폴더가 있으며,<br />
+그 외에도 service 및 utils 폴더가 있다.</p>
+
+    <p>styles 폴더는 CSS 및 SCSS 파일을 저장하는 폴더이다.</p>
+
+    <p>asset 폴더는 아이콘 및 이미지 등의 파일을 저장하는 폴더이다.</p>
+  </li>
+</ol>
+
+<h3 id="2-html-문서">2. html 문서</h3>
+
+<p>index.html의 body는 다음과 같이 간단하다.</p>
+
+<pre><code class="language-HTML">&lt;body&gt;
+  &lt;main id="app"&gt;
+    &lt;div id="page"&gt;&lt;/div&gt;
+    &lt;nav id="navigation"&gt;&lt;/nav&gt;
+  &lt;/main&gt;
+&lt;/body&gt;
+</code></pre>
+
+<h4 id="1-app">1) #app</h4>
+
+<p>id가 “app”인 main 태그이다.<br />
+이 태그 안쪽에는 앱의 모든 콘텐츠, UI, 내비게이션이 들어간다.<br />
+다시 말해, SPA의 최상위 태그라고 말할 수 있다.</p>
+
+<h4 id="2-page">2) #page</h4>
+
+<p>id가 “page”인 div 태그이다.<br />
+이 태그는 앱의 페이지를 담당한다.
+각 페이지에 해당하는 html이 이 태그의 하위로 들어간다.</p>
+
+<p>즉, 현재 페이지에 따라서 #page의 하위 html이 바뀐다.<br />
+BookPage일 경우, BookPage의 html이 #page에 appendChild 되면서 렌더링되는 식이다.</p>
+
+<h4 id="3-navigation">3) #navigation</h4>
+
+<p>id가 “navigation”인 nav 태그이다.<br />
+이 태그는 하단 네비게이션 탭을 담당한다.<br />
+#page와는 달리, 한 번 렌더링된 이후 html이 바뀌지 않는다. 그럴 필요가 없기 때문이다.</p>
+
+<p>index.html의 전체 텍스트는 아래와 같다.<br />
+상술한 태그들 외에도 meta 태그, link 태그, script 태그 등이 존재한다.</p>
+
+<pre><code class="language-HTML">&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="IE=edge" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Bookrest App&lt;/title&gt;
+
+    &lt;meta name="description" content="북레스트 - 독서 관리 애플리케이션입니다." /&gt;
+    &lt;meta name="keywords" content="북레스트, 독서, 노트" /&gt;
+    &lt;meta name="author" content="권기홍" /&gt;
+    &lt;!-- Fonts --&gt;
+    &lt;link href="https://webfontworld.github.io/woowahan/BMDoHyeon.css" rel="stylesheet" /&gt;
+    &lt;link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700&amp;display=swap"
+      rel="stylesheet"
+    /&gt;
+    &lt;link
+      href="//cdn.jsdelivr.net/font-iropke-batang/1.2/font-iropke-batang.css"
+      rel="stylesheet"
+    /&gt;
+    &lt;!-- Fontawesome --&gt;
+    &lt;script src="https://kit.fontawesome.com/fb9a82cb4a.js" crossorigin="anonymous"&gt;&lt;/script&gt;
+    &lt;!-- CSS --&gt;
+    &lt;link href="/src/styles/style.css" rel="stylesheet" /&gt;
+    &lt;!-- Javascript --&gt;
+    &lt;script type="module" src="/src/scripts/app.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;main id="app"&gt;
+      &lt;div id="page"&gt;&lt;/div&gt;
+      &lt;nav id="navigation"&gt;&lt;/nav&gt;
+    &lt;/main&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<h3 id="3-app">3. app</h3>
+
+<p>index.html에서는 app.js를 모듈 스크립트로 불러온다. app.js는 다음과 같다.</p>
+
+<pre><code class="language-Javascript">import MainController from './main/controllers/MainController.js';
+
+document.addEventListener('DOMContentLoaded', () =&gt; {
+  MainController.init();
+});
+</code></pre>
+
+<p>우선 MainController를 불러온다.<br />
+그리고 DOMContentLoaded 이벤트가 발생했을 때,<br />
+즉 초기 HTML 문서를 완전히 불러왔을 때, MainController의 init 메서드를 호출한다.</p>
+
+<p>사실 app.js는 모듈 스크립트이므로 HTML 문서가 완전히 만들어진 이후 실행된다.<br />
+따라서 DOMContentLoaded 이벤트는 굳이 필요하지 않다.<br />
+하지만 안정성을 더 높이기 위하여 추가하였다.</p>
+
+<h3 id="4-maincontroller">4. MainController</h3>
+
+<p>MainController는 다소 복잡하므로 구체적인 설명이 필요하다.<br />
+이쯤에서 다시 한 번 설계도를 보도록 하자. 현재 단계는 빨간색 화살표 지점이다.</p>
+
+<p><img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_2.png?raw=true" alt="앱 설계도 이미지" /></p>
+
+<p>그림에서 알 수 있듯이, MainController의 주 역할은<br />
+<u>각각의 페이지를 동적으로 라우팅(Routing)하는 것</u>이다.</p>
+
+<p>애플리케이션에서 <u>라우팅</u>이란, 어떤 화면에서 다른 화면으로<br />
+화면을 전환하는 내비게이션을 관리하기 위한 기능을 의미한다.</p>
+
+<p>나는 <u>HTML5의 History API인 pushState와 popstate를 사용하여 라우팅을 구현할 것</u>이다.<br />
+이를 pjax 방식이라고 한다.</p>
+
+<p>pjax를 사용하면 history 관리가 가능하다는 장점이 있다.<br />
+(쉽게 말해, 뒤로 가기-앞으로 가기 버튼이 정상적으로 동작한다)<br />
+또한, hash를 사용하지 않기 때문에 SEO에도 큰 문제가 없다.</p>
+
+<p><img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_3.png?raw=true" alt="pjax 이미지" /></p>
+
+<p>출처 : jquery-plugins.net</p>
+
+<p>다시 본론으로 돌아와서, MainController의 코드를 하나씩 설명하겠다.</p>
+
+<pre><code class="language-Javascript">import NavigationView from '../views/NavigationView.js';
+import HomePageView from '../views/HomePageView.js';
+import HomeController from './HomeController.js';
+import BookPageView from '../views/BookPageView.js';
+import BookController from './BookController.js';
+import NotePageView from '../views/NotePageView.js';
+import NoteController from './NoteController.js';
+import SettingView from '../views/SettingView.js';
+import SettingController from './SettingController.js';
+</code></pre>
+
+<p>NavigationView 파일 및 각 화면을 담당하는 View와 Controller 파일을 불러온다.</p>
+
+<pre><code class="language-Javascript">const page = document.getElementById('page');
+const navigation = document.getElementById('navigation');
+</code></pre>
+
+<p>상단 태그인 #page 및 #navigation 태그를 변수에 바인딩한다.</p>
+
+<pre><code class="language-Javascript">export default {
+  init() {
+    NavigationView.setup(navigation)
+      .addEvent('@click', (e) =&gt; this.onClick(e.detail.page));
+
+    this.bindEvent();
+    this.route();
+  },
+</code></pre>
+
+<p>MainController는 하나의 객체이며, 그 안에 여러 메서드를 가지고 있는 형태이다.<br />
+첫 번째 메서드는 init으로, 이름에서 알 수 있듯이 초기화를 담당한다.<br />
+상술했던 app.js에서 호출하는 메서드가 바로 이 녀석이다.</p>
+
+<p>우선 init 메서드는 NavigationView에 navigation 변수를 전달하면서 setup한다.<br />
+그러면 NavigationView는 하단 내비게이션 바를 구성하는데 필요한 로직을 실행한다.<br />
+(이에 관한 구체적인 설명은 다음 포스팅에서 할 예정이다)</p>
+
+<p>다음으로, addEvent라는 메서드를 볼 수 있다.<br />
+이것은 내가 임의로 만든 메서드로,<br />
+NavigationView와 관련된 ‘커스텀 이벤트를 등록하는 기능’을 수행한다.<br />
+사용자가 NavigationView를 클릭하면 @click이라는 커스텀 이벤트가 발생하고,<br />
+이것을 MainController로 가져와 onClick라는 메서드로 처리한다.</p>
+
+<p>“왜 NavigationView가 아니라 MainController에서 처리하지?”<br />
+그것은, <u>사용자의 입력에 대한 처리는 Controller에서 담당하는 것이 원칙</u>이기 때문이다.<br />
+<u>View는 단지 담당하는 UI(네비게이션 등)를 화면에 그리는 역할을 수행할 뿐</u>이다.</p>
+
+<p>하나 더, “왜 addEventListener를 사용하지 않고 추가로 addEvent 메서드를 만든거지?”<br />
+그것은, <u>메서드를 연쇄적으로 사용하는 '메서드 체이닝'을 사용하기 위함이며</u>,
+이것은 this(인스턴스)를 반환하는 메서드만이 가능하기 때문이다.</p>
+
+<p>당연한 사실이지만 addEventListener는 this를 반환하지 않는다.<br />
+반면에, addEvent라는 메서드를 만들어 this를 반환하게 하면<br />
+메서드 체이닝을 사용할 수 있으며, 이는 코드를 간결하게 하는 데 큰 도움을 준다.</p>
+
+<p>다시 본론으로 돌아와, init은 bindEvent와 route 메서드를 호출한 후 종료된다.<br />
+다음은 onClick 메서드이다.</p>
+
+<pre><code class="language-Javascript">  onClick(page) {
+    history.pushState(null, null, page);
+    this.route();
+  },
+</code></pre>
+
+<p>onClick 메서드는 @click 커스텀 이벤트를 담당하는 메서드다.<br />
+파라미터로 page를 전달받으며,<br />
+이것을 History API인 pushState에 전달하여 URL을 변경한다.</p>
+
+<p>예를 들어, 루트 URL이 ‘http://127.0.0.1:4000’이었고 page가 ‘/note’라고 해 보자.<br />
+<code class="language-plaintext highlighter-rouge">history.pushState(null, null, '/note')</code> 이렇게 호출될 것이다.<br />
+그러면 URL은 ‘http://127.0.0.1:4000/note’, 이렇게 변경될 것이다.</p>
+
+<p>이후, onClick 메서드는 route 메서드를 호출한다.</p>
+
+<pre><code class="language-Javascript">  route() {
+    const path = window.location.pathname;
+
+    if (path === '/' || path === '/home') {
+      HomePageView.setup(page);
+      HomeController.init();
+      return;
+    }
+    if (path === '/book') {
+      BookPageView.setup(page);
+      BookController.init();
+      return;
+    }
+    if (path === '/note') {
+      NotePageView.setup(page);
+      NoteController.init();
+      return;
+    }
+    if (path === '/setting') {
+      SettingView.setup(page);
+      SettingController.init();
+      return;
+    }
+    throw new Error('invalid page');
+  },
+</code></pre>
+
+<p>route 메서드는 이름에서 알 수 있듯이, 라우팅에서 가장 중요한 함수다.<br />
+<u>현재 URL을 읽어들여서 화면을 전환하는 기능</u>을 수행한다.</p>
+
+<p>location 객체에서 pathname을 가져온 뒤, 그 pathname에 따라 분기를 나눈다.</p>
+
+<p>예를 들어 pathname이 ‘/’이거나 ‘/home’인 경우, home 화면을 렌더링하는 것이 필요하다.<br />
+따라서 HomePageView와 HomeController를 셋업 및 초기화 한다.<br />
+그 외 ‘book’, ‘note’, ‘setting’ 화면의 렌더링도 동일하게 동작한다.</p>
+
+<p>다시 설계도를 보도록 하자. 우리는 바로 이 부분을 구현한 것이다.</p>
+
+<p><img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_4.png?raw=true" alt="라우팅" /></p>
+
+<p>과연 라우팅이 정상적으로 동작할까?<br />
+아래는 시연 영상이다.<br />
+상단에 있는 URL의 변화도 주목해서 봐 주시길 바란다.</p>
+
+<video width="60%" height="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/2_5.mp4?raw=true" type="video/mp4" />
+</video>
+
+<p style="font-size:1.4rem; font-weight: bold;">라우팅이 성공적으로 구현되었다!! 🎉🎉🎉</p>
+
+<p>그러나 잠깐! 영상의 내용은 조금 이상하다.<br />
+내비게이션이 아닌 <u>'뒤로가기' 버튼을 눌렀을 때에도 URL이 변경되면서 라우팅이 수행</u>되었다.<br />
+어떻게 그것이 가능했을까?<br />
+바로 History API인 popstate 덕분이다.</p>
+
+<pre><code class="language-Javascript">  bindEvent() {
+    window.addEventListener('popstate', () =&gt; this.route());
+  },
+</code></pre>
+
+<p>아직 언급하지 않았으나 MainController에는 bindEvent 메서드가 존재하고,<br />
+여기서 window에 ‘popstate’ 이벤트에 대한 핸들러를 등록한다.</p>
+
+<p>popstate 이벤트는 사용자의 세션 기록 탐색(뒤로 및 앞으로 가기 등)<br />
+으로 인해 현재 URL이 변경될 때 발생한다.</p>
+
+<p>즉, 현재 URL이 변경될때마다 다시 route 메서드를 호출하고,<br />
+route 메서드는 변경된 URL을 읽어들여 화면을 성공적으로 전환한다.</p>
+
+<hr />
+
+<p>지금까지 앱의 기본 폴더 및 파일을 소개하고, 라우팅의 구현에 대해 설명하였다.<br />
+다음 포스팅에서는 네비게이션 및 화면을 구성하는 View 및 Controller에 대해 다룰 예정이다.<br />
+많이 기대해주시길 바란다.</p>
+
+<p><br /></p>
+
+<p>ㅡ 부족한 글 읽어주셔서 감사합니다.</p>
+
+<h2 id="참고자료">참고자료</h2>
+
+<p>SPA &amp; Routing - poiemaweb.com
+History.pushState() - MDN web docs
+popstate - MDN web docs</p>
+:ET

@@ -1,0 +1,223 @@
+I"Z <p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지" /></p>
+
+<h2 id="view--controller">View &amp; Controller</h2>
+
+<p>이번 포스팅에서는 View 및 Controller에 대해 구체적으로 설명하겠다.</p>
+
+<h3 id="1-프로토타입-view">1. 프로토타입 View</h3>
+
+<p>먼저 View의 공통 메서드를 정의한 View.js에 대해 살펴보자.<br />
+View.js는 하나의 객체로 정의되며, 그 안에 4개의 메서드를 포함하고 있다.</p>
+
+<h4 id="1-init">1) init</h4>
+
+<pre><code class="language-Javascript">export default {
+  init(element) {
+    if (!element) {
+      throw new Error(`element가 존재하지 않습니다.`);
+    }
+    this.element = element;
+    return this;
+  },
+</code></pre>
+
+<p>첫 번째 메서드는 init이다.<br />
+init은 element 파라미터로 html 요소를 전달받는다.<br />
+html 요소가 존재하지 않으면 에러를 발생시키고, 존재하면 this.element에 할당한다.</p>
+
+<p>예를 들어, html 요소인 #page가 전달되는 경우,<br />
+<code class="language-plaintext highlighter-rouge">this.element</code>에 <code class="language-plaintext highlighter-rouge">#page</code> 요소가 할당되는 식이다.</p>
+
+<p>이 this.element의 역할은 매우 중요하다.<br />
+<u>this.element는 View의 최상위 요소이며,</u><br />
+<u>View가 실행하는 '렌더링'의 기준점이라고 할 수 있다.</u></p>
+
+<p>View가 어떤 방식으로 렌더링, 즉 화면에 그려지는지 간단히 설명하겠다.
+<u>View는 하위 html 요소들을 생성한 뒤 this.element의 자식으로 추가한다.</u>
+this.element는 DOM 요소이므로 자식 요소들을 추가하면<br />
+DOM 트리가 다시 만들어지고 브라우저의 화면이 새롭게 렌더링된다.<br />
+이것이 View가 화면에 그려지는 방식이다.</p>
+
+<p>다음은 addEvent와 dispatch 메서드이다.</p>
+
+<pre><code class="language-Javascript">  addEvent(event, handler) {
+    this.element.addEventListener(event, handler);
+    return this;
+  },
+
+  dispatch(event, data) {
+    const customEvent = new CustomEvent(event, { detail: data });
+    this.element.dispatchEvent(customEvent);
+    return this;
+  },
+</code></pre>
+
+<p>addEvent는 this.element에 이벤트 핸들러를 등록한다.<br />
+특히 커스텀 이벤트 핸들러를 등록하는 용도로 자주 사용할 것이다.<br />
+addEvent는 this를 반환하는데, 이는 앞서 설명한 ‘메서드 체이닝’을 사용하기 위함이다.<br />
+특히 addEvent는 사용 빈도가 높으므로 이 기법이 유용하다.</p>
+
+<p>dispatch는 커스텀 이벤트 객체를 생성한 뒤, 이를 발생시킨다.<br />
+두 번째 인수로 이벤트와 함께 전달하고 싶은 정보인 data를 전달받으며,
+이것을 detail 프로퍼티를 포함하는 객체에 포함시킨다.</p>
+
+<p style="font-size: 1.1rem;">"왜 기존의 dispatchEvent 메서드를 두고 임의의 dispatch 메서드를 만들었을까?"</p>
+
+<p>=&gt; 우선, 커스텀 이벤트를 발생시키려면 다음의 세 단계가 필요하다.</p>
+
+<ol>
+  <li>커스텀 이벤트 객체 생성</li>
+  <li>커스텀 이벤트 핸들러 등록 (addEvent가 맡는다)</li>
+  <li>커스텀 이벤트 디스패치</li>
+</ol>
+
+<p>기존의 dispatchEvent는 3번 단계를 담당하는 메서드이다.<br />
+반면에, 내가 만든 dispatch 메서드는 1, 3번 기능을 통합하여 수행한다.<br />
+다음의 코드를 비교해보자.</p>
+
+<pre><code class="language-Javascript">// dispatchEvent 사용 시
+View.dispatchEvent(
+  new customEvent('@click', {
+    detail: { message: 'Hello' },
+  })
+);
+
+// dispatch 사용 시
+View.dispatch('@click', { message: 'Hello' });
+</code></pre>
+
+<p><u>보다시피 코드가 훨씬 간결해지고 사용이 편리해졌다.</u><br />
+반복적인 코드의 사용을 제거하였기 때문이다.<br />
+이것이 내가 dispatch라는 임의의 메서드를 만든 이유이다.</p>
+
+<p>마지막 메서드는 replaceChildren이다.</p>
+
+<pre><code class="language-Javascript">  replaceChildren(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    this.element.replaceChildren(template.content);
+  }
+};
+</code></pre>
+
+<p><u>replaceChildren은 html 문자열을 template 엘리먼트로 감싼 뒤,</u><br />
+<u>this.element의 새로운 자식 엘리먼트로 교체한다.</u></p>
+
+<p>먼저 임의의 template 엘리먼트를 만든 후,<br />
+전달받은 html 문자열을 template 엘리먼트 내부에 포함시킨다.</p>
+
+<p>template.content에는 DocumentFragment가 담겨 있다.<br />
+<u>DocumentFragment는 Template이 담고 있는 DOM의 하위 트리를 나타낸다.</u><br />
+<u>DOM에 추가하면 자신은 제거되고 자식 엘리먼트만 DOM에 추가되는 특성이 있다.</u></p>
+
+<p>this.element의 자식으로 이 DocumentFragment를 추가 및 교체한다.<br />
+그러면 this.element의 자식으로 html 엘리먼트가 새롭게 추가된다.<br />
+바로 이러한 방식으로 View가 화면에 그려지게 된다.</p>
+
+<p>한편, 내가 만든 replaceChildren은 View의 메서드이다.<br />
+이는 this.element의 메서드인 replaceChildren과 다르다는 것에 주의하기 바란다.</p>
+
+<p>지금까지 설명한 View.js의 객체는<br />
+HomePageView, BookPageView 등 모든 View 객체들이 프로토타입으로 상속받는다.</p>
+
+<p>지금까지 설명한 init, addEvent, dispatch, replaceChildren은<br />
+<u>다른 모든 View 객체들이 사용할 수 있는 공통 메서드이다.</u><br />
+<u>이것은 View.js의 객체가 모든 View 객체들의 프로토타입이기 때문이다.</u></p>
+
+<h3 id="2-navigationview">2. NavigationView</h3>
+
+<p>이것이 무슨 의미인지 하나씩 살펴보자.</p>
+
+<p>이것은 View.js의 객체가 프로토타입으로 상속받기 때문이다.
+다시 말해, View.js의 객체는 모든 View 객체의 프로토타입이다.</p>
+
+<p>이 사실을</p>
+
+<p>4개의 메서드는</p>
+
+<p>View.js는</p>
+
+<p>다른 모든 View 객체들은 이 View.js의 객체를 프로토타입으로 상속받는다.</p>
+
+<p><a href="https://developer.mozilla.org/ko/docs/Web/HTML/Element/template">template - MDN</a><br />
+<a href="https://developer.mozilla.org/ko/docs/Web/API/DocumentFragment">documentFragment - MDN</a></p>
+
+<p>이 DocumentFragment를</p>
+
+<p>(이 부분의 설명이 어렵다면 )</p>
+
+<p>template.content</p>
+
+<p>replaceChildren은 template 엘리먼트를 만든 후,</p>
+
+<p>replaceChildren과의 비교</p>
+
+<p>왜 replaceChildren을 만들었는가?</p>
+
+<p>그것을 this.element에 자식으로</p>
+
+<p>html 문자열을</p>
+
+<p>template 요소에</p>
+
+<p>렌더 트리에서 구현하고,</p>
+
+<p>반복되고</p>
+
+<p>반복되는 작업은</p>
+
+<p>이처럼 반복되는 작업들은 묶어서 처리하는 것이 코드 퀄리티에 도움이 된다.</p>
+
+<p>이처럼 중복되는 작업들은</p>
+
+<p>이는</p>
+
+<p>1번 단계(커스텀 이벤트 객체 생성)</p>
+
+<p>가독성이 높아지는 것을 알 수 있다.</p>
+
+<p>중복된 코들르</p>
+
+<p>()</p>
+
+<p>커스텀 이벤트</p>
+
+<p>그것은, ‘커스텀 이벤트 객체의 생성과 이벤트</p>
+
+<p>data를 전달받는데,</p>
+
+<p>왜 커스텀 이벤트를 사용하는가?</p>
+
+<p>‘커스텀 이벤트’를 전담하여 등록할 함수로 작성하였다.</p>
+
+<p>일반 이벤트도</p>
+
+<p>여기서 this.element의</p>
+
+<p>특히 View의 ‘렌더링’ 기능에 매우 중요하다.</p>
+
+<p>기준점이라고도 할 수 있다.</p>
+
+<p>이것이 View의 렌더링 원리이다.</p>
+
+<p>View가 그리는 하위 요소들은
+바로 이 this.element의 자식 요소가 된다.</p>
+
+<p>View가 렌더링을 수행하는 모든 태그들이</p>
+
+<p>이 과정은 왜 필요할까?
+그것은 해당 View의 하위 태그들이</p>
+
+<p>element라는 파라미터를 가지며, 여기에 html 요소가 전달된다.<br />
+그리고 객체의 프로퍼티 element에 전달받은 element를 할당한다.</p>
+
+<p>View.element를</p>
+
+<p>active this를 반환하고 종료한다.</p>
+
+<p>(미완성입니다.)</p>
+
+<h3 id="2">2.</h3>
+
+<h2 id="참고자료">참고자료</h2>
+:ET
