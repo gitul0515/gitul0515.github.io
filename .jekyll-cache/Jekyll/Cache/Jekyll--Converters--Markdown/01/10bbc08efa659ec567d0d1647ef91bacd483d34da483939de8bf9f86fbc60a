@@ -1,0 +1,447 @@
+I"�H<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지" /></p>
+
+<h2 id="view--controller">View &amp; Controller</h2>
+
+<p>이번 포스팅에서는 View 및 Controller에 대해 구체적으로 설명하겠다.</p>
+
+<h3 id="1-view의-공통-메서드">1. View의 공통 메서드</h3>
+
+<p>먼저 View의 공통 메서드를 정의한 View.js에 대해 살펴보자.<br />
+View.js는 하나의 객체로 정의되며, 그 안에 4개의 메서드를 포함하고 있다.</p>
+
+<h4 id="1-init">1) init</h4>
+
+<pre><code class="language-Javascript">export default {
+  init(element) {
+    if (!element) {
+      throw new Error(`element가 존재하지 않습니다.`);
+    }
+    this.element = element;
+    return this;
+  },
+</code></pre>
+
+<p>첫 번째 메서드는 init이다.<br />
+init은 element 파라미터로 html 요소를 전달받는다.<br />
+html 요소가 존재하지 않으면 에러를 발생시키고, 존재하면 this.element에 할당한다.</p>
+
+<p>예를 들어, html 요소인 #page가 전달되는 경우,<br />
+<code class="language-plaintext highlighter-rouge">this.element = #page</code> 이렇게 할당되는 식이다.</p>
+
+<p>이 this.element의 역할은 매우 중요하다.<br />
+<u>this.element는 View의 최상위 요소로, 해당 View가 화면에 그려지는 기준점이라고 할 수 있다.</u></p>
+
+<p>View가 어떤 방식으로 렌더링, 즉 화면에 그려지는지 간단히 언급하겠다.<br />
+<u>View는 하위 html 요소들을 생성한 뒤에 this.element의 자식으로 추가한다.</u><br />
+<u>this.element는 DOM 요소이므로 자식 요소들을 추가하면</u><br />
+<u>DOM 트리가 다시 생성되고 브라우저의 화면이 새롭게 렌더링된다.</u></p>
+
+<p><img style="margin-left: 0; width: 90%;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment" /></p>
+
+<p><br />
+이것은 뒤에 나오는 replaceChildren 파트에서 다시 설명하겠다.</p>
+
+<h4 id="2-on">2) on</h4>
+
+<pre><code class="language-Javascript">  on(event, handler) {
+    this.element.addEventListener(event, handler);
+    return this;
+  },
+</code></pre>
+
+<p>on은 this.element에 이벤트 핸들러를 등록한다.<br />
+<u>특히 커스텀 이벤트 핸들러를 등록하는 용도로 자주 사용할 것이다.</u><br />
+on은 this를 반환하는데, 이는 앞서 설명한 ‘메서드 체이닝’을 사용하기 위함이다.<br />
+특히 on은 사용 빈도가 높으므로 이 기법이 유용하다.</p>
+
+<p>혹시 Vue를 다루어봤다면, 이 on이라는 메서드가 익숙하게 느껴질 것이다.<br />
+그렇다. 이 on이라는 메서드의 이름은<br />
+Vue에서 이벤트를 핸들링하는 디렉티브인 <code class="language-plaintext highlighter-rouge">v-on</code>에서 빌려온 것이며, 기능도 유사하다.</p>
+
+<p><a href="https://kr.vuejs.org/v2/guide/events.html" target="_blank">v-on 디렉티브</a></p>
+
+<h4 id="3-dispatch">3) dispatch</h4>
+
+<pre><code class="language-Javascript">  dispatch(event, data) {
+    const customEvent = new CustomEvent(event, { detail: data });
+    this.element.dispatchEvent(customEvent);
+    return this;
+  },
+</code></pre>
+
+<p>dispatch는 커스텀 이벤트 객체를 생성한 뒤, 이를 디스패치(발생)시킨다.<br />
+두 번째 인수로 이벤트와 함께 전달하고 싶은 정보인 data를 전달받으며,<br />
+이것을 detail 프로퍼티를 포함하는 객체에 포함시킨다.</p>
+
+<p>여기서 잠깐!</p>
+
+<p style="font-size: 1.07rem;">"왜 기존의 dispatchEvent 메서드를 두고 임의의 dispatch 메서드를 만들었을까?"</p>
+
+<p>우선 커스텀 이벤트에 대한 설명이 필요하다.<br />
+기본적으로 커스텀 이벤트는 다음의 세 단계를 거쳐 발생시킬 수 있다.</p>
+
+<ol>
+  <li>커스텀 이벤트 핸들러 등록 =&gt; <code class="language-plaintext highlighter-rouge">on</code>이 담당한다.</li>
+  <li>커스텀 이벤트 객체 생성</li>
+  <li>커스텀 이벤트 디스패치</li>
+</ol>
+
+<p>기존의 dispatchEvent는 기본적으로 3번 단계를 담당하는 메서드다.<br />
+즉 커스텀 이벤트 객체를 생성하고 난 뒤에야, dispatchEvent를 사용할 수 있다는 뜻이다.<br />
+또는 인자로 전달할 수도 있지만 코드가 복잡해진다.<br />
+다음을 보자.</p>
+
+<pre><code class="language-Javascript">// 기존의 dispatchEvent를 사용한 커스텀 이벤트의 디스패치
+View.dispatchEvent(
+  new customEvent('@click', {
+    detail: { message: 'Hello' },
+  })
+);
+</code></pre>
+
+<p><u>반면에 나의 dispatch 메서드는 2, 3번 단계를 통합한 메서드이다.</u><br />
+그리고 데이터를 전달하는 로직을 내부적으로 처리해 사용이 편리하다.<br />
+다음을 보자.</p>
+
+<pre><code class="language-Javascript">// dispatch를 사용한 커스텀 이벤트의 디스패치
+View.dispatch('@click', { message: 'Hello' });
+</code></pre>
+
+<p>보다시피 코드가 훨씬 간결해지고 사용이 편리해졌다.<br />
+반복적인 코드의 사용을 제거하였기 때문이다.<br />
+이것이 dispatch라는 임의의 메서드를 만든 이유이다.</p>
+
+<h4 id="4-replacechildren">4) replaceChildren</h4>
+
+<pre><code class="language-Javascript">  replaceChildren(html) {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    this.element.replaceChildren(template.content);
+  }
+};
+</code></pre>
+
+<p>replaceChildren은 html 문자열을 template 요소로 감싼 뒤,<br />
+this.element의 새로운 자식 요소로 교체하는 메서드다.</p>
+
+<p>먼저 임의의 template 요소를 만든 후,<br />
+전달받은 html 문자열을 template 요소 내부에 포함시킨다.</p>
+
+<p>template.content에는 <strong>DocumentFragment</strong>가 담겨 있다.<br />
+<u>DocumentFragment는 Template이 담고 있는 DOM의 하위 트리를 나타낸다.</u><br />
+<u>DOM에 추가하면 자신은 제거되고 자식 엘리먼트만 DOM에 추가되는 특성이 있다.</u></p>
+
+<p><a href="https://gitul0515.github.io/%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8/2022/01/01/DocumentFragment-%EB%85%B8%EB%93%9C-%EC%A0%95%EB%A6%AC-copy-2.html" target="_blank">DocumentFragment 객체</a></p>
+
+<p>this.element의 자식으로 이 DocumentFragment를 추가 및 교체한다.<br />
+여기서 이름은 같지만 다른 메서드인 replaceChildren을 사용한다.<br />
+이를 도식으로 간단히 나타내면 다음과 같다.</p>
+
+<p><img style="margin-left: 0; width: 90%;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment" /></p>
+
+<p><br /></p>
+
+<p>그러면 this.element의 자식으로 html 요소들이 새롭게 추가된다.<br />
+바로 이러한 방식으로 View가 화면에 그려지게 된다.</p>
+
+<p>한편, 내가 만든 replaceChildren은 View의 메서드이다.<br />
+this.element의 메서드로 사용한 replaceChildren과 다르다는 것에 주의하기 바란다.<br />
+<u>this.element의 메서드 replaceChildren은 WEB APIs의 정규 메서드이다.</u></p>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceChildren" target="_blank">replaceChildren - MDN</a></p>
+
+<p>그럼 또 의문이 생길 것이다.</p>
+
+<p style="font-size: 1.07rem;">"기존의 replaceChildren 메서드와의 차이점이 뭔가요? 왜 만들었죠?"</p>
+
+<p><u>그것은 기존의 replaceChildren이 허용하는 인자의 타입 때문이다.</u></p>
+
+<p>기존의 replaceChildren은 인자로 ‘노드 또는 문자열 객체의 집합’을 요구한다.<br />
+mdn에서는 다음과 같이 명시하고 있다.</p>
+
+<blockquote>
+  <p>Parameters<br />
+A set of Node or string objects to replace the Element’s existing children with.</p>
+</blockquote>
+
+<p>해석: 파라미터는 요소의 기존 자식을 대체할 노드 또는 문자열 객체의 집합입니다.</p>
+
+<p>이것이 무슨 말이냐하면…<br />
+html 문자열, 예컨대 <code class="language-plaintext highlighter-rouge">&lt;h1&gt;hello&lt;/h1&gt;</code>은 replaceChildren의 인자로 전달할 수 없다는 뜻이다.<br />
+왜냐하면 이것은 단지 문자열이기 때문이다.<br />
+<u>결국 이 html 문자열을 노드(또는 문자열 객체)의 집합으로 변환하는 과정이 필요하다.</u></p>
+
+<p><u>이 변환 과정을 내부적으로 처리하라고 replaceChildren라는 임의의 메서드를 만들었다.</u><br />
+template 요소를 만들어 html 문자열을 포함시킨 것이 그것이었다.</p>
+
+<p>결과적으로 무엇이 가능해졌는가?<br />
+<u>이제 나의 replaceChildren은 html 문자열도 인자로 받을 수 있게 되었다.</u><br />
+노드로의 변환 과정을 내부적으로 처리해주기 때문에, 사용자(나)는 그걸 신경 쓸 필요 없다.<br />
+<u>덕분에 replaceChildren의 사용이 간편해졌다는 것이 얻은 효과이다.</u></p>
+
+<hr />
+
+<p>지금까지 설명한 init, on, dispatch, replaceChildren은<br />
+<u>다른 모든 View 객체들이 사용할 수 있는 공통 메서드라는 것을 말해두겠다.</u><br />
+<u>이것은 View.js의 객체를 다른 모든 View 객체들이 프로토타입으로 상속받기 때문이다.</u></p>
+
+<p>이러한 사실을 염두에 두고,<br />
+이제 본격적으로 View와 Controller에 대해서 설명하겠다.<br />
+참고로 우리는 앱의 다음 지점을 살펴보고 있는 것이다.</p>
+
+<p><img style="margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_3.png?raw=true" alt="설계도" /></p>
+
+<h3 id="2-네비게이션-view">2. 네비게이션 View</h3>
+
+<p>먼저 NavigationView에 대해서 살펴보자.<br />
+NavigationView는 하단 네비게이션 바를 (화면에) 그리는 것을 담당한다.</p>
+
+<p><img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/1_11.png?raw=true" alt="하단 네비게이션 이미지" />
+<br /></p>
+
+<h4 id="1-객체-생성">1) 객체 생성</h4>
+
+<pre><code class="language-Javascript">import View from './View.js';
+
+const NavigationView = Object.create(View);
+</code></pre>
+
+<p>먼저 View.js의 객체를 불러온 후,<br />
+이 객체를 프로토타입으로 갖는 NavigationView 객체를 생성한다.<br />
+상술하였듯, NavigationView는 View.js 객체의 메서드를 상속받아 사용할 수 있다.</p>
+
+<h4 id="2-setup">2) setup</h4>
+
+<pre><code class="language-Javascript">NavigationView.setup = function (element) {
+  this.init(element);
+  this.render();
+  this.setEvent();
+  return this;
+};
+</code></pre>
+
+<p>그리고 setup 메서드를 정의한다.<br />
+setup은 html 요소인 element를 전달받는다.<br />
+앞서 MainController에서 살펴봤듯이, 이 element는 #navigation 요소가 될 것이다.</p>
+
+<pre><code class="language-Javascript">// MainController.js
+const navigation = document.getElementById('navigation');
+// ...
+init() {
+  // ...
+  NavigationView.setup(navigation);
+  // ...
+}
+</code></pre>
+
+<p>이 #navigation 요소를 init으로 전달하여 호출한다.<br />
+그러면 결과적으로 다음과 같이 할당된다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">NavigationView.element = #navigation 요소</code><br />
+NavigationView의 렌더링 기준점을 설정한 셈이다.</p>
+
+<p>이어 render와 setEvent 메서드를 차례로 호출한다.</p>
+
+<h4 id="3-render">3) render</h4>
+
+<pre><code class="language-Javascript">NavigationView.render = function () {
+  const html = this.getHtml();
+  this.replaceChildren(html);
+};
+
+NavigationView.getHtml = function () {
+  return `
+    &lt;ul class="navigation__tabs"&gt;
+      &lt;li class="navigation__tab"&gt;
+        &lt;a href="/"&gt;
+          &lt;i class="fa-solid fa-plus"&gt;&lt;/i&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li class="navigation__tab"&gt;
+        &lt;a href="/book"&gt;
+          &lt;i class="fa-solid fa-book-open-reader"&gt;&lt;/i&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li class="navigation__tab"&gt;
+        &lt;a href="/note"&gt;
+          &lt;i class="fa-solid fa-pen-to-square"&gt;&lt;/i&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+      &lt;li class="navigation__tab"&gt;
+        &lt;a href="/setting"&gt;
+          &lt;i class="fa-solid fa-square-poll-horizontal"&gt;&lt;/i&gt;
+        &lt;/a&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  `;
+};
+</code></pre>
+
+<p>render는 NavigationView를 화면에 그리는 역할을 담당한다.<br />
+먼저 getHtml 메서드를 통해 html 문자열을 가져온다.</p>
+
+<p>html 문자열은 ul 및 li의 리스트 구성이며, 리스트마다 a 태그와 i 태그로 구성된다.</p>
+
+<p>그리고 이 html 문자열을 replaceChildren 메서드에 전달한다.<br />
+결과적으로 this.element에 html 요소들이 자식으로 추가될 것이다.</p>
+
+<p>이렇게 NavigationView의 렌더링이 완료되었다.</p>
+
+<h4 id="4-setevent">4) setEvent</h4>
+
+<pre><code class="language-Javascript">NavigationView.setEvent = function () {
+  this.element.addEventListener('click', (e) =&gt; this.onClick(e));
+};
+
+NavigationView.onClick = function (e) {
+  if (e.target.matches('#navigation &gt; a')) {
+    e.preventDefault();
+    const page = e.target.getAttribute('href');
+    this.dispatch('@click', { page });
+  }
+};
+
+</code></pre>
+
+<p>setEvent는 이벤트 핸들러를 등록하는 함수다.<br />
+this.element에서 click 이벤트가 발생하면 onClick 메서드를 실행한다.</p>
+
+<p>onClick을 살펴보자. a 태그가 클릭되었다면,<br />
+우선 e.preventDefault 메서드로 a 태그의 기본 동작(새로고침)을 막는다.<br />
+그리고 a 태그의 href 속성에서 클릭된 페이지 정보를 가져 온다.<br />
+커스텀 이벤트 @click을 발생시키면서 페이지 정보를 전달한다.</p>
+
+<p><u>커스텀 이벤트를 발생시키는 것만이 View의 역할이다.</u><br />
+커스텀 이벤트 핸들러를 등록 및 처리하는 것은 Controller에서 맡는다.</p>
+
+<p>이전 포스팅의 MainController 코드를 다시 살펴보자.</p>
+
+<pre><code class="language-Javascript">// MainController.js
+init() {
+  // @click 이벤트 핸들러 등록
+  NavigationView.on('@click', (e) =&gt; this.onClick(e.detail.page));
+  // ...
+}
+// ...
+// @click 이벤트 핸들링
+onClick(page) {
+  history.pushState(null, null, page);
+  this.route();
+}
+</code></pre>
+
+<p>MainController의 onClick 메서드에서 page를 전달받고,<br />
+page로 url 경로를 변경시킨 후, 라우팅을 실행한다.<br />
+결과적으로 클릭된 page로 화면이 전환된다.</p>
+
+<p>혹시 이해가 잘 되지 않는다면, 이전 포스팅을 함께 참고해 주시길 부탁드린다.<br />
+<a href="https://gitul0515.github.io/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%A6%AC%EB%B7%B0/2022/04/16/%EB%B6%81%EB%A0%88%EC%8A%A4%ED%8A%B82.html">북레스트 2</a></p>
+
+<h4 id="5-hide--show">5) hide &amp; show</h4>
+
+<pre><code class="language-Javascript">NavigationView.hide = function () {
+  this.element.classList.add('hide');
+};
+
+NavigationView.show = function () {
+  this.element.classList.remove('hide');
+};
+</code></pre>
+
+<p>hide는 NavigatoinView를 화면에서 안 보이게 한다.<br />
+this.element에 ‘hide’ 클래스가 추가되면 <code class="language-plaintext highlighter-rouge">display: none</code>이 적용되어 감춰진다.<br />
+css 코드는 생략하겠다.</p>
+
+<p>show는 NavigationView를 화면에서 보이게 한다. 기본 상태이다.<br />
+<code class="language-plaintext highlighter-rouge">display: none</code>의 적용을 제거함으로써 가능하다.</p>
+
+<p>상황에 따라 NavigationView를 이렇게 보이거나 감추는 것이 필요하다.<br />
+추후 다시 설명하겠다.</p>
+
+<pre><code class="language-Javascript">export default NavigationView;
+</code></pre>
+
+<p>이렇게 만든 NavigationView를 export한다.</p>
+
+<h3 id="3-화면-view">3. 화면 View</h3>
+
+<p>화면 View란 각각의 화면을 구성하는<br />
+HomePageView, BookPageView, NotePageView, SettingPageView를 말한다.<br />
+구현은 동일하므로 여기서는 HomePageView만을 설명하겠다.</p>
+
+<p>그 전에 먼저, MainController에서 route 메서드를 다시 살펴보자.</p>
+
+<pre><code class="language-Javascript">  route() {
+    const path = window.location.pathname;
+
+    if (path === '/') {
+      HomePageView.setup(page);
+      HomeController.init();
+      return;
+    }
+    //...
+  }
+</code></pre>
+
+<p>route에서 URL의 경로를 읽은 뒤,<br />
+그와 일치하는 View와 Controller를 차례로 실행하였다.</p>
+
+<p>HomePageView의 코드는 아래와 같다.</p>
+
+<pre><code class="language-Javascript">import View from './View.js';
+
+const HomePageView = Object.create(View);
+
+HomePageView.setup = function (element) {
+  this.init(element);
+  this.render();
+  this.bindElement();
+  this.setEvent();
+};
+
+HomePageView.render = function () {
+  const html = this.getHtml();
+  this.replaceChildren(html);
+};
+
+HomePageView.getHtml = function () {
+  return /* html */ `
+    &lt;header class="header"&gt;
+      &lt;h1 class="header__title"&gt;북레스트&lt;/h1&gt;
+      &lt;h3 class="header__message"&gt;책과 함께 휴식을 취하세요 :)&lt;/h3&gt;
+    &lt;/header&gt;
+    &lt;div class="content content--home"&gt;
+      &lt;a class="home__tab home__search-tab" href="/home/search"&gt;
+        &lt;h2&gt;책을 추가해 보세요.&lt;/h2&gt;
+        &lt;h3&gt;읽고 있는 책이 있나요?&lt;/h3&gt;
+      &lt;/a&gt;
+      &lt;a class="home__tab home__tab--calendar" href="/home/calendar"&gt;
+        &lt;div&gt;
+          &lt;h2&gt;독서 달력&lt;/h2&gt;
+          &lt;h3&gt;이번 달은 얼마나 읽었나요?&lt;/h3&gt;
+        &lt;/div&gt;
+        &lt;i class="fa-solid fa-calendar-days"&gt;&lt;/i&gt;
+      &lt;/a&gt;
+    &lt;/div&gt;
+  `;
+};
+
+HomePageView.bindElement = function () {
+};
+
+HomePageView.setEvent = function () {
+};
+
+export default HomePageView;
+</code></pre>
+
+<p>NavigationView와 거의 동일하므로 구체적인 설명은 줄이겠다.<br />
+bindElement와 setEvent가 비어있는데,<br />
+이는 다음 포스팅에서 구현할 부분이라서 잠시 비워두었다.</p>
+
+<h3 id="4-화면-controller">4. 화면 Controller</h3>
+
+<p>(미완성입니다.)</p>
+
+<h2 id="참고자료">참고자료</h2>
+:ET
