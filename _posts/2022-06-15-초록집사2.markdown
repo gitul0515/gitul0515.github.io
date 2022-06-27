@@ -1,0 +1,178 @@
+---
+layout: post
+title: '무한스크롤에서 API 호출 이슈 & 해결안'
+date: 2022-06-11 12:12:52 +0900
+categories: 프로젝트리뷰
+tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
+---
+
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지">
+
+### 이슈
+
+아래는 내가 만들고 있는 피드 목록 페이지다.  
+
+<img style="margin-left: 0; height: 500px" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb2_3.png?raw=true" alt="TIL 이미지">
+
+첫 마운트 시에 5개의 게시물을 불러온 뒤,  
+사용자가 스크롤을 내려 마지막 게시물에 도달하면  
+새롭게 5개의 게시물을 불러오는 방식으로 무한 스크롤을 구현하고 있었다. 
+
+그러던 중 난감한 버그를 만났다.
+
+1. 마지막 포스트에 도달하면 서버 요청이 한 번이 아니라 여러 번 발생한다. 
+2. 스크롤을 다시 올리는 경우에도 서버 요청이 발생한다. 
+
+아래와 같이 의도치 않은 서버 요청이 다수 발생했음을 알 수 있다. 
+
+<img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb2_4.png?raw=true" alt="TIL 이미지">
+
+대체 왜 그럴까? 아래는 내가 작성한 코드이다.  
+IntersectionObserver를 사용하여 구현하였다.  
+onIntersect 함수와 두 번째 useEffect에 주목해주기 바란다.
+
+```javascript
+const MainPage = () => {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [max, setMax] = useState(0);
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    (async () => {
+      const nextPosts = await getPostsPart({
+        offset,
+        limit: LIMIT,
+      }).then((res) => res.data);
+      setPosts(nextPosts);
+      setOffset(offset + 5);
+      setMax(nextPosts[0].channel.posts.length);
+    })();
+  }, []);
+
+  const onIntersect = useCallback(
+    async ([entry], observer) => {
+      if (entry.isIntersecting && !isLoading && offset < max) {
+        setIsLoading(true);
+        setOffset(offset + 5);
+        const nextPosts = await getPostsPart({
+          offset,
+          limit: LIMIT,
+        }).then((res) => res.data);
+        setPosts([...posts, ...nextPosts]);
+        setIsLoading(false);
+      }
+    },
+    [isLoading, offset, max, posts],
+  );
+
+  useEffect(() => {
+    let observer;
+    if (targetRef.current) {
+      observer = new IntersectionObserver(onIntersect, {
+        threshold: 0.4,
+      });
+      observer.observe(targetRef.current);
+    }
+    return () => observer && observer.disconnect();
+  }, [targetRef, onIntersect]);
+
+  return (
+    <PageWrapper header nav info>
+      <PostList>
+        {posts?.map((post, i) => {
+          if (posts.length - 1 === i) {
+            return (
+              <li key={i} ref={targetRef}>
+                <PostItem key={i} post={post} />
+              </li>
+            );
+          } else {
+            return (
+              <li key={i}>
+                <PostItem key={i} post={post} />
+              </li>
+            );
+          }
+        })}
+      </PostList>
+    </PageWrapper>
+  );
+};
+
+const PostList = styled.ul``;
+
+export default MainPage;
+```
+
+### 문제 해결 
+원인: <mark>관찰을 끝낸 Observer가 제거되지 않았기 때문이다.</mark> 
+
+IntersectionObserver를 생성하는 useEffect 훅을 보자.  
+targetRef 또는 onIntersect의 값이 변경되면  
+옵저버를 새롭게 생성하고 있다.  
+
+targetRef는 마지막 게시물 요소이고, onIntersect는 콜백함수다.  
+
+```javascript
+  useEffect(() => {
+    let observer;
+    if (targetRef.current) {
+      observer = new IntersectionObserver(onIntersect, {
+        threshold: 0.4,
+      });
+      observer.observe(targetRef.current);
+    }
+    return () => observer && observer.disconnect();
+  }, [targetRef, onIntersect]);
+```
+
+여기서 targetRef가 중요하다.  
+서버 요청을 통해 리렌더링이 발생하면 targetRef가 변경된다.  
+그리고 IntersectionObserver가 다시 생성된다.  
+
+<mark>그럼 예전의 IntersectionObserver는 어떻게 될까?</mark>  
+<mark>당연히 사라지지 않고 그대로 남아있게 된다!</mark>
+
+<mark>따라서 이미 관찰을 끝낸 IntersectionObserver를 제거하는 작업이 필요하다.</mark>  
+unobserve() 또는 disconnect()를 통해서 가능하다. 
+
+```javascript
+  const onIntersect = useCallback(
+    async ([entry], observer) => {
+      if (entry.isIntersecting && !isLoading && offset < max) {
+        observer.unobserve(entry.target); // 추가한 코드
+        setIsLoading(true);
+        setOffset(offset + 5);
+        const nextPosts = await getPostsPart({
+          offset,
+          limit: LIMIT,
+        }).then((res) => res.data);
+        setPosts([...posts, ...nextPosts]);
+        setIsLoading(false);
+      }
+    },
+    [isLoading, offset, max, posts],
+  );
+```
+
+관찰을 완료했다면, 해당 observe는 이제 필요없으므로  
+unobserve()를 통해 해당 요소에 대한 관찰을 중단시켰다. 
+
+만약 이 처리가 없다면 해당 observer는 계속해서 요소를 관찰할 것이고,  
+의도치 않은 서버 요청이 발생하게 되고 만다. 
+
+unobserve()를 추가한 뒤에는 무한스크롤이 정상적으로 동작한다. 
+
+<video width="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb2_3.mp4?raw=true" type="video/mp4">
+</video>
+
+<br>
+네트워크 탭을 보면 서버 요청이 정상적으로 이루어지고 있음을 알 수 있다. 
+
+<img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb2_2.png?raw=true" alt="TIL 이미지">
+
+### 참고자료
+Mdn: Intersection_Observer_API
