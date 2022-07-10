@@ -45,7 +45,7 @@ View가 어떤 방식으로 렌더링, 즉 화면에 그려지는지 간단히 �
 <u>this.element는 DOM 요소이므로 자식 요소들을 추가하면</u>  
 <u>DOM 트리가 다시 생성되고 브라우저의 화면이 새롭게 렌더링된다.</u>
 
-<img style="margin-left: 0; width: 90%;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment">
+<img style="margin-left: 0; width: 90%; background-color: #fff;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment">
 
 <br>
 이것은 뒤에 나오는 replaceChildren 파트에서 다시 설명하겠다.
@@ -149,7 +149,7 @@ this.element의 자식으로 이 DocumentFragment를 추가 및 교체한다.
 여기서 이름은 같지만 다른 메서드인 replaceChildren을 사용한다.  
 이를 도식으로 간단히 나타내면 다음과 같다.
 
-<img style="margin-left: 0; width: 90%;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment">
+<img style="margin-left: 0; width: 90%; background-color: #fff;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.png?raw=true" alt="documentFragment">
 
 <br>
 
@@ -470,13 +470,13 @@ let isInit = false;
 
 export default {
   init() {
-    // 한 번만 선언되는 코드
+    // 한 번만 호출되는 코드
     if (!isInit) {
       this.setupInnerPage();
       this.addCustomEvent();
       isInit = true;
     }
-    // 중복 선언되는 코드 (예: fetch 등)
+    // 중복 호출되는 코드 (예: fetch 등)
     // ...
   },
 
@@ -486,7 +486,7 @@ export default {
   addCustomEvent() {
   },
 
-  // HomePageView를 조작하는데 필요한 메서드
+  // View에서의 사용자 입력을 처리하는 메서드
   // ...
 };
 ```
@@ -494,24 +494,74 @@ export default {
 너무 짧고 군데군데 비어있지 않은가?  
 당연하다. 아직 어떤 기능도 추가하지 않았기 때문이다.  
 앞으로 기능을 추가함에 따라 비어 있는 영역들을 채울 것이다.  
-여기서는 전체적인 로직을 중심으로 설명하겠다.
+여기서는 전체적인 로직을 간단히 설명하겠다.
 
-Controller는 하나의 객체이며, 그 안에 여러 메서드를 소유한다.  
+Controller는 하나의 객체이며, 그 안에 여러 메서드를 소유하고 있다.  
 가장 중요한 메서드는 init이다.  
 init은 컨트롤러를 초기화하는 역할을 하며,  
-'한 번만 선언되는 영역'과 '중복 선언되는 영역'으로 나뉜다.
+'단일 호출되는 영역'과 '중복 호출되는 영역'으로 나뉜다.
 
-#### 1) 단일 선언
+#### 1) 단일 호출
 
-한 번만 선언되는 영역에는 setupInnerPage와 addCustomEvent가 있다.  
-setupInnerPage는 내부페이지를 Setup하는 역할이다.
-내부페이지가 무엇이냐구?  
-우선 아래 영상을 봐주기 바란다.
+단일 호출되는 것은 setupInnerPage와 addCustomEvent 메서드이다.  
+이들은 컨트롤러가 처음 초기화될 때 단 한번 호출된다.
 
-#### 2) 중복 선언
+setupInnerPage는 내부페이지를 초기 설정(Setup)하는 역할이다.  
+'내부 페이지'란 용어가 이해가 잘 안 갈 수 있는데...  
+예를 들면 다음과 같다.
 
-#### 3) View 조작 메서드
+<video width="60%" height="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_1.mp4?raw=true" type="video/mp4">
+</video>
 
-(미완성입니다.)
+<img style="width: 250px; margin-left: 0;" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/3_4.png?raw=true" alt="화면 도식">
+
+'홈 화면'에서 추가 탭을 눌렀을 때, '책 검색 화면'으로 이동한다.  
+이때 '책 검색 화면'을 '홈 화면'의 내부 페이지라고 부를 수 있다.  
+이것을 내부 페이지라고 명명하겠다.
+
+HomePageView, BookPageView, NotePageView, SettingPageView는  
+각각 내부 페이지를 소유하고 있다.  
+이러한 내부 페이지의 초기 설정을 setupInnerPage 메서드에서 수행한다.
+
+=> 이 부분이 이해가 어려울 수 있을 것 같다.  
+다음 포스팅에서 내부 페이지를 실제로 구현하면서 더욱 설명하겠다.
+
+한편, addCustomEvent 메서드는 View에 커스텀 이벤트 핸들러를 등록한다.  
+앞서 살펴 본 on 메서드를 사용할 것이다.
+
+#### 2) 중복 호출
+
+중복 호출되는 것은 대표적으로 fetch 관련 함수가 있다.  
+예를 들어, View에서 특정 영역을 그리기 위해서는  
+데이터베이스(Model)에서 데이터를 동적으로 불러와야 한다.
+
+만약 데이터가 업데이트된 경우,  
+데이터를 새롭게 불러와야하므로 fetch를 다시 호출한다.
+
+이처럼 컨트롤러가 초기화될 때마다 다시 호출되는 영역이다.
+
+#### 3) 사용자 입력 처리
+
+View에서 사용자의 입력이 발생한 경우, 그 처리를 담당하는 메서드들이 들어간다.
+
+예를 들어, 사용자가 검색 폼에서 책 제목을 입력한 경우  
+"데이터베이스에서 저장된 책 데이터를 가져오는 메서드"가 필요할 것이다.
+
+이처럼 사용자의 입력을 처리하는 메서드들이 포함된다.
+
+<hr/>
+여기까지 View 및 Controller의 핵심적인 사항들에 대해 모두 설명하였다.  
+다시 한 번 지금까지의 결과물을 보도록 하자.
+
+
+이번 포스팅은 다소 지루한 내용이었을 수 있을 것 같다.  
+다음 포스팅에서는 좀 더 재미있는 내용,  
+"검색 API의 활용과 무한 스크롤"에 관해 다루어보겠다.
 
 ## 참고자료
+
+## 드리는 말
+학습용 프로젝트를 진행하며 작성한 글이며, 부정확한 내용이 있을 수 있습니다.  
+참고로만 읽으실 것을 권장드립니다. 감사합니다. 
+

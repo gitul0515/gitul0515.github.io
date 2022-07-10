@@ -17,10 +17,9 @@ css 우선순위 Cascading
 innerHTML, textContent, innerText
 반응형 시 크기 조절
 
-reatc-router 변화
-1. switch -> routes로 네임 변경
-2. component 옵션이 element로 변경
-3. exact는 더 이상 사용되지 않음
+문자열과 문자열 객체의 차이 
+낙관적 업데이트 
+url을 변경하되, history는 저장하지 않기 
 
 rem, em
 https://firsteast.tistory.com/123?category=971056

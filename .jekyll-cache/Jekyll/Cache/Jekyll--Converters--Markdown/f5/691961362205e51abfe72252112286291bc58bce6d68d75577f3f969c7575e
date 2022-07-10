@@ -1,0 +1,226 @@
+I"�C<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지" /></p>
+
+<h3 id="이슈">이슈</h3>
+
+<p>내가 구현한 무한스크롤에서 문제점이 한 가지 발생했다.<br />
+그것은 바로, 유저가 다른 페이지를 탐색하다가 뒤로가기를 누르면<br />
+원래의 위치로 되돌아 올 수 없다는 것이다.<br />
+이는 사용성에 결코 좋지 않다.</p>
+
+<video width="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb3_0.mp4?raw=true" type="video/mp4" />
+</video>
+
+<p>사실, 이것은 무한 스크롤이 가지고 있는 본질적인 문제점이다.<br />
+기본적으로 React-Router는 페이지 이동 시 스크롤을 유지해주지만,<br />
+무한스크롤이라면 이야기는 달라진다.<br />
+무한스크롤로 불러온 데이터는 페이지를 이동하면 전부 초기화되기 때문이다.<br />
+그렇기 때문에 원래의 스크롤 위치로 복원하려면 별도의 처리가 필요하다.</p>
+
+<h3 id="문제-해결">문제 해결</h3>
+<p>먼저 해결해야 할 사안을 구체적으로 파악하자.<br />
+무한스크롤이 구현된 페이지는 MainPage이다.<br />
+내가 원하는 것은 MainPage로 돌아올 때 무한스크롤의 위치를 복원하는 것이다.<br />
+이를 구조도로 나타내면 다음과 같다.</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb3_3.png?raw=true" alt="초록집사 표지" /></p>
+
+<p>내가 생각해낸 방법은 ‘세션 스토리지’를 사용하여<br />
+MainPage에서 불러 온 데이터의 개수를 임시 저장하는 것이었다.</p>
+
+<p>우선 useSessionStorage라는 커스텀 훅을 만들었다.<br />
+세션 스토리지를 사용할 수 있는 훅이다.</p>
+
+<pre><code class="language-Javascript">import { useState } from 'react';
+
+const useSessionStorage = (key, initialValue) =&gt; {
+  const [storedValue, setStoredValue] = useState(() =&gt; {
+    try {
+      const item = sessionStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) =&gt; {
+    try {
+      setStoredValue(value);
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue];
+};
+
+export default useSessionStorage;
+</code></pre>
+<p>이 커스텀 훅은 storedValue와 setValue를 반환한다.<br />
+storedValue는 세션 스토리지에 저장된 값이며,<br />
+setValue는 이 값을 갱신할 수 있는 함수이다.</p>
+
+<p>다음으로 useScrollPosition이라는 커스텀 훅을 만들었다.<br />
+세션 스토리지의 key를 선언하고,<br />
+useSessionStorage를 실행하는 화살표 함수를 리턴한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">useSessionStorage</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./useSessionStorage</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">SCROLL_POSITION_KEY</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">prevPostIndex</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">useSessionStorage</span><span class="p">(</span><span class="nx">SCROLL_POSITION_KEY</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>이제 이 useScrollPosition을 다음과 같이 불러와 사용하면 된다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="p">[</span><span class="nx">prevPostIndex</span><span class="p">,</span> <span class="nx">setPrevPostIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useScrollPosition</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>먼저 PostDetailPage로 이동하는 경우이다.<br />
+setPrevPostIndex를 봐주기 바란다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">const</span> <span class="nx">handleClickPost</span> <span class="o">=</span> <span class="nx">useCallback</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">isDetailPage</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">setPrevPostIndex</span><span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="nx">navigate</span><span class="p">(</span><span class="s2">`/post/detail/</span><span class="p">${</span><span class="nx">postId</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span> <span class="p">{</span>
+      <span class="na">state</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nx">post</span><span class="p">,</span>
+        <span class="nx">index</span><span class="p">,</span>
+      <span class="p">},</span>
+    <span class="p">});</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">setCurrentPostIndex</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">postId</span><span class="p">,</span> <span class="nx">post</span><span class="p">,</span> <span class="nx">isDetailPage</span><span class="p">,</span> <span class="nx">navigate</span><span class="p">]);</span>
+</code></pre></div></div>
+<p>navigate는 useNavigate를 통해 반환된 메서드이다.<br />
+navigate를 통해 페이지를 이동하기 전, index를 세션 스토리지에 저장한다.</p>
+
+<p>참고로, index는 포스트가 몇 번째 순서인가를 가리킨다.<br />
+그림으로 나타내면 다음과 같다.</p>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb3_4.png?raw=true" alt="초록집사 표지" /></p>
+
+<p>이 index를 기억함으로써, 무한스크롤의 데이터를 복원할 것이다.<br />
+<br />
+다음은 SearchTagPage로 이동하는 경우다.</p>
+
+<pre><code class="language-Javascript">  const handleClickTag = useCallback(
+    (tag) =&gt; {
+      setCurrentPostIndex(index + 1);
+      navigate(`/tag/${tag.slice(1)}`, {
+        state: {
+          tag,
+        },
+      });
+    },
+    [index, setCurrentPostIndex, navigate],
+  );
+
+</code></pre>
+<p>마찬가지로, setPrevPostIndex를 통해 페이지를 이동하기 전 index를 세션 스토리지에 저장한다.<br />
+<br />
+과연 세션 스토리지에 저장이 잘 되었을까?</p>
+
+<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb3_5.png?raw=true" alt="초록집사 표지" /></p>
+
+<p>저장이 잘 된 것을 확인할 수 있다!<br />
+이제 이 값을 MainPage로 다시 돌아올 때 사용하면 된다.<br />
+중요한 코드에 주석 1, 2, 3을 달아두었다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">LIMIT</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span> <span class="c1">// 한 번에 불러오는 데이터의 개수</span>
+
+<span class="kd">const</span> <span class="nx">MainPage</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">posts</span><span class="p">,</span> <span class="nx">setPosts</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">([]);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">offset</span><span class="p">,</span> <span class="nx">setOffset</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 불러올 데이터(post)의 시작 인덱스</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">max</span><span class="p">,</span> <span class="nx">setMax</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 전체 데이터의 개수 </span>
+  <span class="kd">const</span> <span class="nx">targetRef</span> <span class="o">=</span> <span class="nx">useRef</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">prevPostIndex</span><span class="p">,</span> <span class="nx">setPrevPostIndex</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useScrollPosition</span><span class="p">();</span> 
+
+  <span class="nx">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">limit</span> <span class="o">=</span> <span class="nx">prevPostIndex</span> <span class="p">?</span> <span class="nx">prevPostIndex</span> <span class="p">:</span> <span class="nx">LIMIT</span><span class="p">;</span> <span class="c1">// 주석 1</span>
+    <span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">nextPosts</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">getPostsPart</span><span class="p">({</span>
+        <span class="nx">offset</span><span class="p">,</span>
+        <span class="nx">limit</span><span class="p">,</span>
+      <span class="p">}).</span><span class="nx">then</span><span class="p">((</span><span class="nx">res</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+      <span class="nx">setPosts</span><span class="p">(</span><span class="nx">nextPosts</span><span class="p">);</span>
+      <span class="nx">setMax</span><span class="p">(</span><span class="nx">nextPosts</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">channel</span><span class="p">.</span><span class="nx">posts</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+      <span class="nx">setOffset</span><span class="p">(</span><span class="nx">prevPostIndex</span> <span class="p">?</span> <span class="nx">prevPostIndex</span> <span class="p">:</span> <span class="nx">LIMIT</span><span class="p">);</span> <span class="c1">// 주석 2</span>
+    <span class="p">})();</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+
+  <span class="nx">useEffect</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="c1">// 주석 3</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">targetRef</span><span class="p">.</span><span class="nx">current</span> <span class="o">&amp;&amp;</span> <span class="nx">prevPostIndex</span><span class="p">)</span> <span class="p">{</span> 
+      <span class="nb">window</span><span class="p">.</span><span class="nx">scrollTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">);</span> 
+      <span class="nx">setPrevPostIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">targetRef</span><span class="p">,</span> <span class="nx">prevPostIndex</span><span class="p">,</span> <span class="nx">setPrevPostIndex</span><span class="p">]);</span>
+
+  <span class="c1">// 중략...</span>
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">PageWrapper</span> <span class="nx">header</span> <span class="nx">nav</span> <span class="nx">info</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">PostList</span><span class="o">&gt;</span>
+        <span class="p">{</span><span class="nx">posts</span><span class="p">?.</span><span class="nx">map</span><span class="p">((</span><span class="nx">post</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+          <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">li</span> <span class="nx">key</span><span class="o">=</span><span class="p">{</span><span class="nx">i</span><span class="p">}</span> <span class="nx">ref</span><span class="o">=</span><span class="p">{</span><span class="nx">posts</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">===</span> <span class="nx">i</span> <span class="p">?</span> <span class="nx">targetRef</span> <span class="p">:</span> <span class="kc">null</span><span class="p">}</span><span class="o">&gt;</span>
+              <span class="o">&lt;</span><span class="nx">PostItem</span> <span class="nx">key</span><span class="o">=</span><span class="p">{</span><span class="nx">i</span><span class="p">}</span> <span class="nx">index</span><span class="o">=</span><span class="p">{</span><span class="nx">i</span><span class="p">}</span> <span class="nx">post</span><span class="o">=</span><span class="p">{</span><span class="nx">post</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>            <span class="o">&lt;</span><span class="sr">/li</span><span class="err">&gt;
+</span>          <span class="p">);</span>
+        <span class="p">})}</span>
+      <span class="o">&lt;</span><span class="sr">/PostList</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/PageWrapper</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div></div>
+<p><br />
+<span style="font-size: 2rem">설명</span></p>
+<ol>
+  <li>prevPostIndex가 존재한다면, prevPostIndex를 limit으로 하여 데이터를 불러온다.<br />
+prevPostIndex가 없다면(0인 경우), 기존의 LIMIT를 사용한다.</li>
+  <li>
+    <p>데이터를 불러온 뒤에, prevPostIndex로 offset을 변경해준다.</p>
+  </li>
+  <li>데이터를 불러왔으므로 새롭게 렌더링이 발생한다.<br />
+targetRef.current 또한 변경될 것이다.<br />
+스크롤을 최하단으로 내리고, prevPostIndex를 0으로 초기화한다.</li>
+</ol>
+
+<p>결과적으로 스크롤을 이전과 같이 복원할 수 있게 된다.</p>
+
+<video width="60%" controls="controls">
+  <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb3_6.mp4?raw=true" type="video/mp4" />
+</video>
+
+<h3 id="최선의-해결책이-아니다">최선의 해결책이 아니다</h3>
+<p>눈치채셨을지 모르지만, 이것은 Hack한 방법이다.<br />
+특히 렌더링 비용을 고려한다면 이것은 최선의 해결책이 아니다.</p>
+
+<p>만일 사용자가 100번째 포스트를 보고 있다고 생각해 보라.<br />
+그러면 스크롤을 복원하기 위해<br />
+100개의 포스트를 한꺼번에 불러와서 렌더링해야만 한다.<br />
+100개가 아니라 500개, 1000개라면 어떠할까?<br />
+데이터의 개수가 많아질수록 비용은 선형적으로 증가할 것이다.</p>
+
+<p>지금은 프로젝트 기간이라서 많이 바쁘기 때문에, 
+어쩔 수 없이 이 방법을 사용해서 구현하였다.<br />
+그러나 다시 한 번 말하지만, 이것은 근본적인 해결책이 아니다.</p>
+
+<p>추후 이 부분을 개선해보고 싶다.<br />
+특히 가상 스크롤(Virtual Scroll)이라는 것에 대해 관심이 간다.</p>
+
+<p>가상 스크롤이란 “화면에 직접적으로 보여지는 부분만 그리고,<br />
+나머지 부분은 가상으로 그려내는 것”을 말한다.</p>
+
+<p>어려운 주제일지 모르지만 도전욕구가 샘솟는다.
+프로젝트 기간이 종료된 이후, 
+리팩터링을 하면서 가상스크롤로 대체해보고 싶다는 생각이 든다.</p>
+
+<p>==============================================</p>
+
+<p>학습을 진행하면서 작성한 글 입니다. 
+부정확한 정보가 있을 수 있습니다. 참고로만 봐주시기 바랍니다.</p>
+
+:ET

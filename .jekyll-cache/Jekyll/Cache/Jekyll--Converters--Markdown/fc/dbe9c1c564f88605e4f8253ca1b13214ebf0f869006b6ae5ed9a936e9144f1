@@ -1,0 +1,58 @@
+I"�<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지" /></p>
+
+<h3 id="이슈">이슈</h3>
+
+<p>댓글 추가 기능을 구현하면서 다음과 같은 버그를 만났다.</p>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_06_11_1.png?raw=true" alt="TIL 이미지" /></p>
+
+<p>분명히 textarea에 Enter를 작성하여 댓글을 등록하였다. 그런데…</p>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_06_11_2.png?raw=true" alt="TIL 이미지" /></p>
+
+<p>실제로는 Enter, 즉 개행이 반영되지 않는 버그이다.<br />
+개행이 올바르게 반영되지 않고 하나의 공백으로 처리된다. 
+왜 그럴까?</p>
+
+<h3 id="문제-해결">문제 해결</h3>
+<p>해결안: <mark>CSS의 white-space 속성값을 pre-wrap으로 부여한다.</mark></p>
+
+<p>white-space는 요소 안에 공백 처리를 어떻게 할지 지정하는 속성이다. 기본값은 normal이다.</p>
+
+<div style="font-size: 20px">normal</div>
+<p>연속 공백을 하나로 합침. 개행 문자도 다른 공백 문자와 동일하게 처리한다.</p>
+
+<p>다음과 같은 결론을 내릴 수 있다.</p>
+
+<ol>
+  <li><mark>개행 문자를 다른 공백 문자와 동일하게 처리하므로, 엔터가 반영되지 않았다.</mark></li>
+  <li><mark>연속 공백을 하나로 합치기 때문에, Enter를 여러 번 입력했음에도 하나의 공백이 되었다.</mark> 
+<br /></li>
+</ol>
+
+<p>반면에 pre-wrap은 다음과 같다.</p>
+
+<div style="font-size: 20px">pre-wrap</div>
+
+<p>연속 공백 유지. 줄 바꿈은 개행 문자와 <code class="language-plaintext highlighter-rouge">&lt;br&gt;</code> 요소에서 일어나며,<br />
+  한 줄이 너무 길어서 넘칠 경우 자동으로 줄을 바꾼다.</p>
+
+<p>이에 <code class="language-plaintext highlighter-rouge">white-space: pre-wrap</code>을 적용하게 되면…</p>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/22_06_11_4.png?raw=true" alt="TIL 이미지" /></p>
+
+<p>댓글창에 Enter가 제대로 반영된 것을 볼 수 있다.</p>
+
+<p>추가적으로, <code class="language-plaintext highlighter-rouge">white-space: pre</code>는 다음과 같다.</p>
+
+<div style="font-size: 20px">pre</div>
+<p>연속 공백 유지. 줄 바꿈은 개행 문자와 <code class="language-plaintext highlighter-rouge">&lt;br&gt;</code> 요소에서만 일어난다.</p>
+
+<p>pre-wrap과 유사하지만, 한 줄이 너무 길어서 넘칠 경우에도<br />
+개행 문자 또는 <code class="language-plaintext highlighter-rouge">&lt;br&gt;</code>이 없으면 줄바꿈이 되지 않는다.</p>
+
+<p>그것은 내가 원하는 바가 아니므로 <code class="language-plaintext highlighter-rouge">white-space: pre-wrap</code>을 적용하였다.</p>
+
+<h3 id="참고자료">참고자료</h3>
+<p>Mdn: white-space</p>
+:ET

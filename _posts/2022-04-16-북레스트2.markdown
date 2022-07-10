@@ -309,12 +309,12 @@ route 메서드는 변경된 URL을 읽어들여 화면을 성공적으로 전�
 다음 포스팅에서는 네비게이션 및 화면을 구성하는 View 및 Controller에 대해 다룰 예정이다.  
 많이 기대해주시길 바란다.
 
-<br>
-
-ㅡ 부족한 글 읽어주셔서 감사합니다.
-
 ## 참고자료
 
 SPA & Routing - poiemaweb.com
 History.pushState() - MDN web docs
 popstate - MDN web docs
+
+## 드리는 말
+학습용 프로젝트를 진행하며 작성한 글이며, 부정확한 내용이 있을 수 있습니다.  
+참고로만 읽으실 것을 권장드립니다. 감사합니다. 
