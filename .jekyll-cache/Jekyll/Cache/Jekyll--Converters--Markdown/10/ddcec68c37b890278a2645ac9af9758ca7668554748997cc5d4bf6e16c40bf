@@ -1,0 +1,212 @@
+I"pG<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지" /></p>
+
+<h3 id="이슈">이슈</h3>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb4_0.png?raw=true" width="300" alt="초록집사 표지" /></p>
+
+<p>현재 우리의 앱은 로그인을 해야만 이용할 수 있다.<br />
+그러나 이 방식은 서비스 측면에서 좋지 않다고 생각한다.<br />
+앱의 서비스와 콘텐츠가 어떤 것이 있는지 보여주지도 않고,<br />
+로그인과 회원가입을 먼저 요구하는 것은 이상하지 않은가?<br />
+앱을 처음 방문한 사용자의 대부분은 그냥 떠나버릴 것이라고 생각한다.</p>
+
+<p>그래서 비로그인 사용자도 앱의 주요 기능을 이용할 수 있도록 제한을 완화해보았다.</p>
+
+<p>로그인한 유저의 정보가 꼭 필요한 Private 기능과,<br />
+그렇지 않은 Public 기능으로 나누어 권한을 관리해야 할 것이다. 이를 정리하면 다음과 같다.</p>
+
+<h4 id="비로그인-사용자의-권한">비로그인 사용자의 권한</h4>
+
+<p>원래 가능했던 것</p>
+
+<ul>
+  <li>로그인 페이지에 접근할 수 있다. 로그인할 수 있다.</li>
+  <li>회원가입 페이지에 접근할 수 있다. 회원가입할 수 있다.</li>
+  <li>404 페이지에 접근할 수 있다.</li>
+</ul>
+
+<hr />
+
+<p>허용 (Public)</p>
+
+<ol>
+  <li>메인페이지에 접근할 수 있다. 게시물 목록을 볼 수 있다.</li>
+  <li>게시물 상세 페이지에 접근할 수 있다.</li>
+  <li>태그 페이지에 접근할 수 있다.</li>
+  <li>검색 페이지에 접근할 수 있다. 검색할 수 있다.</li>
+  <li>다른 유저의 마이페이지에 접근할 수 있다.</li>
+  <li>팔로우 페이지에 접근할 수 있다 (팔로우 신청은 할 수 없다)</li>
+</ol>
+
+<hr />
+
+<p>제한 (Private)</p>
+
+<ol>
+  <li>게시물에 좋아요를 누를 수 있다 (그러나 저장은 안 된다)</li>
+  <li>게시물에 댓글을 달 수 없다.</li>
+  <li>게시물 등록 페이지에 접근할 수 없다. 게시물을 등록하거나 수정할 수 없다.</li>
+  <li>자신의 마이페이지에 접근할 수 없다.</li>
+  <li>자신의 정보 페이지에 접근할 수 없다.</li>
+  <li>자신의 정보 수정 페이지에 접근할 수 없다.</li>
+  <li>다른 유저에게 팔로우를 신청할 수 없다.</li>
+  <li>알림 페이지에 접근할 수 없다. (헤더에 알림 아이콘이 표시되지 않음)</li>
+</ol>
+
+<h4 id="모달-만들기">모달 만들기</h4>
+
+<p>비로그인 사용자가 제한된 기능에 접근할 경우 다음과 같은 모달을 띄워 보여준다.</p>
+
+<p><img style="margin-left: 0" src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb4_1.png?raw=true" alt="초록집사 표지" /></p>
+
+<p>이를 위해 LoginRequireModal이라는 컴포넌트를 만들었다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">Modal</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">components</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useCallback</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useNavigate</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-router-dom</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">theme</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">styles/theme</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">MODAL_TITLE_LOGIN_REQUIRED</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">로그인이 필요한 서비스입니다.</span><span class="dl">'</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">MODAL_DESCRIPTION_LOGIN_REQUIRED</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">로그인 화면으로 이동하시겠어요?</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">LoginRequireModal</span> <span class="o">=</span> <span class="p">({</span> <span class="nx">visible</span><span class="p">,</span> <span class="nx">onClose</span> <span class="p">})</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">navigate</span> <span class="o">=</span> <span class="nx">useNavigate</span><span class="p">();</span>
+
+  <span class="kd">const</span> <span class="nx">handleClick</span> <span class="o">=</span> <span class="nx">useCallback</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">navigate</span><span class="p">(</span><span class="dl">'</span><span class="s1">/login</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span> <span class="na">replace</span><span class="p">:</span> <span class="kc">true</span> <span class="p">});</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">navigate</span><span class="p">]);</span>
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Modal</span> <span class="nx">visible</span><span class="o">=</span><span class="p">{</span><span class="nx">visible</span><span class="p">}</span> <span class="nx">onClose</span><span class="o">=</span><span class="p">{</span><span class="nx">onClose</span><span class="p">}</span><span class="o">&gt;</span>
+      <span class="o">&lt;</span><span class="nx">Modal</span><span class="p">.</span><span class="nx">Content</span>
+        <span class="nx">title</span><span class="o">=</span><span class="p">{</span><span class="nx">MODAL_TITLE_LOGIN_REQUIRED</span><span class="p">}</span>
+        <span class="nx">description</span><span class="o">=</span><span class="p">{</span><span class="nx">MODAL_DESCRIPTION_LOGIN_REQUIRED</span><span class="p">}</span>
+      <span class="sr">/</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">Modal</span><span class="p">.</span><span class="nx">Button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="nx">handleClick</span><span class="p">}</span><span class="o">&gt;</span><span class="nx">예</span><span class="o">&lt;</span><span class="sr">/Modal.Button</span><span class="err">&gt;
+</span>      <span class="o">&lt;</span><span class="nx">Modal</span><span class="p">.</span><span class="nx">Button</span> <span class="nx">onClick</span><span class="o">=</span><span class="p">{</span><span class="nx">onClose</span><span class="p">}</span> <span class="nx">style</span><span class="o">=</span><span class="p">{</span><span class="nx">modalButtonStyle</span><span class="p">}</span><span class="o">&gt;</span>
+        <span class="nx">아니오</span>
+      <span class="o">&lt;</span><span class="sr">/Modal.Button</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/Modal</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">modalButtonStyle</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">color</span><span class="p">:</span> <span class="nx">theme</span><span class="p">.</span><span class="nx">color</span><span class="p">.</span><span class="nx">fontBlack</span><span class="p">,</span>
+  <span class="na">backgroundColor</span><span class="p">:</span> <span class="nx">theme</span><span class="p">.</span><span class="nx">color</span><span class="p">.</span><span class="nx">backgroundNormal</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">LoginRequireModal</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>사전에 만들어두었던 Modal 컴포넌트를 기반으로 만든 것이다.<br />
+Modal 컴포넌트에 관해서는 아래의 깃허브 코드를 참고해주시기 바란다.</p>
+
+<p><a href="https://github.com/prgrms-fe-devcourse/FEDC2_GreenButler_Off/tree/develop/src/components/Modal" target="_blank">깃허브 코드</a></p>
+
+<p>여기서는 간략히만 설명하겠다.<br />
+‘예’ 버튼을 누를 경우 로그인 화면으로 이동하도록 처리한다.<br />
+‘아니오’ 버튼을 누르거나 모달 바깥을 클릭했을 때 모달이 종료되는데,<br />
+이에 대한 처리는 prop으로 받는 onClose를 통해서 한다.<br />
+<code class="language-plaintext highlighter-rouge">navigate(-1)</code>을 통해 뒤로가거나, 원래의 화면 그대로 있거나 둘 중 하나이다.</p>
+
+<h3 id="로그인이-필요한-페이지-접근-처리">로그인이 필요한 페이지 접근 처리</h3>
+<p>Router 폴더에 PrivateWrapper 컴포넌트를 추가하였다.</p>
+
+<p><img src="https://user-images.githubusercontent.com/80658269/178792038-e25bd10e-87a9-4120-ba42-528d67746624.png" alt="image" /></p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">useLocalToken</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">hooks/useLocalToken</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useNavigate</span><span class="p">,</span> <span class="nx">Outlet</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react-router-dom</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="nx">LoginRequireModal</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">components/Modal/customs/LoginRequireModal</span><span class="dl">'</span><span class="p">;</span>
+<span class="k">import</span> <span class="p">{</span> <span class="nx">useCallback</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">const</span> <span class="nx">PrivateWrapper</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">token</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useLocalToken</span><span class="p">();</span>
+  <span class="kd">const</span> <span class="nx">navigate</span> <span class="o">=</span> <span class="nx">useNavigate</span><span class="p">();</span>
+
+  <span class="kd">const</span> <span class="nx">handleCloseModal</span> <span class="o">=</span> <span class="nx">useCallback</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">navigate</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+  <span class="p">},</span> <span class="p">[</span><span class="nx">navigate</span><span class="p">]);</span>
+
+  <span class="k">return</span> <span class="nx">token</span> <span class="p">?</span> <span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Outlet</span> <span class="o">/&gt;</span>
+  <span class="p">)</span> <span class="p">:</span> <span class="p">(</span>
+    <span class="o">&lt;&gt;</span>
+      <span class="o">&lt;</span><span class="nx">Outlet</span> <span class="o">/&gt;</span>
+      <span class="o">&lt;</span><span class="nx">LoginRequireModal</span> <span class="nx">visible</span><span class="o">=</span><span class="p">{</span><span class="kc">true</span><span class="p">}</span> <span class="nx">onClose</span><span class="o">=</span><span class="p">{</span><span class="nx">handleCloseModal</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>    <span class="o">&lt;</span><span class="sr">/</span><span class="err">&gt;
+</span>  <span class="p">);</span>
+<span class="p">};</span>
+<span class="k">export</span> <span class="k">default</span> <span class="nx">PrivateWrapper</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>사전에 만들어 둔 useLocalToken으로 로컬스토리지에서 token을 꺼내온다.<br />
+<a href="https://github.com/prgrms-fe-devcourse/FEDC2_GreenButler_Off/tree/develop/src/hooks" target="_blank">useLocalToken 코드</a></p>
+
+<p>token이 존재한다면 로그인이 된 것이므로 페이지를 그대로 보여준다.</p>
+
+<p>여기서 Outlet은 React-Router v6에서 도입된 기능으로,<br />
+부모 경로 요소에서 자식 경로 요소를 렌더링하는 데 사용된다.<br />
+간단히 말해 {children}을 사용하는 것과 같은 효과가 난다.</p>
+
+<p>힌편, token이 존재한다면 로그인이 되지 않은 것이므로<br />
+<mark>페이지를 보여주되, LoginRequireModal을 띄운다.</mark></p>
+
+<p>이를 Router에 적용한다. 로그인이 필요한 Private 페이지일 경우 다음과 같이 적용한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">element</span><span class="o">=</span><span class="p">{</span><span class="o">&lt;</span><span class="nx">PrivateWrapper</span> <span class="o">/&gt;</span><span class="p">}</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">path</span><span class="o">=</span><span class="dl">"</span><span class="s2">/post/create</span><span class="dl">"</span> <span class="nx">element</span><span class="o">=</span><span class="p">{</span><span class="o">&lt;</span><span class="nx">PostEditPage</span> <span class="o">/&gt;</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span>  <span class="o">&lt;</span><span class="sr">/Route</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p>참고로, 로그인이 불필요한 Public 페이지는 아래와 같다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">Route</span> <span class="nx">path</span><span class="o">=</span><span class="dl">"</span><span class="s2">/</span><span class="dl">"</span> <span class="nx">element</span><span class="o">=</span><span class="p">{</span><span class="o">&lt;</span><span class="nx">PostEditPage</span> <span class="o">/&gt;</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<h3 id="로그인이-필요한-기능-제한-처리">로그인이 필요한 기능 제한 처리</h3>
+
+<p>좋아요, 댓글, 팔로우 신청 시 LoginRequireModal을 띄운다.</p>
+
+<p>이것들은 각 페이지에서 작업해야 한다.<br />
+예를 들어, 댓글 작성은 PostDetailPage에 있으므로 해당 페이지에서 처리한다.<br />
+우선, 다음과 같이 LoginRequireModal의 렌더링 여부를 상태로 관리한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">const</span> <span class="p">[</span><span class="nx">loginModalOn</span><span class="p">,</span> <span class="nx">setLoginModalOn</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>비로그인한 유저가 댓글을 작성한 경우 아래와 같이 처리한다.</p>
+<pre><code class="language-Javascript">      if (!token) {
+        setLoginModalOn(true);
+        return;
+      }
+</code></pre>
+
+<p>그러면 LoginRequireModal이 렌더링된다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="o">&lt;</span><span class="nx">LoginRequireModal</span> <span class="nx">visible</span><span class="o">=</span><span class="p">{</span><span class="nx">loginModalOn</span><span class="p">}</span> <span class="nx">onClose</span><span class="o">=</span><span class="p">{</span><span class="nx">handleCloseModal</span><span class="p">}</span> <span class="sr">/</span><span class="err">&gt;
+</span></code></pre></div></div>
+
+<p>LoginRequireModal이 닫힌 경우(아니오를 누르거나 모달 바깥을 클릭한 경우)<br />
+handleCloseModal을 통해 처리한다.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">const</span> <span class="nx">handleCloseModal</span> <span class="o">=</span> <span class="nx">useCallback</span><span class="p">(()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">setLoginModalOn</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+  <span class="p">},</span> <span class="p">[]);</span>
+</code></pre></div></div>
+
+<p>전체 코드는 아래 링크를 참고해주시기 바란다.</p>
+
+<p><a href="https://github.com/prgrms-fe-devcourse/FEDC2_GreenButler_Off/blob/develop/src/pages/PostDetailPage/index.jsx" target="_blank">깃허브 링크</a></p>
+
+<h3 id="결과물">결과물</h3>
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/178791615-3d90feca-dae8-4048-a828-3f739c958573.mp4?raw=true" type="video/mp4" />
+</video>
+
+<hr />
+
+<p>학습을 진행하면서 작성한 글 입니다.<br />
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 봐주시기 바랍니다.</p>
+
+:ET
