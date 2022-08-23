@@ -1,0 +1,79 @@
+---
+layout: post
+title: 'NextJS의 렌더링 방식에 대한 이해'
+date: 2022-07-12 12:12:52 +0900
+categories: 리액트
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+<img src="https://user-images.githubusercontent.com/80658269/186180453-eecc6510-7fb9-453b-ab8b-91720ad2bcec.jpg" width="60%" />
+
+<br />
+
+이번 최종 프로젝트에서는 Next.js를 통해 SSR을 일부 도입할 예정이다.  
+SSR을 왜 도입하려고 하는가?  
+SEO 최적화, 빠른 초기 로딩 속도 등의 이점이 있기 때문이다.  
+<br >
+특히, CSR만으로 구현했던 중간 프로젝트에서는 SEO를 잘 고려하지 못했는데 이 점이 아쉽다.  
+아무리 열심히 사이트를 만들었어도 사용자에게 잘 노출되지 못하면 무슨 소용이겠는가?  
+SEO도 웹 개발에 있어서 매우 중요한 측면이라고 느껴진다.  
+<br >
+그래서 SSR의 장점을 얻기 위해 Next.js를 도입하기로 마음먹었고,  
+공식 문서 및 사이트를 리딩하며 배운 내용을 정리해보았다. 
+
+## Next.js란?
+
+- React와 같은 Single Page Application에 SSR을 적용하기 위한 프레임워크  
+- 그 외에도 Code Splitting, Image Optimization, Pre-fetching 등을 지원한다.  
+- Next는 단순히 **SPA를 SSR 방식으로 전환하는 것이 아닌, 부분 적용하는 것**이다.  
+- 첫 페이지 로딩만 SSR 방식으로 렌더링을 하고,  
+  나머지는 CSR 방식을 사용한다면 두 장점을 모두 흡수할 수 있다.   
+- **CSR + (SSR 또는 SSG) 전략**  
+
+## Static-Site-Generation
+
+**HTML을 빌드 타임에 각 페이지별로 생성하고,**  
+**해당 페이지로 요청이 올 경우 이미 생성된 HTML 문서를 반환한다. (기본값)**  
+**SSG를 특정 데이터와 같이 해야하는 경우 getStaticProps 함수를 사용**한다.   
+동적 경로를 사용하고 싶은 경우 getStaticPaths와 함께 사용한다.   
+빌드 시, JS 파일과 HTML이 미리 생성된다.   
+
+### 필요한 경우
+
+- 성능이 중요한 경우 (CDN을 통해 더 빠른 응답)  
+- 정적으로 생성하여 각 요청에 동일한 문서를 반환할 수 있는 경우  
+    (마케팅 페이지, 블로그 게시물, 제품의 목록 등)  
+    
+<img src="https://user-images.githubusercontent.com/80658269/186182217-c79c0697-7ad6-4ef1-bec4-2745b6278794.png" />
+
+## Server-Side-Rendering
+
+요청이 올 때마다 해당하는 HTML 문서를 그때 그때 생성하여 반환한다.   
+빌드 시, JS 파일만 있고 HTML은 없다.  
+
+### 필요한 경우
+
+- 항상 최신 상태를 유지해야 하는 경우 (요청에 따라 응답 내용이 시시각각 변하는 경우)  
+- 요청마다 다른 내용 또는 형식의 HTML 문서가 반환되는 경우  
+  (제품의 상세 페이지 / 분석 차트 등)
+    
+<img src="https://user-images.githubusercontent.com/80658269/186182228-5aa32466-c1a6-470b-a9d3-dd65c8114bad.png" />
+
+## Client-Side-Rendering
+
+만약 데이터의 변동이 매우 빈번하다면,   
+굳이 pre-rendering을 하지 말고 기존 React에서처럼 data-fetching을 통해 CSR에서 렌더링하라.
+
+### 필요한 경우
+
+- 데이터의 변동이 매우 빈번한 경우
+- SEO 적용 또는 데이터 pre-rendering이 불필요한 경우
+- 유저 페이지
+    개인적인 영역이면서 특정 유저에게 귀속되며,  
+    외부 노출이 필요하거나 SEO를 적용할 필요가 거의 없다.  
+    또한, 유저의 수정을 통해 즉걱적으로 화면이 변동하는 페이지.   
+
+## 참고자료
+
+<a>https://velog.io/@longroadhome/FE-SSRServer-Side-Rendering-%EA%B7%B8%EB%A6%AC%EA%B3%A0-SSGStatic-Site-Generation-feat.-NEXT%EB%A5%BC-%EC%A4%91%EC%8B%AC%EC%9C%BC%EB%A1%9C</a>  
+<a>https://nextjs.org/docs</a>  
