@@ -1,0 +1,124 @@
+---
+layout: post
+title: '웹 접근성을 고려한 HTML'
+date: 2022-07-16 16:12:52 +0900
+categories: 리액트
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+Manuel Matuzovic의 Writing HTML with Accessibility in Mind를 읽고 정리한 글입니다.  
+
+## 웹 접근성이란? 
+
+장애인이나 고령자들이 웹 사이트에서 제공하는 정보를 비장애인과 동등하게 접근하고  
+이용할 수 있도록 보장하는 것으로 웹 접근성 준수는 **법적의무사항**이다.   
+
+- 시각, 이동성, 청각, 인지  
+- 스크린 리더, 화면 확대 도구, 음성 인식, 키보드 오버레이 등  
+- 시각장애인 중 전맹은 20% 이하에 불과하고 80%는 저시력장애인이다.    
+  스크린리더에만 의존하지 않고 화면도 같이 본다.    
+    
+
+## 접근성을 고려한 HTML 작성하기
+
+### 1. 기본 언어 설정  
+
+HTML 페이지에서 정확한 언어를 정의하는 것은   
+보조기술이 알맞는 음성 프로파일이나 문자 집합을 선택하는데에 도움이 된다.   
+
+**만약 문서 안에서 언어가 바뀐다면 lang 속성을 특정 태그에 사용하라.**
+
+```html
+<p>
+   There is a certain <i lang="fr" class="idiomatic">je ne sais quoi</i>in the air.
+</p>
+```
+
+### 2. 콘텐츠 숨기기
+
+시각적으로 숨기거나 스크린 리더가 읽어주길 원하지 않을 경우,  
+display: none 등을 사용하여 콘텐츠를 숨길 수 있다.   
+
+### 3. img 태그의 alt 속성
+
+이미지의 alt 속성은 절대 생략해서는 안 된다.   
+이미지가 단순히 디자인을 위한 것이고, 유용한 추가 정보를 제공하지 않는다면   
+**background-image**로 사용하라. img 태그를 사용한다면 **alt 속성을 빈 값(alt=””)으로 두어라.**   
+비시각적인 브라우저에서 렌더링 시 제외시킬 것이다.   
+
+### 4. button 태그를 사용하라
+button은 중요하고 유용한 특징이 많이 있다.   
+
+- 포커싱 가능  
+- 클릭 가능 (마우스와 키보드로)  
+- 스크린 리더가 해당 요소를 버튼으로 인식함  
+
+### 5. heading 태그로 정확하게 마크업을 구조화하라
+
+heading 태그로 아웃라인을 잡아줌으로써 사용자에게 더 나은 페이지 구조에 대한 이해와   
+각 섹션사이의 관계를 알려줄 수 있다.  
+무엇보다도 보조기술을 사용하는 사용자가 탐색하는 데에 도움이 된다.  
+  
+- heading 태그를 쌓을 때 단계를 뛰어넘지 마라  
+- 아웃라인을 생성하는 데에 h1 태그를 여러 번 사용하지 마라  
+
+### 6. 랜드마크를 사용하라
+article, aside, nav, section으로 주제에 맞게 섹션을 나누어 마크업하는 것을 권장한다.   
+스크린 리더 사용자들이 섹션과 섹션 사이를 바로 이동하면서 탐색할 수 있다.   
+이렇게 탐색할 수 있는 섹션을 **랜드마크**라고 한다.   
+  
+※ 섹션을 나누는 요소들을 남용하지는 마라.  
+  의미에 맞는 구분과 목적이 아니라면 CSS/JS를 위해 div를 사용하라.   
+
+### 7. main 태그를 사용하라
+
+주 콘텐츠를 main 태그로 묶음으로써, 사용자가 단축키를 통해 주 콘텐츠로 바로 넘어갈 수 있다.   
+하나의 문서에는 단 하나의 main 요소만이 존재해야 하며,  
+main 요소는 article, aside, footer, header, nav 요소의 자손이어서는 안 된다.   
+
+### 8. fieldsets은 form을 그룹핑하는데 중요하다
+
+```html
+<form>
+  <fieldset>
+    <legend>T-Shirt size</legend>
+    <input type="radio" id="s" name="shirtsize" />
+    <label for="s">S</label>  
+    <input type="radio" id="m" name="shirtsize" />
+    <label for="m">M</label>  
+    <input type="radio" id="l" name="shirtsize" />
+    <label for="l">L</label>   
+  </fieldset>
+</form>
+```
+
+**fieldset**은 form 요소들을 감쌀 때 <section>처럼 여겨진다.   
+그룹을 형성하는 여러 form 요소들과 <legend>에 상응하는 해당 그룹을 나타내는   
+label이 있다면 fieldset을 사용하라.   
+
+### 9. aria-label, aria-labelledby
+스크린 리더 또는 브라우저에게 정보를 제공하고 싶을 때 사용한다.   
+일반적인 HTML 요소와 함께 사용할 수 있다.   
+
+1. **aria-label**  
+화면에 현재 요소를 **설명할 텍스트가 없을 경우**에 사용하는 설명용 텍스트를 담는다.  
+
+```html
+<button class="bt_menu" aria-label="navigation menu">네비용 버튼</button>
+```
+  이미지를 사용해 시각적 표현을 할 경우 **대체 텍스트 역할**을 한다.   
+   aria-label 속성의 정보는 native text(네비용 버튼)보다 스크린리더의 우선순위가 높다.   
+
+1. **aria-labelledby**  
+  화면에 현재 요소를 **설명할 텍스트가 있을 경우**에 해당 텍스트 영역과 현재 요소를 **연결**한다.   
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187087376-ec5e6954-4392-4875-8142-86548336705f.png)
+
+aria-labelledby는 **숨겨져 있는 요소**(display:none or visibility:hidden)도 참조할 수 있다.  
+aria-labelledby는 **aria-label보다 스크린리더의 우선순위가 높다**.   
+
+## 참고 자료
+
+<a href='https://web-for-all.tistory.com/3'>접근성을 고려한 HTML 작성하기</a>  
+<a href='https://abcdqbbq.tistory.com/77'>WAI-ARIA 접근성2. 영역에 대한 설명, 레이블 (aria-label, aria-labelledby)</a>  
+<a href='https://developer.mozilla.org/ko/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_aria-label_attribute'>aria-label 속성 사용 - 접근성 | MDN</a>  

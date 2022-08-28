@@ -1,0 +1,221 @@
+---
+layout: post
+title: '후기 작성 페이지 - 비로그인 사용자의 접근 제한'
+date: 2022-08-22 15:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+<img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />
+
+## 서론
+
+유저의 로그인 상태나 권한(일반 유저, 관리자 등)에 따라 접근 가능한 페이지가 다르다.  
+**Public Route**는 로그인 여부와 관계없이 모든 유저에게 허용되는 페이지라고 할 수 있다.   
+반대로, **Private Route**는 로그인한 사용자에게만 허용되는 페이지다.  
+비로그인 사용자가 Private Route로 접근하는 경우, 로그인 페이지로 리다이렉트해야 한다.  
+
+내가 맡은 **후기 작성 및 수정 페이지**가 Private Route에 속한다.   
+물론, 서버에서 로그인 유저만이 후기를 작성할 수 있도록 허용은 하지만,   
+프론트 측에서 사전에 이를 막는 것이 UX 및 보안 측면에서 마땅하다고 생각한다.   
+그렇다면, **이러한 접근 제한(Access Control)을 어떻게 구현할 수 있을까?**   
+
+중간 프로젝트에서는 React-router-dom을 사용했었으며,   
+로컬 스토리지에 저장된 토큰을 꺼내 유무를 확인한 뒤,  
+Private Route로의 접근을 허용하거나 로그인 페이지로 리다이렉트하였다.   
+자세한 것은 아래 링크를 참고해주시기 바란다.  
+
+[비로그인 사용자의 접근 관리하기](https://gitul0515.github.io/%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%A6%AC%EB%B7%B0/2022/06/25/%EC%B4%88%EB%A1%9D%EC%A7%91%EC%82%AC4.html)
+  
+한편, Next.js에서는 이를 어떻게 구현할 수 있을까?   
+그리고 URL변경을 통한 우회 접속을 어떻게 차단할 수 있을까?   
+
+## 로그인 여부 판단하기
+
+이번 프로젝트에서는 Cookie를 통해 유저의 토큰을 저장하고 있으며,   
+Recoil을 사용하여 유저의 정보를 전역적으로 관리하고 있는 상황이다.   
+
+```typescript
+// useUserAuthActions.ts
+const localLogin = async (values: UserLocalLoginRequest) => {
+    try {
+      const res = await userAPI.localLogin(values);
+      const { accessToken, refreshToken } = res.data.data;
+      setToken('ACCESS_TOKEN', accessToken);
+      setToken('REFRESH_TOKEN', refreshToken);
+
+      const { data } = await userAPI.getMyInfo();
+      const { userId, email, nickname, profileImage } = data.data;
+      setUser({ userId, email, nickname, profileImage, isLoggedIn: true });
+      message.success(res.data.message);
+      router.push('/');
+    } catch (e) {
+      e.message = 'SigninError';
+      message.error(e.response.data.message);
+      throw e;
+    }
+  };
+```
+
+로그인에 성공하면, accessToken과 refreshToken을 받아와 쿠키에 저장하며,   
+추가로 유저의 정보를 조회하여 데이터를 받아온 뒤,   
+'userId, email, nickname, profileImage, isLoggedIn' 등을 전역적으로 저장해둔다.   
+로그아웃 시에는 쿠키에 저장된 토큰을 비우며, 전역적으로 저장해 둔  유저의 정보를 초기화한다.   
+더 자세한 것은 아래 링크를 참고해주시기 바란다.   
+여기서는 간단히만 설명하였다.   
+
+[Team-BackFro-ArtZip-FE/index.ts at develop · prgrms-web-devcourse/Team-BackFro-ArtZip-FE](https://github.com/prgrms-web-devcourse/Team-BackFro-ArtZip-FE/blob/develop/hooks/useUserAuthActions/index.ts)
+[Team-BackFro-ArtZip-FE/user.ts at develop · prgrms-web-devcourse/Team-BackFro-ArtZip-FE](https://github.com/prgrms-web-devcourse/Team-BackFro-ArtZip-FE/blob/develop/states/user.ts)
+  
+
+## 첫번째 방안, HOC
+이제 본격적으로 접근 제한을 구현해보자.   
+첫 번째로 생각했던 방안은 **고차컴포넌트**(HOC)였다.   
+고차 컴포넌트는 컴포넌트를 가져와 새로운 컴포넌트를 반환하는 함수이다.  
+  
+내가 생각했던 바는 이렇다.   
+`Private Page` 컴포넌트를 props로 받아와서   
+고차 컴포넌트 내부에서 로그인 여부를 판단한 뒤,   
+로그인이 되었다면 `Private Page`를 그대로 리턴하고, 그렇지 않으면 `Login Page`를 리턴한다.   
+이러한 로직에 고차 컴포넌트가 적합하다는 생각이 들었기 때문이다.   
+따라서 아래와 같이 구현한 뒤 적용하였다.   
+
+```typescript
+import { useEffect } from 'react';
+import { NextPage } from 'next';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from 'states';
+import { useRouter } from 'next/router';
+import { message } from 'antd';
+import { Spinner } from 'components/atoms';
+
+function withAuth(Component: NextPage | React.FC) {
+  const Auth = () => {
+		const router = useRouter();
+    const { isLoggedIn } = useRecoilValue(userAtom);
+
+    useEffect(() => {
+      if (!isLoggedIn) {
+        message.warn('로그인이 필요한 서비스입니다.');
+        router.push('/signin');
+      }
+    }, []);
+
+    return isLoggedIn ? <Component /> : <Spinner />;
+  };
+  return Auth;
+}
+
+export default withAuth;
+```
+
+```typescript
+// 후기 생성 페이지
+// ...
+export default withAuth(ReviewCreatePage);
+```
+
+그런데 잠깐!   
+팀 동료의 의견은 조금 달랐다.   
+<mark>고차 컴포넌트를 사용함으로써 컴포넌트 계층이 복잡해질 우려가 있다</mark>는 것이다.   
+특히 우리는 **Atomic Design Pattern**으로 컴포넌트를 분리하고 있는데,   
+여기에 고차 컴포넌트를 추가하면 계층이 더 복잡해질 수 있다는 의견이었다.  
+<br />
+<img src="https://user-images.githubusercontent.com/80658269/187086318-ead8d49f-a497-4887-9611-2e6855443737.png" width="100%" />
+<br />
+또한, 고차 컴포넌트는 클래스형 컴포넌트에서 자주 사용되는 방식이며,   
+우리는 함수형 컴포넌트를 사용하기 때문에 ‘커스텀 훅’이 더 적합할 것이라는 생각이 들었다.   
+
+## 두번째 방안, 커스텀 훅
+그래서 나는 다음과 같이 `useWithAuth`라는 커스텀 훅을 만들었다.   
+
+```typescript
+import { useState, useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from 'states';
+import { useRouter } from 'next/router';
+import { message } from 'antd';
+
+const useWithAuth = () => {
+  const [isChecking, setIsChecking] = useState(true);
+  const { isLoggedIn } = useRecoilValue(userAtom);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      message.warn('로그인이 필요한 서비스입니다.');
+      router.push('/signin');
+    } else {
+      setIsChecking(false);
+    }
+  }, []);
+
+  return [isChecking];
+};
+
+export default useWithAuth;
+```
+유저의 로그인 여부를 나타내는 isLoggedIn 속성을 검사한다.   
+로그인이 안 되었다면 로그인 화면으로 리다이렉트하고,   
+그렇지 않으면 로그인이 된 상태이므로, isChecking을 false로 바꾸어준다.   
+그리고 후기 생성 페이지에 아래와 같이 적용하였다.   
+
+```typescript
+const [isChecking] = useWithAuth();
+  if (isChecking) {
+    return <Spinner />;
+  }
+
+return 
+  // 후기 생성 페이지 출력
+```
+
+isChecking이 true인 경우에는 Spinner를 통해 검사중임을 나타낸다.   
+로그인이 되었음이 확인되면 후기 생성 페이지를 정상적으로 보여준다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187086342-d5f933c5-ff03-47f4-8747-581efd4d1b63.mp4" type="video/mp4">
+</video>
+
+url을 통한 우회 접속도 아래와 같이 차단하였다.   
+후기 수정페이지에도 동일하게 적용하였다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187086347-20be566e-ccd0-4a8b-ad6a-305179e599af.mp4" type="video/mp4">
+</video>
+
+## 결론
+이상과 같이 Next.js에서 Private Router로의 접근 제한을 구현해보았다.   
+첫 번째는 고차컴포넌트(HOC)를 통해서였고, 두 번째는 커스텀 Hook을 사용해서였다.   
+두 방식 모두 Access Control이라는 로직을 재사용하는데 적합한 방식이었다.   
+
+한편, 내가 느낀 바를 조심스럽게 적어보면 다음과 같다.   
+아무래도 <mark>HOC를 사용하면 컴포넌트의 구조가 복잡해지고,</mark>   
+<mark>따라서 추후 수정이 필요한 경우 그 복잡성으로 인해 문제가 발생할 수 있다는 생각이 든다.   
+  
+반면에, <mark>커스텀 Hook은 필요한 기능만 담아 선언적으로 사용하기 때문에,</mark>  
+<mark>개발자 입장에서는 생각할 것이 줄어들어 더 간편하게 사용할 수 있다고 느꼈다.</mark>   
+실제로 React 공식문서에서도 대부분의 경우 HOC을 커스텀 Hook으로 대체할 수 있으며,  
+컴포넌트 트리의 중첩을 줄일 수 있다고 명시되어 있다.  
+일반적으로 커스텀 Hook이 HOC의 단점을 보완하는 방식이라고 인식되는 듯하다.  
+(상술했던 구조의 복잡성 외에도 네이밍 충돌, Props에서 오는 혼동 등)  
+  
+하지만 그렇다고 HOC이 완전히 쓸모가 없는 것은 아니라고 생각한다.  
+기존의 클래스형 컴포넌트로 작성된 프로젝트에서는 HOC이 더 적합한 방식이라고 생각한다.   
+Hook은 함수형 컴포넌트에서만 사용할 수 있으므로 사용이 제한되기 때문이다.   
+HOC을 그대로 사용하되, 일부 로직에서 커스텀 Hook을 도입할 수도 있을 것이다.   
+이 경우, HOC로 의도적으로 한 번 감싼 뒤에 Hook을 사용하는 방식을 생각해 볼 수 있을 것이다.   
+(정확하지 않은 개인적인 추측입니다)  
+
+<mark>중요한 것은 HOC든, 커스텀 Hook이든 사용법을 정확하게 숙지하고</mark>     
+<mark>상황에 맞는 가장 적절한 방식을 선택하는 것이 개발자의 역량이라는 생각이 든다.</mark>
+
+## 참고자료
+
+<a href='https://ko.reactjs.org/docs/hooks-custom.html'>리액트 공식문서 - 자신만의 Hook 만들기</a>  
+<a href='https://yceffort.kr/2020/10/react-hooks-and-hocs'>리액트의 Hooks과 HOC, HOC의 사용이 복잡해지는 경우</a>  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다. 
