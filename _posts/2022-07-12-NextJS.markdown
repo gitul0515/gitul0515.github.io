@@ -77,3 +77,8 @@ SEO도 웹 개발에 있어서 매우 중요한 측면이라고 느껴진다.
 
 <a>https://velog.io/@longroadhome/FE-SSRServer-Side-Rendering-%EA%B7%B8%EB%A6%AC%EA%B3%A0-SSGStatic-Site-Generation-feat.-NEXT%EB%A5%BC-%EC%A4%91%EC%8B%AC%EC%9C%BC%EB%A1%9C</a>  
 <a>https://nextjs.org/docs</a>  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다. 

@@ -1,0 +1,253 @@
+---
+layout: post
+title: '후기 작성 페이지 - 전시회 검색'
+date: 2022-08-02 16:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+<img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />
+
+## 서론
+
+내가 맡은 페이지 중 하나는 **후기 작성 및 수정 페이지**이다.  
+multipart/form-data를 다루는 것이 익숙하지 않아서 조금 헤매었던 부분이다.  
+특히 여러 개의 이미지 파일을 업로드하고,  
+그 이미지 파일을 수정(삭제 또는 추가)하는 부분이 조금 까다로웠다.   
+하지만 그만큼 새로운 많은 지식을 배울 수 있던 소중한 경험이었다.  
+
+<img src="https://user-images.githubusercontent.com/80658269/187079777-34e23185-bbcf-45b8-aa51-8a601f3dd2fe.png" width="50%" />
+
+## 어떻게 만들것인가
+
+우선 백엔드 팀원과의 논의를 통해 도출한 API 명세는 아래와 같았다.  
+
+- Content-Type: multipart/form-data  
+- 후기 내용이 들어간 json 파일 1개, 이미지 파일 0 ~ 9개  
+- 후기 내용(필수)  
+    
+    ```json
+    {
+    	"exhibitionId" : 전시회 id,
+    	"date" : 다녀온 날짜,
+    	"title" : 후기 제목,
+    	"content" : 후기 내용,
+    	"isPublic" : 후기 공개 여부,
+    }
+    ```
+    
+- 이미지 파일 0 ~ 9개 (선택)  
+(.png, .jpeg, .jpg 확장자도 가능, 최대 9개, 필수X)
+
+### 궁금했던 점  
+후기 내용을 왜 ‘파일’로 만들어서 전송해야 할까?  
+이미지 파일은 당연히 파일로 보내더라도,   
+후기 내용은 단순히 객체이므로, 파일이 아니라 JSON 문자열로 전송하는 방법도 있을 것이다.  
+그럼에도 불구하고, 왜 파일로 보내길 원하는가?  
+
+**“JSON 문자열이 아닌 File로 보내야하는 이유가 있는가? 그렇게 했을 때 어떤 이점이 있는가?”**  
+라는 의문이 조금 들었다. 
+
+백엔드 팀원의 답변에 따르면  
+**하나의 파일로 만듦으로써 유관한 데이터들을 묶고 싶기 때문**이라고 한다.   
+그래서 파일로 만들어 전송해주기를 바란다는 것이었다.   
+
+나는 백엔드 분야의 지식은 부족해서 서버에서 데이터를 어떻게 처리하는지는 솔직히 잘 모른다.   
+하지만, **관련 있는 데이터를 묶는다는 것은 타당한 이유라는 생각이 들었다.**   
+그래야만 데이터를 다루는 것이 용이해지기 때문이다.   
+
+추후 백엔드쪽 공부를 하게 된다면,  
+전송받는 데이터를 처리하는 부분에 대해서 구체적으로 더 알아보고 싶은 마음이 들었다.  
+
+## 후기 작성 - 어려웠던 점
+
+후기를 작성 페이지에서 조금 어려웠던 부분은 두 가지다. 
+
+1. **전시회 검색 기능**
+2. **다수 이미지 파일 업로드**
+3. **이미지 파일의 수정** 
+
+이 글에서는 **전시회 검색 기능**을 중심으로 이야기해보겠다. 
+
+## 전시회 검색 기능
+
+사용자로부터 다녀 온 전시회를 입력받아야 했다.   
+까다로운 것은 **전시회의 ‘제목’을 입력하게 할 순 없다는 것**이었다.   
+예컨대, ‘서울 핸드 아티코리아’라는 전시회 제목이 있다고 해 보자.   
+누군가는 ‘서울 아티코리아’, ‘핸드 아티코리아’ 등 제목을 축약해서 입력할지도 모른다.   
+이들이 같은 전시회를 가리킨다고 어떻게 보장할 수 있을까? 즉, 데이터를 신뢰할 수 없게 된다.   
+따라서 전시회의 ‘제목’이 아닌, 전시회의 id를 입력받아야 했고,   
+이를 위해 ‘**전시회 검색 기능**’을 아래와 같이 구현하였다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187079784-41bcc358-a034-41f6-8dcc-2415cb8fb4fc.mp4" type="video/mp4">
+</video>
+
+사용자가 전시회를 입력한 뒤 검색 버튼을 누르면,   
+검색 API를 통해 결과를 조회하여 하단에 리스트로 보여준다.   
+또한, 사용자가 리스트의 한 항목을 클릭하면 오른쪽에 포스터가 나타나도록 하였으며,   
+클릭한 전시회의 id를 submitData 객체에 저장하는 형태로 구현하였다.   
+코드를 살펴보면 아래와 같다.   
+
+```tsx
+interface SubmitData {
+  exhibitionId: number; // 전시회의 id
+  date: string;
+  title: string;
+  content: string;
+  isPublic: boolean;
+}
+
+// ... 중략
+
+const ReviewCreatePage = () => {
+	const submitData = useRef<SubmitData>(initialData);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>();
+  const [posterImage, setPosterImage] = useState(imageUrl.EXHIBITION_DEFAULT);
+
+  // ...중략
+
+  const handleSearch = async (value: string) => {
+    const isEmpty = !/\S/.test(value);
+    if (isEmpty) {
+      message.warning('한 글자 이상 입력해주세요.');
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      const { exhibitions } = await reviewAPI.searchExhibition(value).then((res) => res.data.data); 
+      exhibitions.length === 0 && message.warning('검색 결과가 없습니다.');
+      setSearchResults([...exhibitions]);
+
+      if (resultList.current) {
+        resultList.current.style.visibility = 'visible';
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+return <ReviewEditForm>
+	  // ...중략
+
+		<Form.Item label="다녀 온 전시회">
+		  <SearchContainer ref={searchContainer}>
+		    <InnerContainer>
+		      <SearchBar
+		        placeholder="전시회 제목을 검색해 주세요."
+		        enterButton
+		        onSearch={handleSearch}
+		        defaultValue={query.name}
+		      />
+		      <ResultList ref={resultList}>
+		        {searchResults?.map(({ exhibitionId, name, thumbnail }) => (
+		          <ResultItem
+		            key={exhibitionId}
+		            onClick={() => {
+		              submitData.current['exhibitionId'] = exhibitionId;
+		              setPosterImage(thumbnail);
+		            }}
+		          >
+		            {name}
+		          </ResultItem>
+		        ))}
+		      </ResultList>
+		    </InnerContainer>
+		    <Poster
+		      src={posterImage}
+		      alt="전시회 포스터 이미지"
+		      preview={posterImage !== imageUrl.EXHIBITION_DEFAULT}
+		    />
+		  </SearchContainer>
+		</Form.Item>
+		// ... 중략
+```
+
+## useClickAway
+
+한편, **useClickAway라는 커스텀 훅을 만들어 사용**하였다.   
+useClickAway는 **특정 엘리먼트 이외의 영역을 클릭할 때를 감지할 수 있는 훅**이다.  
+이게 언제 필요하냐면, 검색 결과 리스트(ResultList)가 자연스럽게 사라지도록 하기 위해서 필요하다.   
+검색 결과 리스트(ResultList)가 사라지지 않고 계속 보이면 아래 영상처럼 어색해 보인다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187079792-f3061880-89d6-4728-a1cc-5040b92f59aa.mp4" type="video/mp4">
+</video>
+
+useClickAway 훅의 코드를 살펴보면 아래와 같다.   
+**특정 엘리먼트를 ref**로 전달받고, 그 특정 엘리먼트 이외의 영역이   
+클릭(또는 터치) 되었을 때에 실행할 **handler 함수**를 전달받는다.   
+(여기서 ref는 HTMLElement에 속하는 요소를 가리키는 ref 객체여야만 한다.   
+ 제네릭을 사용하여, `<T extends HTMLElement = HTMLElement>` 와 같이 구현하였다)
+
+```tsx
+import { useEffect, RefObject } from 'react';
+
+type Event = MouseEvent | TouchEvent;
+
+const useClickAway = <T extends HTMLElement = HTMLElement>(
+  ref: RefObject<T>,
+  handler: (event: Event) => void,
+) => {
+  useEffect(() => {
+    const listener = (event: Event) => {
+      const element = ref?.current;
+      if (!element || element.contains((event?.target as Node) || null)) {
+        return;
+      }
+
+      handler(event);
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [ref, handler]);
+};
+
+export default useClickAway;
+```
+
+document에 전역적으로 이벤트 핸들러를 걸어주고,   
+컴포넌트가 언마운트가 될 때 이벤트 핸들러를 제거한다.   
+<br />
+이 useClickAway 훅을 다음과 같이 사용하였다.   
+searchContainer의 바깥 영역이 클릭되었을 때, resultList를 안 보이게 한다는 것이다.   
+
+`visibility: hidden` 을 사용하였다.
+
+`display: none`이 아니라 `visibility: hidden`을 사용한 것은 
+
+사소하지만 성능상의 이점이 있기 때문이다. 
+
+**display:none은 리플로우와 리페인트를 발생시키지만,** 
+
+**visibility:hidden은 레이아웃에 영향을 주지 않으므로 리페인트만 발생시킨다**는 것이 그것이다. 
+
+```tsx
+const searchContainer = useRef<HTMLDivElement>(null);
+const resultList = useRef<HTMLUListElement>(null);
+
+  useClickAway(searchContainer, () => {
+    if (resultList.current) {
+      resultList.current.style.visibility = 'hidden';
+    }
+  });
+```
+
+결과물을 보자. 
+
+다음과 같이 검색 결과 리스트(ResultList)가 자연스럽게 사라지게 되었다!
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187079788-06d01393-1697-42d7-bfb9-c39c22431278.mp4" type="video/mp4">
+</video>
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다. 

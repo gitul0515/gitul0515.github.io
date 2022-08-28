@@ -1,243 +1,215 @@
 ---
 layout: post
-title: '후기 작성 페이지 - 전시회 검색'
-date: 2022-08-08 12:12:52 +0900
+title: '후기 작성 페이지 - 이미지 파일 업로드'
+date: 2022-08-08 17:12:52 +0900
 categories: 프로젝트리뷰
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
 
 <img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />
 
-## 서론
+후기 작성 시, 사용자가 여러 사진 파일을 업로드할 수 있도록 구현하였다.   
 
-내가 맡은 페이지 중 하나는 **후기 작성 및 수정 페이지**이다.  
-multipart/form-data를 다루는 것이 익숙하지 않아서 조금 헤매었던 부분이다.  
-특히 여러 개의 이미지 파일을 업로드하고,  
-그 이미지 파일을 수정(삭제 또는 추가)하는 부분이 조금 까다로웠다.   
-하지만 그만큼 새로운 많은 지식을 배울 수 있던 소중한 경험이었다.  
+![Untitled](https://user-images.githubusercontent.com/80658269/187078395-954afebe-a99c-4914-a99b-41745ba77b32.png)
 
-![Untitled](%E1%84%92%E1%85%AE%E1%84%80%E1%85%B5%20%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%20%E1%84%91%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%8C%E1%85%B5%20-%20%E1%84%8C%E1%85%A5%E1%86%AB%E1%84%89%E1%85%B5%E1%84%92%E1%85%AC%20%E1%84%80%E1%85%A5%E1%86%B7%E1%84%89%E1%85%A2%E1%86%A8%20cfb4cb4e9f634e93934fef26b0874b0b/Untitled.png)
+Antd의 Upload 컴포넌트를 사용하였다. 그렇기에 마크업은 전혀 어렵지 않았다.   
+반면에, 예상 외로 **까다로웠던 것은 ‘타입’이었다.**   
+  
+위 이미지와 같이 파일을 업로드하면,   
+각 파일은 `UploadFile` 이라는 Antd 고유의 타입으로 정의된다.   
+아래는 `UploadFile` 의 interface 선언이다. (상당히 많은 속성들이 정의되어 있다…)  
 
-## 어떻게 만들것인가
-
-우선 백엔드 팀원과의 논의를 통해 도출한 API 명세는 아래와 같았다.  
-
-- Content-Type: multipart/form-data  
-- 후기 내용이 들어간 json 파일 1개, 이미지 파일 0 ~ 9개  
-- 후기 내용(필수)  
-    
-    ```json
-    {
-    	"exhibitionId" : 전시회 id,
-    	"date" : 다녀온 날짜,
-    	"title" : 후기 제목,
-    	"content" : 후기 내용,
-    	"isPublic" : 후기 공개 여부,
-    }
-    ```
-    
-- 이미지 파일 0 ~ 9개 (선택)  
-(.png, .jpeg, .jpg 확장자도 가능, 최대 9개, 필수X)
-
-### 궁금했던 점  
-후기 내용을 왜 ‘파일’로 만들어서 전송해야 할까?  
-이미지 파일은 당연히 파일로 보내더라도,   
-후기 내용은 단순히 객체이므로, 파일이 아니라 JSON 문자열로 전송하는 방법도 있을 것이다.  
-그럼에도 불구하고, 왜 파일로 보내길 원하는가?  
-
-**“JSON 문자열이 아닌 File로 보내야하는 이유가 있는가? 그렇게 했을 때 어떤 이점이 있는가?”**  
-라는 의문이 조금 들었다. 
-
-백엔드 팀원의 답변에 따르면  
-**하나의 파일로 만듦으로써 유관한 데이터들을 묶고 싶기 때문**이라고 한다.   
-그래서 파일로 만들어 전송해주기를 바란다는 것이었다.   
-
-나는 백엔드 분야의 지식은 부족해서 서버에서 데이터를 어떻게 처리하는지는 솔직히 잘 모른다.   
-하지만, **관련 있는 데이터를 묶는다는 것은 타당한 이유라는 생각이 들었다.**   
-그래야만 데이터를 다루는 것이 용이해지기 때문이다.   
-
-추후 백엔드쪽 공부를 하게 된다면,  
-전송받는 데이터를 처리하는 부분에 대해서 구체적으로 더 알아보고 싶은 마음이 들었다.  
-
-## 후기 작성 - 어려웠던 점
-
-후기를 작성 페이지에서 조금 어려웠던 부분은 두 가지다. 
-
-1. **전시회 검색 기능**
-2. **다수 이미지 파일 업로드**
-3. **이미지 파일의 수정** 
-
-이 글에서는 **전시회 검색 기능**을 중심으로 이야기해보겠다. 
-
-## 전시회 검색 기능
-
-사용자로부터 다녀 온 전시회를 입력받아야 했다.   
-까다로운 것은 **전시회의 ‘제목’을 입력하게 할 순 없다는 것**이었다.   
-예컨대, ‘서울 핸드 아티코리아’라는 전시회 제목이 있다고 해 보자.   
-누군가는 ‘서울 아티코리아’, ‘핸드 아티코리아’ 등 제목을 축약해서 입력할지도 모른다.   
-이들이 같은 전시회를 가리킨다고 어떻게 보장할 수 있을까? 즉, 데이터를 신뢰할 수 없게 된다.   
-따라서 전시회의 ‘제목’이 아닌, 전시회의 id를 입력받아야 했고,   
-이를 위해 ‘**전시회 검색 기능**’을 아래와 같이 구현하였다.   
-
-[녹화_2022_08_19_04_05_53_848.mp4](%E1%84%92%E1%85%AE%E1%84%80%E1%85%B5%20%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%20%E1%84%91%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%8C%E1%85%B5%20-%20%E1%84%8C%E1%85%A5%E1%86%AB%E1%84%89%E1%85%B5%E1%84%92%E1%85%AC%20%E1%84%80%E1%85%A5%E1%86%B7%E1%84%89%E1%85%A2%E1%86%A8%20cfb4cb4e9f634e93934fef26b0874b0b/%25EB%2585%25B9%25ED%2599%2594_2022_08_19_04_05_53_848.mp4)
-
-사용자가 전시회를 입력한 뒤 검색 버튼을 누르면,   
-검색 API를 통해 결과를 조회하여 하단에 리스트로 보여준다.   
-또한, 사용자가 리스트의 한 항목을 클릭하면 오른쪽에 포스터가 나타나도록 하였으며,   
-클릭한 전시회의 id를 submitData 객체에 저장하는 형태로 구현하였다.   
-코드를 살펴보면 아래와 같다.   
-
-```tsx
-interface SubmitData {
-  exhibitionId: number; // 전시회의 id
-  date: string;
-  title: string;
-  content: string;
-  isPublic: boolean;
+```typescript
+export interface UploadFile<T = any> {
+    uid: string;
+    size?: number;
+    name: string;
+    fileName?: string;
+    lastModified?: number;
+    lastModifiedDate?: Date;
+    url?: string;
+    status?: UploadFileStatus;
+    percent?: number;
+    thumbUrl?: string;
+    crossOrigin?: React.ImgHTMLAttributes<HTMLImageElement>['crossOrigin'];
+    originFileObj?: RcFile;
+    response?: T;
+    error?: any;
+    linkProps?: any;
+    type?: string;
+    xhr?: T;
+    preview?: string;
 }
-
-// ... 중략
-
-const ReviewCreatePage = () => {
-	const submitData = useRef<SubmitData>(initialData);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>();
-  const [posterImage, setPosterImage] = useState(imageUrl.EXHIBITION_DEFAULT);
-
-  // ...중략
-
-  const handleSearch = async (value: string) => {
-    const isEmpty = !/\S/.test(value);
-    if (isEmpty) {
-      message.warning('한 글자 이상 입력해주세요.');
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      const { exhibitions } = await reviewAPI.searchExhibition(value).then((res) => res.data.data); 
-      exhibitions.length === 0 && message.warning('검색 결과가 없습니다.');
-      setSearchResults([...exhibitions]);
-
-      if (resultList.current) {
-        resultList.current.style.visibility = 'visible';
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
-  };
-
-return <ReviewEditForm>
-	  // ...중략
-
-		<Form.Item label="다녀 온 전시회">
-		  <SearchContainer ref={searchContainer}>
-		    <InnerContainer>
-		      <SearchBar
-		        placeholder="전시회 제목을 검색해 주세요."
-		        enterButton
-		        onSearch={handleSearch}
-		        defaultValue={query.name}
-		      />
-		      <ResultList ref={resultList}>
-		        {searchResults?.map(({ exhibitionId, name, thumbnail }) => (
-		          <ResultItem
-		            key={exhibitionId}
-		            onClick={() => {
-		              submitData.current['exhibitionId'] = exhibitionId;
-		              setPosterImage(thumbnail);
-		            }}
-		          >
-		            {name}
-		          </ResultItem>
-		        ))}
-		      </ResultList>
-		    </InnerContainer>
-		    <Poster
-		      src={posterImage}
-		      alt="전시회 포스터 이미지"
-		      preview={posterImage !== imageUrl.EXHIBITION_DEFAULT}
-		    />
-		  </SearchContainer>
-		</Form.Item>
-		// ... 중략
 ```
 
-## useClickAway
+이 중 `originFileObj` 라는 속성으로 File 객체가 담겨 있는 것을 볼 수 있다.   
+실제로 formData에 append할 것은 `originFileObj`라는 이 객체이며, 다른 속성은 불필요하다.  
+그런데 다시 한 번 보자.   
+`originFileObj`는 File 객체가 아니라 `RcFile`이라는 타입의 객체다.  
+File 객체를 확장하여 선언한 것이 RcFile이라는 타입이다.  
 
-한편, **useClickAway라는 커스텀 훅을 만들어 사용**하였다.   
-useClickAway는 **특정 엘리먼트 이외의 영역을 클릭할 때를 감지할 수 있는 훅**이다.  
-이게 언제 필요하냐면, 검색 결과 리스트(ResultList)가 자연스럽게 사라지도록 하기 위해서 필요하다.   
-검색 결과 리스트(ResultList)가 사라지지 않고 계속 보이면 아래 영상처럼 어색해 보인다.   
+```typescript
+export interface RcFile extends File {
+    uid: string;
+}
+```
 
-[녹화_2022_08_19_04_53_30_576.mp4](%E1%84%92%E1%85%AE%E1%84%80%E1%85%B5%20%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%20%E1%84%91%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%8C%E1%85%B5%20-%20%E1%84%8C%E1%85%A5%E1%86%AB%E1%84%89%E1%85%B5%E1%84%92%E1%85%AC%20%E1%84%80%E1%85%A5%E1%86%B7%E1%84%89%E1%85%A2%E1%86%A8%20cfb4cb4e9f634e93934fef26b0874b0b/%25EB%2585%25B9%25ED%2599%2594_2022_08_19_04_53_30_576.mp4)
+상당히 복잡하지 않은가??  
+그렇다. <mark>내가 필요한 것은 서버에 전송할 File 객체인데,</mark>  
+<mark>Antd의 고유한 타입 정의로 인해 이 File 객체를 얻어내는 것이 상당히 까다로웠다.</mark>   
+  
+결과적으로, 나는 다음과 같이 구현하였다.   
+우선 아래와 같이 업로드 한 파일을 저장하는 files를 선언하였다. UploadFile의 배열이다.   
 
-useClickAway 훅의 코드를 살펴보면 아래와 같다.   
-**특정 엘리먼트를 ref**로 전달받고, 그 특정 엘리먼트 이외의 영역이   
-클릭(또는 터치) 되었을 때에 실행할 **handler 함수**를 전달받는다.   
-(여기서 ref는 HTMLElement에 속하는 요소를 가리키는 ref 객체여야만 한다.   
- 제네릭을 사용하여, `<T extends HTMLElement = HTMLElement>` 와 같이 구현하였다)
+```typescript
+const [files, setFiles] = useState<UploadFile[]>([]);
+```
 
-```tsx
-import { useEffect, RefObject } from 'react';
+폼이 제출되면, 업로드한 이미지 파일을 formData에 담아야 한다.   
+나는 `appendFilesToFormData`라는 유틸 함수를 만들었고, 아래와 같이 files를 넘겨주었다.   
 
-type Event = MouseEvent | TouchEvent;
+```typescript
+appendFilesToFormData('files', files, formData);
+```
 
-const useClickAway = <T extends HTMLElement = HTMLElement>(
-  ref: RefObject<T>,
-  handler: (event: Event) => void,
+내가 만든 `appendFilesToFormData` 함수의 타입 정의는 아래와 같다.  
+
+```typescript
+const appendFilesToFormData: (key: string, files: FileList | UploadFile[], _formData?: FormData) => FormData
+```
+
+**파라미터 설명**
+
+- key: formData에 담을 File의 key이다. 임의의 문자열을 key로 정할 수 있다.  
+- files: 파일 목록이다. FileList 또는 UploadFile[]을 받을 수 있다.  
+  이 경우에는 UploadFile[]을 받겠지만, 일반적으로 사용되는 FileList도 받을 수 있도록 했다.   
+    
+- _formData: 말 그대로 formData이다. optional.  
+  formData를 전달할 경우 해당 formData에 append 하며,   
+  그렇지 않을 경우 새로운 formData를 생성하여 append한 뒤 반환한다. 
+    
+이제 구체적으로 `appendFilesToFormData` 를 살펴보자.   
+
+```typescript
+export const appendFilesToFormData = (
+  key: string,
+  files: FileList | UploadFile[],
+  _formData?: FormData,
 ) => {
-  useEffect(() => {
-    const listener = (event: Event) => {
-      const element = ref?.current;
-      if (!element || element.contains((event?.target as Node) || null)) {
-        return;
-      }
-
-      handler(event);
-    };
-
-    document.addEventListener('mousedown', listener);
-    document.addEventListener('touchstart', listener);
-
-    return () => {
-      document.removeEventListener('mousedown', listener);
-      document.removeEventListener('touchstart', listener);
-    };
-  }, [ref, handler]);
-};
-
-export default useClickAway;
-```
-
-document에 전역적으로 이벤트 핸들러를 걸어주고,   
-컴포넌트가 언마운트가 될 때 이벤트 핸들러를 제거한다.   
-<br />
-이 useClickAway 훅을 다음과 같이 사용하였다.   
-searchContainer의 바깥 영역이 클릭되었을 때, resultList를 안 보이게 한다는 것이다.   
-
-`visibility: hidden` 을 사용하였다.
-
-`display: none`이 아니라 `visibility: hidden`을 사용한 것은 
-
-사소하지만 성능상의 이점이 있기 때문이다. 
-
-**display:none은 리플로우와 리페인트를 발생시키지만,** 
-
-**visibility:hidden은 레이아웃에 영향을 주지 않으므로 리페인트만 발생시킨다**는 것이 그것이다. 
-
-```tsx
-const searchContainer = useRef<HTMLDivElement>(null);
-const resultList = useRef<HTMLUListElement>(null);
-
-  useClickAway(searchContainer, () => {
-    if (resultList.current) {
-      resultList.current.style.visibility = 'hidden';
+  const formData = _formData ? _formData : new FormData();
+  for (let i = 0; i < files.length; i++) {
+    if ('originFileObj' in files[i]) {
+      formData.append(key, (files[i] as UploadFile).originFileObj as File);
+    } else {
+      formData.append(key, files[i] as File);
     }
-  });
+  }
+  return formData;
+};
 ```
 
-결과물을 보자. 
+for문에서 files에 저장된 파일을 하나씩 가져온다.   
+이 파일은 File 객체이거나, UploadFile 객체이다.   
+위에서 말했듯이, **이 둘은 엄연히 다르므로 구분하여 처리하는 것이 필요하다.**   
+  
+우선 `originFileObj` 속성의 존재 여부로 구분할 수 있다.   
+`originFileObj` 속성이 존재한다면 UploadFile 객체이며,   
+이 UploadFile 객체에서 `originFileObj` 속성만을 꺼내어 formData에 담아야 한다.   
 
-다음과 같이 검색 결과 리스트(ResultList)가 자연스럽게 사라지게 되었다!
+```typescript
+if ('originFileObj' in files[i]) {
+  formData.append(key, files[i].originFileObj);
+}
+```
 
-[녹화_2022_08_19_04_29_42_533.mp4](%E1%84%92%E1%85%AE%E1%84%80%E1%85%B5%20%E1%84%8C%E1%85%A1%E1%86%A8%E1%84%89%E1%85%A5%E1%86%BC%20%E1%84%91%E1%85%A6%E1%84%8B%E1%85%B5%E1%84%8C%E1%85%B5%20-%20%E1%84%8C%E1%85%A5%E1%86%AB%E1%84%89%E1%85%B5%E1%84%92%E1%85%AC%20%E1%84%80%E1%85%A5%E1%86%B7%E1%84%89%E1%85%A2%E1%86%A8%20cfb4cb4e9f634e93934fef26b0874b0b/%25EB%2585%25B9%25ED%2599%2594_2022_08_19_04_29_42_533.mp4)
+나는 위에서 `originFileObj` 속성의 존재 여부로 구분할 수 있다고 말했지만,   
+타입스크립트는 그렇지 않은 모양이었다. 아래와 같은 타입 에러가 발생하였다.   
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187078397-87049331-244b-4a72-b843-6c70cce7073f.png)
+
+어쩔 수 없이 as 키워드를 통해 files[i]가 UploadFile임을 확언해주어야 했다.   
+
+아래와 같이 변경하였다.   
+
+```typescript
+if ('originFileObj' in files[i]) {
+      formData.append(key, (files[i] as UploadFile).originFileObj);
+    }
+```
+
+이 문제는 해결되었으나, 타입 오류가 또 있었다.   
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187078399-2cd7bfdd-a495-4ec5-8ae9-de59668206ff.png)
+
+위에서 말했듯, `originFileObj`는 `RcFile`이라는 Antd 고유의 타입이며,   
+이는 File 타입과 다르기 때문에 생긴 오류였다. (File은 Blob에 속한다)  
+하지만 `RcFil`과 `File`은 차이점이 크지 않다. uid라는 속성이 하나 추가되었을 뿐이다.   
+
+```typescript
+export interface RcFile extends File {
+    uid: string;
+}
+```
+
+그렇기에 타입스크립트가 이를 File로 간주하도록 하였고, 타입 오류를 해결할 수 있었다.   
+
+```typescript
+if ('originFileObj' in files[i]) {
+      formData.append(key, (files[i] as UploadFile).originFileObj as File);
+    }
+```
+
+이상의 구현 과정을 통해, Antd의 이미지 파일을 성공적으로 업로드할 수 있었다.   
+아래의 결과물을 보자.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187079521-e5ceb8be-4885-4d6f-9f50-8b99da3d06d6.mp4" type="video/mp4">
+</video>
+
+
+한편, files[i]가 File 객체인 경우 (사실 이것이 일반적인 경우다)  
+다음과 같이 formData에 담는다.   
+이 경우에도 files[i]가 File임을 확언해주는 선언이 필요했다.   
+
+```typescript
+else {
+      formData.append(key, files[i] as File);
+    }
+```
+
+이 경우에도 성공적으로 처리할 수 있다.   
+아래의 결과물을 보자.   
+유저의 프로필 이미지를 업로드하는 부분으로, Antd를 사용하지 않았다.   
+즉, files[i]가 `UploadFile`이 아니라 일반 `File`이다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/187079518-1e2828e7-23fc-41dc-b64d-61b247f92eb6.mp4" type="video/mp4">
+</video>
+
+성공적으로 처리된 것을 확인할 수 있다 :)
+
+이 기능을 구현하면서 느낀 것이 두 가지 있다.   
+
+1. <mark>Antd와 같은 UI 라이브러리에는 장단점이 존재한다.</mark>  
+    Antd와 같은 UI 라이브러리를 사용하면,   
+    이미 만들어진 컴포넌트를 쉽게 사용할 수 있으므로 매우 편리하다. 이것이 큰 장점이다.   
+    하지만 타입 정의, 그리고 여기서 다루지는 않았지만 고유의 속성이나 메소드 등  
+    해당 컴포넌트만의 작동 방식이 존재한다.  
+    그 고유한 작동 방식 때문에, 디테일한 작업을 할 경우 문제가 오히려 복잡해질 수 있다.  
+    이 글에서 다루었던 타입 관련 이슈가 바로 그것이었다.  
+    앞으로 UI 라이브러리를 사용할 때에는   
+    이러한 장단점을 잘 고려해서 신중하게 결정할 필요가 있을 것 같다.   
+    
+  
+2. <mark>타입스크립트의 추론은 완전하지 않다.</mark>  
+    타입 가드를 통해 나름대로 타입을 구분하였음에도,   
+    생소하고 복잡한 타입인 경우 타입스크립트가 추론에 실패하는 것을 보았다.      
+    (물론 내가 타입 가드를 잘못한 것일 수도 있다. 그렇다면 지적해주시기 바란다)      
+    이 경우에는 어쩔 수 없이 타입을 확언해야만 했다.   
+    타입스크립트의 추론은 완전하지 않다는 것,   
+    그런 경우 사용자가 임의로 타입을 확언해주는 것이 필요함을 깨달았다.  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다. 

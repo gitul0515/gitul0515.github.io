@@ -1,0 +1,177 @@
+---
+layout: post
+title: 'SWR, 잘 이해하고 사용하자'
+date: 2022-08-26 12:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187077595-af956478-213e-4868-8d01-403b651e08da.png)
+
+프로젝트에 SWR을 도입할 것을 건의하면서 작성했던 글이다.  
+결과적으로 팀원들은 SWR의 도입을 수긍해주었으며, 현재 프로젝트에 적용하고 있는 상황이다.  
+블로그에도 공유한다.  
+
+## SWR이란?
+  
+- Vercel에서 만든 **데이터 fetching을 위한 리액트 훅**  
+- **Axios를 완전히 대체하는 기술은 아니다.**   
+  데이터 fetch, 즉 **GET에 특화된 라이브러리**라고 할 수 있다.  
+  그 외 POST, PUT 등은 axios를 그대로 사용할 예정이다.  
+
+## 왜 필요한가
+
+### 데이터 fetching 단순화
+
+아래는 우리 프로젝트의 **유저 정보 조회 API**이다.  
+
+```typescript
+// 기존 방식
+const [userInfo, setUserInfo] = useState();
+  useEffect(() => {
+    (async () => {
+      const data = await userAPI.getUserInfo(Number(id)).then((res) => res.data.data);
+      setUserInfo(data);
+    })();
+  }, []);
+```
+
+```typescript
+// SWR 사용 
+const { data: userInfo } = useSWR(`/api/v1/users/${id}/info`);
+```
+
+훨씬 명확하고 간단하며, 선언적임을 알 수 있다. ~~클린코드 만세~~
+
+### 데이터 전역 관리
+
+`useSWR('/api/signin', Fetcher)`를 호출했다면 무슨 일이 일어나는가?  
+
+1. '/api/signin'라는 주소에서 Fetcher라는 함수를 실행한다.  
+2. 함수 실행 결과로 데이터를 받아와서, 데이터를 **캐시**한다.  
+
+#### 캐시?  
+
+한 번 fetch한 데이터를 내부적으로 캐시한다.  
+즉, **클라이언트에 잠시 저장을 해둔다**는 의미이다.  
+**다른 컴포넌트에서 동일한 상태를 사용하고자 할 경우, 캐시해둔 상태를 그대로 리턴**한다.  
+**캐싱을 기반으로 데이터를 전역적으로 공유한다는 것이 이 의미이다.**  
+
+#### 예시  
+
+후기 상세페이지에서 **후기 단건 조회 API를** 사용한다.  
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187077606-0daf7fcf-9d72-4acf-b51b-fdc246f8cbcd.png)
+
+후기 수정 페이지에서도 **후기 단건 조회 API**를 사용한다.  
+(새로고침이 일어날 수 있으므로 필요하다)  
+
+![Untitled](https://user-images.githubusercontent.com/80658269/187077617-b42e586d-c3ab-4264-98f0-d76c071b6d16.png)
+
+두 페이지(컴포넌트)는 아래와 같은 SWR을 사용한다. key가 동일하다.   
+
+```tsx
+useSWR(`/api/v1/reviews/156`)
+```
+
+`원격 데이터를 사용하는 서로 다른 컴포넌트가 같은 key를 사용한다면 동일한 상태를 공유한다`  
+
+#### 잠깐!  
+
+현재 우리 프로젝트는  
+**로그인 여부에 따라 authRequest, unAuthRequest를 구별하여 요청을 다르게 보내고 있다.**  
+
+이에 따라 응답 데이터가 달라지기 때문이다.  
+**이와 같은 동적인 요청도 useSWR을 통해서 가능하다.**   
+아래는 전역적으로 설정한 SWR 옵션이다.   
+
+```typescript
+const swrOptions = {
+  fetcher: async (url: string) => {
+    const isLoggedIn = cookie.load('REFRESH_TOKEN');
+    const accessToken = cookie.load('ACCESS_TOKEN');
+
+    if (isLoggedIn) {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_END_POINT}${url}`, {
+        headers: {
+          accessToken,
+        },
+      });
+      return res.data.data;
+    } else {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_END_POINT}${url}`);
+      return res.data.data;
+    }
+  },
+};
+```
+
+아래는 ‘후기 단건조회’의 응답 테스트다. useSWR을 사용하였다.   
+
+**로그인 하지 않은 경우**  
+
+![Untitled 3](https://user-images.githubusercontent.com/80658269/187077621-d40392e2-fc47-426a-adc0-6711f6a724c3.png)
+
+**로그인 한 경우**   
+
+![Untitled 4](https://user-images.githubusercontent.com/80658269/187077626-7f8d6798-dfc9-41b7-a163-cd2d4f9b9e16.png)
+
+**SWR을 통해서도 인증 여부에 따른 동적인 요청이 가능함**을 확인하였다.   
+
+그 외에도, Fetcher 함수 및 baseURL을 전역적으로 설정해두었다.   
+
+```typescript
+  const res = await axios.get(`${process.env.NEXT_PUBLIC_API_END_POINT}${url}`);
+  return res.data.data;
+```
+
+아래 PR에 적용하였다.   
+
+[https://github.com/prgrms-web-devcourse/Team-BackFro-ArtZip-FE/pull/238](https://github.com/prgrms-web-devcourse/Team-BackFro-ArtZip-FE/pull/238)
+
+**사용하는 쪽에서는 Fetcher 함수를 꼭 전달할 필요가 없으며,**   
+**예컨대 아래와 같이 사용하면 된다.**   
+
+```typescript
+const { data, error } = useSWR(`/api/v1/users/${id}/info`);
+```
+
+### SWR vs react-query
+
+react-query가 기능에 있어 더 다양하다고 하지만,   
+**Next.js와의 호환성 및 사용의 용이함 측면에서는 SWR이 장점이 있다고 생각**한다.   
+
+### 기타 다양한 옵션들
+
+- 포커싱 시 데이터 갱신, 인터벌 시 갱신, 재연결 시 갱신 옵션 등 (**서버와의 동기화)**  
+- MUTATE 함수 지원 (필요한 경우, 데이터를 즉시 업데이트할 수 있다)  
+- SSR, SSG 지원  
+
+## SWR의 사용법
+
+```typescript
+const { data, error, isValidating, mutate } = useSWR(key, fetcher, options)
+```
+
+### 반환값
+
+- data: fetcher 함수가 가져온 데이터 (또는 undefined)  
+- error: fetcher가 던진 에러 (또는 undefined)  
+- isValidation: 요청이나 갱신 로딩의 여부  
+- mutate: 캐시된 데이터를 뮤테이트(데이터 수정, 업데이트)  
+
+### 파라미터
+
+- **key**: 요청을 위한 고유한 키 문자열 (url, 필수)  
+- **fetcher**: key를 받고 데이터를 반환하는 비동기 함수 (필수x)  
+- **options**: SWR hook을 위한 옵션 객체 (필수x)  
+
+## 참고자료
+
+<a href='https://basemenks.tistory.com/245'>SWR 이란 무엇인가? (#백엔드 데이터 #전역)</a>  
+<a href='https://swr.vercel.app/ko/docs/data-fetching'>데이터 가져오기 - SWR</a>  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다. 
