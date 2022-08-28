@@ -1,9 +1,0 @@
-I"R<p><img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지" /></p>
-
-<h4 id="리액트의-특징">리액트의 특징</h4>
-<ol>
-  <li>Reactive Programming<br />
-React는 상태를 관찰하고 변화가 발생할 경우 
-연관된 곳에서 연산을 수행한다.</li>
-</ol>
-:ET

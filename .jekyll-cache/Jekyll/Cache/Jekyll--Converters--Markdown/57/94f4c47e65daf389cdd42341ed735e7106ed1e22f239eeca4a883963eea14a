@@ -1,3 +1,0 @@
-I"!<h4 id="4-import">4. @import</h4>
-<p>기능에 따라 코드를 파일로 분리하는 것은 재사용 및 유지보수에 유리하다. CSS 파일도 예외는 아니다. Sass는 @import를 통해 여러 CSS 파일을 import 할 수 있다. 기존의 CSS @import보다 편리하다.</p>
-:ET
