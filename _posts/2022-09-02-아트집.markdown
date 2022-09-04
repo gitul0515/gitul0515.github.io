@@ -1,0 +1,188 @@
+---
+layout: post
+title: '원본 객체의 불변성을 보장하기'
+date: 2022-09-02 12:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+
+<img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />
+
+## 불변성  
+데이터, 특히 원본 데이터는 가능한 불변성을 보장하는 것이 중요하다.   
+데이터를 불변하게 다루지 않으면   
+데이터들간의 간섭으로 인해 예상치 못한 버그가 발생할 수 있기 때문이다.   
+특히, <mark>객체는 동일한 객체라도 속성 값이 변경될 수 있기 때문에 가변적이다.</mark>   
+따라서 객체를 다룰 때에는 각별히 조심해서 다루어야만 한다.   
+아래의 간단한 코드를 살펴보자.   
+
+```tsx
+const one = { a: 1 };
+const two = one;
+two.a = 2;
+console.log(one); // { a: 2 }
+```
+
+one이라는 객체의 불변성이 보장되지 않았고, 속성이 변경되었다.   
+만약 이것이 의도하지 않은 바뀜이라면, 그때부터 버그가 발생하게 된다.   
+바로 오늘 내가 경험했던 것처럼 말이다…  
+
+## 버그의 발생
+오늘 나는 원본 객체의 불변성을 보장하지 않고, 함부로 다루었기 때문에   
+예상하지 못한 버그를 만났고, 한동안 곤욕을 치러야 했다.   
+반성문을 쓰는 숙연한 마음으로 이 리뷰를 쓰고 있다…  
+버그는 아래 영상을 통해 확인할 수 있다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/188321378-7d1963ad-0701-4ac5-975b-111114c03829.mp4" type="video/mp4">
+</video>
+
+후기를 작성하고 난 뒤, 다시 후기 작성 페이지로 돌아와서  
+곧바로 **제출하기 버튼을 누르면 동일한 내용의 후기가 그대로 생성된다!**  
+  
+  
+예상하지 못한 버그에 나는 한동안 당황하였다.   
+버그가 발생한 까닭은, 내가 서두에서도 밝혔듯   
+<mark>원본 데이터의 불변성을 제대로 보장하지 않았기 때문이다.</mark>  
+
+아래의 코드를 보자.   
+
+```tsx
+interface SubmitData {
+  exhibitionId: number;
+  date: string;
+  title: string;
+  content: string;
+  isPublic: boolean;
+}
+
+// 초기화 데이터 (원본)
+const initialData: SubmitData = {
+  exhibitionId: 0,
+  date: '',
+  title: '',
+  content: '',
+  isPublic: true,
+};
+
+const ReviewCreatePage = () => {
+  const submitData = useRef<SubmitData>(initialData);
+```
+
+`initialData`가 바로 원본 데이터로써,   
+submitData의 current 값을 초기화하는데 사용된다.   
+컴포넌트 외부에 선언되었으므로, 컴포넌트의 생명주기와는 상관없이 존재한다.   
+
+그런데 아래와 같이 사용하면 어떻게 될까?   
+
+```tsx
+const submitData = useRef<SubmitData>(initialData);
+```
+
+`submitData.current` === `initialData`가 되어버린다!  
+그러면 아래와 같이 submitData.current의 값을 변경할 경우  
+원본 데이터인 initialData의 값이 바뀌게 되는 것이다.   
+
+```tsx
+submitData.current['exhibitionId'] = 123;
+// initialData['exhibitionId'] = 123과 같다.
+```
+
+불변성이 보장되어야 할 initialData가 변경되었으므로 문제가 발생한다.   
+페이지 컴포넌트가 마운트 되면   
+아래와 같이 useRef는 재선언되면서 initialData로 초기화되는데…  
+
+```tsx
+const ReviewCreatePage = () => {
+  const submitData = useRef<SubmitData>(initialData);
+```
+
+그런데 이 initialData의 상태는 이전에 변경되었던 값이다!   
+그렇기 때문에, ‘동일한 내용의 후기가 그대로 생성되는 버그’가 발생한다.   
+콘솔을 통해 확인해보자.   
+
+```tsx
+useEffect(() => {
+    console.log(submitData.current);
+  }, []);
+```
+
+처음 페이지에 진입했을 때  
+
+![Untitled](https://user-images.githubusercontent.com/80658269/188321397-e40433ec-1c6a-4c1d-aa72-ce2985e3afa9.png)
+
+후기를 생성한 뒤, 다시 페이지에 진입했을 때  
+
+![Untitled 1](https://user-images.githubusercontent.com/80658269/188321400-b8911929-50af-4c55-a189-89723032ed52.png)
+
+초기화가 제대로 되지 않았고, 이전에 변경되었던 값을 그대로 가지고 있다!  
+
+## 해결안  
+이 문제를 해결하려면 어떻게 해야 할까?   
+<mark>원본 데이터의 불변성을 보장해주면 해결이 가능하다.</mark>  
+  
+일반적으로는 Object.freeze를 통해 객체를 동결시키거나,   
+얕은 복사 또는 깊은 복사를 통해 새로운 객체를 생성해서 사용하는 방법이 있다.   
+우선 Object.freeze를 통해 객체를 안전하게 동결시켰다.   
+
+```tsx
+const initialData: SubmitData = {
+  exhibitionId: 0,
+  date: '',
+  title: '',
+  content: '',
+  isPublic: true,
+};
+
+Object.freeze(initialData);
+```
+
+객체 동결은 필수는 아니지만 안전함을 추구하기 위해 사용하였다.  
+이후 함부로 값을 바꾸려 하면 아래와 같은 에러가 발생한다.   
+
+![Untitled 2](https://user-images.githubusercontent.com/80658269/188321402-cf067887-4e0d-4d7c-93e3-fa0eeed0eda0.png)
+
+한편, initialData를 그대로 넘겨주는 것이 아니라,   
+얕은 복사를 통해 새 객체를 생성해서 넘겨준다. 스프레드 연산자를 사용하였다.   
+
+```tsx
+const submitData = useRef<SubmitData>({ ...initialData });
+```
+
+만약 initialData의 속성으로 또 다른 객체, 즉 중첩 객체가 있다면   
+얕은 복사가 아니라 깊은 복사가 필요할 것이다.   
+<mark>얕은 복사는 중첩 객체의 불변성을 보장해줄 수 없기 때문이다.</mark>   
+
+깊은 복사로는 JSON 메서드, 재귀 함수, lodash 라이브러리 등을 사용할 수 있다.  
+내가 예전에 작성한 글을 참고해주시기 바란다.   
+
+[https://gitul0515.github.io/자바스크립트/2022/02/16/깊은복사.html](https://gitul0515.github.io/%EC%9E%90%EB%B0%94%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8/2022/02/16/%EA%B9%8A%EC%9D%80%EB%B3%B5%EC%82%AC.html)
+
+이렇게 간단하게 문제가 해결되었다.   
+첫 번째 콘솔은 ‘페이지에 처음 진입 시’, 두 번째 콘솔은 ‘페이지에 재진입 시’이다.   
+초기화가 제대로 이루어지고 있음을 확인할 수 있다.   
+
+![Untitled 3](https://user-images.githubusercontent.com/80658269/188321407-ff8d4c67-5db6-4d99-b85a-91b3675c8b93.png)
+
+동일한 내용의 후기가 생성되는 버그도 더이상 발생하지 않는다ㅎ  
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/188321412-d00fbe17-f53c-4fcd-94bd-564a8436adf5.mp4" type="video/mp4">
+</video>
+
+## 결론
+원본 데이터의 불변성을 보장하는 것이 중요하다는 것은 알았지만,  
+이전에는 잘 와닿지 않았던 것이 사실이다.   
+하지만 이번 삽질(?) 경험을 통해서,   
+데이터의 불변성이 어째서 중요한지 몸소 체감하고 깨우칠 수 있었던 것 같다.   
+불변성을 보장하게 되면, 데이터 간에 간섭을 최소화할 수 있고   
+예상치 못한 버그의 가능성을 줄일 수 있기 때문이다.   
+이러한 사실을 마음에 잘 새겨놓아야겠다는 생각이 들었다.   
+
+## 참고 자료
+[JavaScript Immutability](https://opentutorials.org/module/4075)
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.    
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다.   

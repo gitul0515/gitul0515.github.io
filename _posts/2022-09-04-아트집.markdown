@@ -1,0 +1,232 @@
+---
+layout: post
+title: 'useDebounce(1) - 버튼 중복 클릭 방어하기'
+date: 2022-09-04 11:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+  
+<img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />
+  
+프로젝트를 리팩토링하던 중,   
+이벤트 핸들러의 과도한 호출을 방지하기 위해 Debounce를 사용할 필요를 느꼈다.   
+  
+먼저 Debounce와 Throttle에 대해서 정리해 보자.  
+Debounce와 Throttle은 짧은 시간 간격으로 연속해서 발생하는 이벤트를 그룹화하여   
+과도한 이벤트 핸들러의 호출을 방지하는 기법이다.   
+
+### 디바운스  
+- 디바운스는 짧은 시간 간격으로 발생하는 이벤트를 그룹화해서  
+  <mark>마지막에 한 번만 이벤트 핸들러가 호출되도록 한다.</mark>   
+- 사용: resize 이벤트 처리, 입력 필드 자동완성 UI 구현, 버튼 중복 클릭 방지 등  
+
+### 스로틀  
+- 스로틀은 짧은 시간 간격으로 발생하는 이벤트를 그룹화해서  
+  <mark>일정 시간 단위로 이벤트 핸들러가 최대 한 번만 호출되도록 한다.</mark>   
+    
+- 사용: scroll 이벤트 처리, 무한 스크롤 UI의 구현 등  
+  (디바운스를 사용하면 스크롤을 멈출 때만 이벤트를 발생시킨다.   
+  따라서 디바운스보다는 스로틀이 더 적합하다)  
+
+
+**핵심 차이점**  
+<mark>스로틀은 일정 시간마다 이벤트가 한 번씩 호출됨을 보장한다. 디바운스는 그렇지 않다.</mark>  
+    
+## 버튼 중복 클릭 방지  
+내가 구현한 페이지에는 폼의 ‘제출 버튼’이 많다.   
+만약, 사용자가 느린 네트워크 환경에서 버튼을 연타한다면 무슨 일이 발생할까?   
+아래와 같이 이벤트 및 API가 과도하게 호출되는 대참사…가 발생한다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/188322618-971cebf3-aebb-4cc4-8639-2cb00075d00a.mp4" type="video/mp4">
+</video>
+
+이때 필요한 것이 바로 Debounce이다.   
+그래서 useDebounceClick이라는 커스텀 훅을 직접 구현하였다.   
+
+## useDebounceClick 구현
+
+먼저 함수의 스펙은 아래와 같다.   
+
+```tsx
+const useDebounceClick: <T extends HTMLElement = HTMLElement>
+                        (handler: (e?: Event) => void, ms?: number) => RefObject<T>[]
+```
+
+- `<T extends HTMLElement = HTMLElement>`: 클릭 이벤트를 바인딩 할 요소의 타입  
+- handler: 클릭 이벤트의 핸들러 함수  
+- ms: 지연 시간  
+- RefObject<T>: 클릭 이벤트가 걸린 요소. 리턴값.  
+
+```tsx
+import { useEffect, useRef } from 'react';
+
+const useDebounceClick = <T extends HTMLElement = HTMLElement>(
+  handler: (e?: Event) => void,
+  ms = 250,
+) => {
+  const timerId = useRef<ReturnType<typeof setTimeout>>();
+  const ref = useRef<T>(null);
+```
+
+timerId는 타이머를 식별할 수 있는 고유한 타이머 ID다.   
+여기서는 유틸리티 타입인 **ReturnType**을 사용하였다.   
+ReturnType은 함수 Type의 반환 타입으로 구성된 타입을 생성한다.  
+  
+예를 들면 아래와 같다. (타입스크립트 공식문서 참조)  
+
+```tsx
+declare function f1(): { a: number; b: string };
+type T = ReturnType<typeof f1>; // type T = { a: number; b: string; }
+```
+
+내가 얻은 것은 setTimeout의 반환 타입(NodeJS.Timeout)이었다.   
+  
+한편, 아래와 같이 window를 붙여서 브라우저 환경임을 나타내는 방법도 있는데,   
+이 경우 타입은 NodeJS.Timeout이 아니라 number로 평가된다.   
+
+```tsx
+const timerId = useRef<number>(); // timerId.current: number | undefined
+
+// 중략...
+// setTimeout에 window를 붙여서 브라우저 환경임을 나타낸다. 
+timerId.current = window.setTimeout(() => {
+        handler(e);
+      }, ms);
+```
+
+다시 본론으로 돌아오자.   
+
+```tsx
+  useEffect(() => {
+    const listener = (e: Event) => {
+      timerId.current && clearTimeout(timerId.current);
+      timerId.current = setTimeout(() => {
+        handler(e);
+      }, ms);
+    };
+
+    const element = ref.current;
+    element && element.addEventListener('click', listener);
+
+    return () => {
+      element && element.removeEventListener('click', listener);
+      timerId.current && clearTimeout(timerId.current);
+    };
+  }, [handler, ms]);
+
+  return [ref];
+};
+
+export default useDebounceClick;
+```
+
+ref.current에 클릭 이벤트 핸들러로 listener 함수를 걸어준다.   
+listener 함수는 타이머 함수를 통해 ms 시간이 지난 후, handler 함수를 실행한다.   
+그런데 ms 시간이 지나기 전에, 클릭 이벤트가 또 호출된다면   
+기존의 타이머를 취소하고 다시 타이머를 건다.   
+이것이 디바운스의 핵심 로직이다.   
+  
+**“짧은 시간 간격으로 발생하는 이벤트를 그룹화해서**  
+ **마지막에 한 번만 이벤트 핸들러를 호출한다.**  
+  
+한편, <mark>클린업을 잊어버리면 안 된다.</mark>  
+이 훅을 사용하는 컴포넌트가 언마운트 되었을 때, 또는 의존 배열의 값이 바뀌었을 때   
+아래와 같이 이벤트를 해제하고, 타이머ID가 남아 있다면 취소시킨다.   
+  
+```tsx
+    return () => {
+      element && element.removeEventListener('click', listener);
+      timerId.current && clearTimeout(timerId.current);
+    };
+```
+
+이와 같은 뒷정리가 없다면,   
+해당 요소에 클릭 이벤트가 계속 걸려 있게 된다.   
+이벤트 핸들러의 중복 실행 등 예기치 않은 버그가 생기므로 주의해야 한다.   
+전체 코드는 아래와 같다.   
+
+```tsx
+import { useEffect, useRef } from 'react';
+
+const useDebounceClick = <T extends HTMLElement = HTMLElement>(
+  handler: (e?: Event) => void,
+  ms = 250,
+) => {
+  const timerId = useRef<ReturnType<typeof setTimeout>>();
+  const ref = useRef<T>(null);
+
+  useEffect(() => {
+    const listener = (e: Event) => {
+      timerId.current && clearTimeout(timerId.current);
+      timerId.current = setTimeout(() => {
+        handler(e);
+        clearTimeout(timerId.current);
+      }, ms);
+    };
+
+    const element = ref.current;
+    element && element.addEventListener('click', listener);
+
+    return () => {
+      element && element.removeEventListener('click', listener);
+      timerId.current && clearTimeout(timerId.current);
+    };
+  }, [handler, ms]);
+
+  return [ref];
+};
+
+export default useDebounceClick;
+```
+
+이것을 아래와 같이 사용하였다. SubmitButton 요소에 걸어주었다.   
+
+```tsx
+const handleSubmit = (e?: Event) => {
+    e?.preventDefault();
+    form.submit();
+  };
+const [debounceRef] = useDebounceClick(handleSubmit, 300);
+
+// 중략...
+
+return (
+  // 중략...
+	<SubmitButton type="primary" ref={debounceRef}>
+	  저장
+	</SubmitButton>
+)
+```
+
+이제 더 이상, 중복 클릭으로 인한 문제가 발생하지 않는다!   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/188322619-d938cd96-1f6b-4acb-82b5-af5d3edb4403.mp4" type="video/mp4">
+</video>
+
+후기 작성 및 수정 페이지에도 적용하였다.   
+커스텀 훅을 한 번 만들면 재사용하기 좋다는 것을 다시 한 번 느낀다.  
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/188322620-c58fd92f-7ae7-48e7-b3cf-4e01adbf52ba.mp4" type="video/mp4">
+</video>
+
+## 결론 및 리팩토링 방향  
+
+이번에 만든 useDebounceClick 훅은 클릭 이벤트에만 국한되어 있다.   
+따라서 범용성이 부족하다.  
+클릭 이벤트 외에도 다양한 이벤트를 받을 수 있게 하거나,  
+디바운스의 핵심 로직을 따로 추출하는 등으로 개선할 필요가 있다.   
+특히, 앞으로 검색 필드 자동완성 UI를 구현할 계획인데,    
+이 때에도 Debounce를 활용할 것이다.   
+useDebounceClick 훅의 로직을 여기에 재사용할 수 있도록 수정해보아야겠다.
+
+## 참고 자료  
+- “모던 자바스크립트 DeepDive”, 이웅모, p.803-808  
+- 타입스크립트 공식 문서 - 유틸리티 타입    
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.    
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다.   
