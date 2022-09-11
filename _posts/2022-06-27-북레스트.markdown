@@ -1,0 +1,92 @@
+---
+layout: post
+title: '바닐라 JS 프로젝트에서 API key 숨기기'
+date: 2022-06-27 11:12:52 +0900
+categories: 프로젝트리뷰
+tags: [개인프로젝트, 자바스크립트]
+---
+  
+<img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지">
+  
+## 문제: 환경 변수 사용 불가  
+“북레스트” 프로젝트를 배포하던 중 문제가 발생했다.   
+프로젝트에서는 카카오 API를 사용하고 있는데, 발급받은 API key를 숨겨야 했다.   
+만일 이것이 리액트 환경이라면 루트 폴더에 .env를 만들어 환경변수를 만들면 된다.   
+  
+그러나 문제는, “북레스트”는 리액트 환경이 아니라는 것이었다.  
+NodeJS 환경도 아니며, 클라이언트 사이드에서 바닐라 JS를 사용한 프로젝트이다.   
+따라서 **.env를 만들고 dotenv를 통해 환경 변수를 사용하는 것이 불가능했다.**   
+**브라우저에서는 Node가 제공하는 process.env 전역 변수를 사용할 수 없기 때문**이다.   
+  
+솔직히 꽤 당황했다.   
+리액트로는 환경 변수를 만드는 것이 너무나 쉬웠기에,   
+바닐라 자바스크립트 환경에서도 문제가 안 될 것이라고 생각했는데,   
+이것이 불가능한 일이었다니…미리 인지하지 못한 나의 잘못이었다고 생각한다.   
+  
+## 해결안  
+어쨌든, 어떻게든 다른 방법을 찾아야 했다.   
+처음에는 Node.js 환경을 구성하여 환경 변수를 등록하고,  
+카카오 API를 호출하는 또 다른 API를 만들어 배포한 뒤 사용하려고 했다.   
+그러나 이 방법은 시간이 조금 걸릴 것이라 예상되었다.   
+다른 방법은 없는 것일까?   
+  
+**CSR 프로젝트에서는 보안이 필요한 값들을 정말로 숨길 수 없는 것일까?**   
+답은, “불완전하지만 가능하다”이다.   
+.env를 사용할 수는 없지만 Netlitfy의 Build command를 사용하는 방법이 존재한다.   
+우선 API key를 저장한 파일을 별도로 분리한 뒤, .gitignore에 포함시킨다.   
+  
+```JavaScript
+// key.js
+export const KAKAO_API_KEY = '(API KEY)';
+```  
+  
+변경 사항을 커밋한 뒤 push하면  key.js는 제외하고 깃 레포에 올라간다.   
+그대로 Netlify에서 배포를 하면 물론 에러가 난다.  
+key.js가 존재하지 않기 때문이다.   
+  
+**존재하지 않는 이 key.js 파일을 Nelitfy의 Build command에서 만들어주는 것이 핵심이다.**   
+  
+배포한 Site -> Site settings -> Bulid & deploy -> Build settings로 들어가보자.    
+Build command라고 적혀있는 부분을 찾을 수 있다.  
+  
+![Untitled 1](https://user-images.githubusercontent.com/80658269/189532233-a2e07718-6b38-448a-9947-6444ccd5b1f2.png)
+  
+여기에 아래와 같이 입력해 준다.   
+`cd src/config && echo -e "export const API_KEY = 'asndjsanasndjnasldnasljdn';">key.js`  
+src/config 폴더로 이동한 후, key.js라는 파일을 생성한다는 의미이다.   
+
+index.html을 기준으로 하며, 각자의 폴더 구성에 맞는 key.js의 위치를 적어주면 된다.   
+그리고 key.js의 내용은 `export const API_KEY = 'asndjsanasndjnasldnasljdn';`와 같다.  
+이것은 아래의 내용과 동일하다.   
+  
+```jsx
+// key.js
+export const API_KEY = 'asndjsanasndjnasldnasljdn';
+```
+  
+즉, **로컬에서만 존재하는 key.js 파일을 빌드 시에도 동일하게 만들어주는 것이다.**   
+해당 커맨드가 입력되면 key.js가 동일하게 만들어진다.   
+아래는 실제 결과물이다.   
+key.js가 적용되어 카카오 API가 정상적으로 호출되는 것을 확인할 수 있다.  
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/189532234-a1ec51e1-5207-4a51-a24f-072afc5b1761.mp4" type="video/mp4">
+</video>
+
+## 한계 및 결론  
+이 방법은 불완전하다.   
+깃허브 레포에는 API key를 노출시키지 않을 수 있지만,   
+배포 환경에서 네트워크 탭을 열어보면 API key가 여전히 드러나기 때문이다.   
+하긴, 이것은 .env를 사용하더라도 마찬가지일 것이다.   
+브라우저 환경에서 API key, EndPoint와 같이 보안이 필요한 값을 숨기는   
+더 좋은 방법은 무엇이 있을까?   
+그리고 만일 완전히 숨길 수 없다면, 보완할 수 있는 방법(CORS 설정 등)에는 무엇이 있을까?   
+이것에 대해 앞으로 더 공부해봐야겠다는 생각이 들었다.   
+
+## 참고 자료  
+[How to Use Environment Variables in VanillaJS](https://www.freecodecamp.org/news/how-to-use-environment-variables-in-vanillajs/)
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.    
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다.   

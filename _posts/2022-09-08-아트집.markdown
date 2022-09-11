@@ -1,0 +1,208 @@
+---
+layout: post
+title: 'useDebounce(2) - 검색 자동 완성 UI'
+date: 2022-09-08 11:12:52 +0900
+categories: 프로젝트리뷰
+tags: [최종프로젝트, 리액트, 데브코스]
+---
+    
+디바운스 훅 시리즈(?)의 두 번째 글이다!  
+전시회 검색 기능을 리팩토링하였다.  
+무엇을 바꿨을까?  
+기존에는 검색 버튼을 명시적으로 클릭해야만 검색이 가능했었다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/189532599-1f2132b1-c718-4aee-96b9-94e468651217.png" width="100%" style="margin-left: 0"/>
+  
+이것을, <mark>글자를 입력하면 자동으로 검색이 되고, 결과가 나타나도록 리팩토링하였다.</mark>    
+글자를 입력할 때마다 검색이 발생하는 것은 아니다.  
+사용자의 입력이 끝나면 0.3초 후 검색이 발생하도록 디바운스를 적용하였다.   
+아래 영상을 참고해주시기 바란다.   
+  
+  
+<br>
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/189532605-22565cb7-a469-42b3-93c1-895a875bab59.mp4" type="video/mp4">
+</video>
+  
+## 구현 방법  
+  
+검색어(searchWord)의 변경을 감지하는 것이 핵심이다.   
+아래와 같이 검색바(SearchBar)의 value가 바뀔 때마다 searchWord를 갱신한다.   
+
+```tsx
+<SearchBar
+  ...(생략)
+  onChange={(e) => setSearchWord(e.target.value)}
+  />
+```
+그리고 아래와 같이 useDebounceSearch를 적용한다.   
+  
+```tsx
+useDebounceSearch(handleSearch, 300, searchWord);
+```
+- 첫 번째 인자: 디바운스로 호출하는 콜백 함수  
+- 두 번째 인자: 디바운스의 지연 시간  
+- 세 번째 인자: 의존값. 이 값이 변경되면 디바운스가 트리거된다.  
+    
+     
+    
+useDebounceSearch는 아래와 같이 구현하였다.   
+```tsx
+import { useEffect, useRef } from 'react';
+
+const useDebounceSearch = <T>(
+  handler: (e?: Event) => void,
+  ms = 300,
+  dependentValue: T,
+) => {
+  const timerId = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    const listener = (e?: Event) => {
+      timerId.current && clearTimeout(timerId.current);
+      timerId.current = setTimeout(() => {
+        handler(e);
+      }, ms);
+    };
+    listener();
+
+    return () => {
+      timerId.current && clearTimeout(timerId.current);
+    };
+  }, [handler, ms, dependentValue]);
+};
+
+export default useDebounce;
+```
+useEffect를 보자.   
+의존 배열로 ms, handler, dependentValue가 있다.   
+이들 중 handler와 ms는 실질적으로 거의 바뀌지 않는다.   
+자주 변경되는 것은 dependentValue로 받은 searchWord이며,   
+이 searchWord의 값이 바뀔 때마다 useEffect의 콜백 함수를 재실행한다. (클린업도 포함)  
+useEffect의 콜백 함수를 재실행하면 listener 함수가 재실행된다.   
+  
+이 listener 함수에 디바운스의 로직이 들어있다.   
+타이머 함수를 통해 ms의 시간이 지난 후, handler를 실행하는데   
+ms가 지나기 전에 listener 또 실행되면 기존의 타이머를 취소하고 타이머를 다시 건다.   
+이것이 디바운스의 핵심이다.   
+  
+우리가 handler로 전달한 것은 handleSearch라는 함수였다.  
+이 함수를 통해 검색이 실행된다.   
+
+```tsx
+useDebounceSearch(handleSearch, 300, searchWord);
+```
+
+## 코드 중복은 싫어요! 
+사실 구현 자체는 별로 어렵지 않았다.   
+문제는, 이번에 구현한 `useDebounceSearch` 훅과   
+1편에서 구현했던 `useDebounceClick` 훅의 로직이 너무 중복된다는 것이었다!   
+  
+두 개의 훅은 모두 디바운스를 사용한 훅이다.   
+하나의 훅은 ‘버튼의 중복 클릭을 방지’하기 위해 만들었고,  
+다른 훅은 ‘검색 자동 완성 UI’를 구현하기 위해 만들었다.   
+  
+그러나, 굳이 이 둘을 따로 만들 필요가 있을까?   
+말했듯이 두 훅은 디바운스를 사용한다는 공통점이 있다.   
+그렇다면 하나의 공통 훅을 만들어서 양쪽 상황 모두에 적용할 수 있게 해야 한다.   
+요컨대, <mark>커스텀 훅을 유연하게 만들어 범용성을 넓혀야 마땅하다</mark>.   
+  
+한편, 다소의 문제점이 있었는데   
+그것은 useDebounceClick는 요소(버튼 등)에 click 이벤트를 건 뒤   
+click이 발생하면 디바운스가 트리거되는 방식이고,   
+useDebounceSearch는 의존값을 받아서,   
+의존값이 변경되면 디바운스가 트리거되는 방식이라는 것이다.   
+  
+이 차이점 때문에 약간 까다로웠다.   
+검색바(SearchBar)에 change 이벤트를 걸어 처리하는 것은 불가능했다.   
+왜냐하면, SearchBar는 Antd 컴포넌트를 사용하고 있었기 때문이다.   
+Antd는 SearchBar에 change 이벤트를 거는 것을 막고 있었다.   
+(Antd 컴포넌트가 아니라 일반 input 요소라면 가능했을 것이다)  
+  
+반면, 버튼을 클릭한 횟수를 useState로 저장해 클릭 시마다 증가시키고   
+이것을 의존값으로 넘겨서 디바운스를 트리거하는 방식은 어떨까?   
+그 방법을 사용한다면 가능할 거라는 생각이 들었다.   
+하지만 일단은, 양쪽 방식을 모두 수용할 수 있도록 구현하였다.   
+아래 코드를 보자. 변경된 부분은 주석을 통해 표기하였다.   
+  
+```tsx
+import { useEffect, useRef } from 'react';
+
+const useDebounce = <T>(
+  handler: (e?: Event) => void,
+  ms = 300,
+  dependentValue: T,
+  eventType?: string, // 추가
+) => {
+  const timerId = useRef<ReturnType<typeof setTimeout>>();
+  const ref = useRef<HTMLElement>(null); // 추가
+
+  useEffect(() => {
+    const listener = (e?: Event) => {
+      timerId.current && clearTimeout(timerId.current);
+      timerId.current = setTimeout(() => {
+        handler(e);
+      }, ms);
+    };
+
+		// 추가 및 수정
+    const element = ref.current;
+    if (element && eventType) {
+      element.addEventListener(eventType, listener);
+    } else {
+      listener();
+    }
+
+    return () => {
+      if (element && eventType) { // 추가
+        element.removeEventListener(eventType, listener);
+      }
+      timerId.current && clearTimeout(timerId.current);
+    };
+  }, [ms, handler, dependentValue, eventType]);
+
+  return [ref]; // 추가
+};
+
+export default useDebounce;
+```
+추가된 것은 eventType과 ref이다.   
+eventType은 옵셔널인데, 만약 이것이 존재한다면   
+요소(ref.current)에 이벤트 핸들러를 건다.   
+추후 ref.current에 eventType이라는 이벤트가 발생하면 listener 함수를 실행하도록 한다.   
+만약 eventType이 없다면 listener 함수를 곧바로 실행한다.   
+또한, 이 훅은 ref를 리턴한다.   
+훅을 사용할 때는 ref를 리턴받아서 디바운스를 적용하고 싶은 요소에 걸어주면 된다.   
+
+```tsx
+// 검색 자동 완성 UI
+useDebounce(handleSearch, 500, searchWord);
+
+// 버튼 중복 클릭 방지 
+const [ref] = useDebounce(handleSubmit, 300, null, 'click');
+```
+
+결과적으로 useDebounce라는 하나의 훅을 통해서   
+‘검색 자동 완성 UI’과 ‘버튼 중복 클릭 방지’라는 목적을 모두 달성할 수 있었다!  
+
+## 결론
+때로는 기능 구현 자체보다,   
+코드의 중복을 막기 위해 리팩토링하는 작업이 더 어렵게 느껴진다.  
+<mark>공통점을 추출하고 차이점을 제거 또는 수용할 수 있는 방안을 고민해야 하기 때문이다.</mark>   
+하지만 이것도 시간이 지남에 따라 숙달되리라고 믿는다.   
+여러 방식을 고민하고 시도하다 보면, 자연스럽게 사고의 범위가 넓어질 것이고   
+이러한 경험이 효율적인 리팩토링의 밑거름이 될 수 있을 것이라 확신한다.   
+  
+한편, 내가 이번에 만들었던 useDebounce라는 커스텀 훅…  
+과연 이것이 최선일까?라는 생각이 조금 든다.   
+다름 아닌 addEventListener 때문이다.   
+일반적으로 리액트에서 addEventListener는 자주 사용되는 방식이 아니다.    
+클린업에서 removeEventListenr를 통해 이벤트를 제거하기는 해도,   
+<mark>혹시라도 이벤트가 제거되지 않아서 예상치 못한 버그가 발생할 수 있다는 생각이 든다.</mark>   
+그런 점에서, 이상적인 방식은 아니라는 생각이 들어 찜찜하다.   
+addEventListener를 사용하지 않는 방식으로 다시 리팩토링을 해봐도 좋을 것 같다.  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.    
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다.   
