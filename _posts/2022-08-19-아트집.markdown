@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 'useDebounce(2) - 검색 자동 완성 UI'
+title: '<아트집> 최종 프로젝트 회고'
 date: 2022-08-19 11:12:52 +0900
 categories: 프로젝트리뷰
 tags: [최종프로젝트, 리액트, 데브코스]
