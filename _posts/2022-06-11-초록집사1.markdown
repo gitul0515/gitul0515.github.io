@@ -2,7 +2,7 @@
 layout: post
 title: '엔터가 반영 되지 않는 이슈 & 해결안'
 date: 2022-06-11 12:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
 ---
 

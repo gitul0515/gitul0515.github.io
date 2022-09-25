@@ -2,8 +2,8 @@
 layout: post
 title: '웹 접근성을 고려한 HTML'
 date: 2022-07-16 16:12:52 +0900
-categories: 리액트
-tags: [최종프로젝트, 리액트, 데브코스]
+categories: HTML&CSS
+tags: [HTML&CSS]
 ---
 
 Manuel Matuzovic의 Writing HTML with Accessibility in Mind를 읽고 정리한 글입니다.  

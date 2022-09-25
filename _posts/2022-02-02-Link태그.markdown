@@ -2,8 +2,8 @@
 layout: post
 title: "React에서 Link를 쓰는 이유"
 date: 2022-02-02 14:12:52 +0900
-categories: React
-tags: [React]
+categories: 리액트
+tags: [리액트]
 ---
 
 React Router에서 화면을 전환할 때는 a 태그가 아니라 Link를 사용해야만 한다. 헌데 어째서 그럴까? Link는 무엇을 하는 녀석이고, a 태그를 사용해서는 안 되는 이유는 무엇일까?  

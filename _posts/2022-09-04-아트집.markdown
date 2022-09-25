@@ -2,7 +2,7 @@
 layout: post
 title: 'useDebounce(1) - 버튼 중복 클릭 방어하기'
 date: 2022-09-04 11:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
   

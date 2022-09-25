@@ -2,7 +2,7 @@
 layout: post
 title: 'SWR, 잘 이해하고 사용하자'
 date: 2022-08-26 12:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
 

@@ -2,7 +2,7 @@
 layout: post
 title: '원본 객체의 불변성을 보장하기'
 date: 2022-09-02 12:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
 

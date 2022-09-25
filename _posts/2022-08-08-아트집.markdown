@@ -2,7 +2,7 @@
 layout: post
 title: '후기 작성 페이지 - 이미지 파일 업로드'
 date: 2022-08-08 17:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
 

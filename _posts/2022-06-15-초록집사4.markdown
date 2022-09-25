@@ -2,7 +2,7 @@
 layout: post
 title: '비로그인 사용자의 접근 관리하기'
 date: 2022-06-25 12:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
 ---
 

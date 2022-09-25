@@ -2,7 +2,7 @@
 layout: post
 title: '버그 해결 - SWR의 캐시 이슈'
 date: 2022-09-21 21:12:52 +0900
-categories: 프로젝트리뷰
+categories: 리액트
 tags: [최종프로젝트, 리액트, 데브코스]
 ---
 
