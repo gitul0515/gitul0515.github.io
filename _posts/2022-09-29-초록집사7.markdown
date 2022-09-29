@@ -1,0 +1,210 @@
+---
+layout: post
+title: '댓글에 SWR을 적용하여 실시간 대화 지원하기'
+date: 2022-09-29 12:12:52 +0900
+categories: 리액트
+tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
+---
+
+오랜만에 초록집사 프로젝트의 리팩토링 글이다.  
+이전에 만들었던 댓글 UI에 SWR을 적용하였다.  
+
+<img src="https://user-images.githubusercontent.com/80658269/193081531-003050a3-4e4e-4154-bdf6-749761314ef1.png" 
+width="50%" style="margin-left: 0"/>
+
+그 이유는 **서버와의 동기화**를 높이기 위함이다.   
+댓글은 유저들의 대화가 실시간으로 발생할 수 있는 UI다.   
+그러므로, **데이터를 최신으로 업데이트하는 것이 특히나 중요하다.**   
+  
+만일 유저 1, 2가 댓글에서 대화를 나누려 한다고 해 보자.   
+그런데 댓글창이 업데이트가 되지 않아서   
+상대방의 댓글을 볼 수 없으면 대화가 제대로 이루어지지 못할 것이다.   
+예컨대 아래처럼 말이다.   
+  
+### 유저1의 화면  
+
+<img src="https://user-images.githubusercontent.com/80658269/193081541-097de054-6b90-462b-8c7e-7334845f8b1d.png" 
+width="50%" style="margin-left: 0"/>
+
+### 유저2의 화면
+<img src="https://user-images.githubusercontent.com/80658269/193081548-d8f6152f-9fb2-438d-8a13-610be9195ccf.png" 
+width="50%" style="margin-left: 0"/>
+
+## 현재 코드의 문제점
+지금은 useEffect를 사용해서 마운트 이후  
+해당 포스트의 데이터를 '딱 한 번' 가져와 사용하고 있다.  
+이 포스트 데이터에 댓글 데이터가 들어있다. (post.comments)  
+
+```jsx
+const [post, setPost] = useState(null);
+
+useEffect(() => {
+    const postId = location.pathname.split('/')[3];
+    (async () => {
+      const { data } = await getPostData(postId);
+      setPost(data);
+    })();
+  }, []);
+
+//...(중략)
+
+return (
+  <CommentList>
+	  {post.comments
+            .map(comment => ( ... 댓글 컴포넌트 )
+  </CommentList>
+)
+
+```
+
+그리고 댓글에 대한 업데이트(추가 및 삭제)가 발생하면  
+클라이언트에서 post 및 comments 데이터를 자체적으로 업데이트한다.  
+
+```jsx
+const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!localToken) {
+      setLoginModalOn(true);
+      return;
+    }
+    if (!inputRef.current.value) {
+      return;
+    }
+    const newComment = await onAddComment(post._id, inputRef.current.value);
+    
+    // 댓글 목록 업데이트
+    setPost({ 
+      ...post,
+      comments: [...post.comments, newComment],
+    });
+};
+
+const handleDeleteComment = async () => {
+    setCommentModalOn(false);
+    if (commentIdToDelete.current) {
+      await onDeleteComment(commentIdToDelete.current);
+      const nextComments = post.comments.filter(
+        (comment) => comment._id !== commentIdToDelete.current,
+      );
+
+      // 댓글 목록 업데이트
+      setPost({
+        ...post,
+        comments: nextComments,
+      });
+  }
+};
+```
+
+하지만 이것은 클라이언트만의 자체적인 업데이트이며,   
+**서버의 최신 데이터를 반영한 것이라고 할 수 없다.**   
+이 때문에 문제가 발생한다.  
+위에서 보았듯이, 유저 1은 댓글을 작성했지만   
+유저 2의 댓글 목록에는 반영되지 않는 문제가 생기는 것이다.  
+  
+## SWR을 적용해보자  
+이러한 문제를 해결할 수 있는 것이 SWR이다.  
+SWR의 풀네임은 stale-while-revalidate로,  
+**캐시(스태일)로부터 데이터를 반환한 후,**  
+**fetch 요청(재검증)을 하고,**  
+**최종적으로 최신화된 데이터를 가져오는 전략**이다.   
+  
+또한, SWR은 데이터를 한 번 가져오고 끝내는 것이 아니라,  
+**사용자 포커스 및 네트워크 재연결 시 데이터를 최신으로 즉각 갱신**해준다.   
+바로 이것이 중요하다.  
+  
+코드에 SWR을 적용해보자. 
+먼저 데이터를 가져오는 부분이다.   
+```jsx
+const fetcher = (url) => axios.get(url).then((res) => res.data);
+const postId = location.pathname.split('/')[3];
+
+const { data: post, mutate } = useSWR(
+  `${process.env.REACT_APP_API_URL}/posts/${postId}`,
+  fetcher,
+);
+```
+useSWR을 사용하여 key와 fetcher 함수를 넣어준다.   
+SWR은 key라는 url에 접근하여 fetcher를 실행한 결과를 반환한다.   
+(fetcher를 전역적으로 설정할 수도 있다)  
+그리고 반환받은 데이터를 post에 저장해 사용한다.   
+  
+mutate는 캐시 데이터를 갱신 및 유효성 검증을 요청할 수 있는 함수다.   
+[https://swr.vercel.app/ko/docs/mutation](https://swr.vercel.app/ko/docs/mutation)  
+이를 사용해 post 데이터(캐시 데이터)를 업데이트 해 보자.   
+```jsx
+const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!localToken) {
+      setLoginModalOn(true);
+      return;
+    }
+    if (!inputRef.current.value) {
+      return;
+    }
+    const newComment = await onAddComment(post._id, inputRef.current.value);
+
+    // mutate를 사용해 캐시 데이터를 업데이트한다. 
+    mutate(
+      {
+        ...post,
+        comments: [...post.comments, newComment],
+      },
+    );
+  };
+
+const handleDeleteComment = async () => {
+    setCommentModalOn(false);
+    if (commentIdToDelete.current) {
+      await onDeleteComment(commentIdToDelete.current);
+    
+      // mutate를 사용해 캐시 데이터를 업데이트한다. 
+      mutate(
+        {
+          ...post,
+          comments: post.comments.filter(({ _id }) => _id !== commentIdToDelete.current),
+        },
+      );
+    }
+  }
+```
+
+댓글 등록 및 삭제 시, 로컬에서 캐시 데이터를 즉시 업데이트한다.  
+그리고 SWR은 이 로컬 데이터가 올바른지 확인하기 위해  
+갱신(다시 가져오기)을 트리거한다.  
+이제 결과물을 보자.   
+  
+**유저1과 유저2는 댓글 UI에서 실시간으로 대화를 나눌 수 있을까?**   
+아래 영상을 참고해주시기 바란다.   
+  
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/193081559-e75fbdfb-f5ed-4983-bb1f-7c59f5872ebf.mp4" type="video/mp4">
+</video>
+  
+문제가 해결되었다.  
+댓글 UI에서 최신 데이터로 갱신이 이루어지기 때문에  
+두 유저는 이제 실시간으로 대화를 나누는 것이 가능해졌다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/193081552-24a812f4-2156-4d02-8afa-afaddc2d7ba0.png" 
+width="50%" style="margin-left: 0"/>
+
+기본적으로 포커스 및 네트워크 재연결 시 데이터가 최신으로 자동 갱신되며,   
+위 코드에서 작성한 바와 같이,   
+muate를 사용해서 특정한 상황에서 갱신을 직접 요청할 수도 있고,   
+갱신 주기를 임의로 설정하는 것 또한 가능하다.   
+  
+## 결론
+<mark>클라이언트와 서버 데이터의 동기화 문제는 무척이나 중요하다.</mark>   
+특히 댓글창과 같이 데이터의 업데이트가 실시간으로 이루어지는   
+UI에서는 더욱 말이다. 만약 SWR이 아니었다면,  
+어떤 상황 또는 주기에 따라 데이터를 리패칭하는 로직을 작성해야 했을 것이다.  
+가능은 했겠지만, 코드가 상당히 길어졌을 것이다.  
+이 **일반적이면서도 은근히 골치 아픈 동기화의 문제**를  
+간단하게 해결해준다는 점에서 SWR은 무척이나 유용한 도구라고 생각한다.  
+앞으로 공식문서를 통해 더 공부하면서 잘 사용해봐야겠다.  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 봐주시기 바랍니다. 
+
