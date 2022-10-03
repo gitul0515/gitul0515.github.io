@@ -3,7 +3,7 @@ layout: post
 title: '무한스크롤에서 API 호출 이슈 & 해결안'
 date: 2022-06-11 12:12:52 +0900
 categories: 리액트
-tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
+tags: [중간프로젝트, 리액트, 데브코스, 리팩토링_초록집사]
 ---
 
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지">
@@ -41,31 +41,28 @@ const MainPage = () => {
 
   useEffect(() => {
     (async () => {
-      const nextPosts = await getPostsPart({
+      const { data: nextPosts }= await getPostsPart({
         offset,
         limit: LIMIT,
-      }).then((res) => res.data);
+      });
       setPosts(nextPosts);
       setOffset(offset + 5);
       setMax(nextPosts[0].channel.posts.length);
     })();
   }, []);
 
-  const onIntersect = useCallback(
-    async ([entry], observer) => {
+  const onIntersect = async ([entry], observer) => {
       if (entry.isIntersecting && !isLoading && offset < max) {
         setIsLoading(true);
         setOffset(offset + 5);
-        const nextPosts = await getPostsPart({
+        const { data: nextPosts } = await getPostsPart({
           offset,
           limit: LIMIT,
-        }).then((res) => res.data);
+        });
         setPosts([...posts, ...nextPosts]);
         setIsLoading(false);
       }
-    },
-    [isLoading, offset, max, posts],
-  );
+    };
 
   useEffect(() => {
     let observer;
@@ -75,8 +72,7 @@ const MainPage = () => {
       });
       observer.observe(targetRef.current);
     }
-    return () => observer && observer.disconnect();
-  }, [targetRef, onIntersect]);
+  }, [posts.length]);
 
   return (
     <PageWrapper header nav info>
@@ -107,13 +103,11 @@ export default MainPage;
 ```
 
 ### 문제 해결 
-원인: <mark>관찰을 끝낸 Observer가 제거되지 않았기 때문이다.</mark> 
+원인: <mark>관찰을 끝낸 observer가 제거되지 않았기 때문이다.</mark> 
 
 IntersectionObserver를 생성하는 useEffect 훅을 보자.  
-targetRef 또는 onIntersect의 값이 변경되면  
-옵저버를 새롭게 생성하고 있다.  
-
-targetRef는 마지막 게시물 요소이고, onIntersect는 콜백함수다.  
+posts.length의 값이 변경되면 옵저버를 새롭게 생성하고 있다.  
+targetRef.current는 마지막 게시물 요소이고, onIntersect는 콜백함수다.  
 
 ```javascript
   useEffect(() => {
@@ -124,46 +118,54 @@ targetRef는 마지막 게시물 요소이고, onIntersect는 콜백함수다.
       });
       observer.observe(targetRef.current);
     }
-    return () => observer && observer.disconnect();
-  }, [targetRef, onIntersect]);
+  }, [posts.length]);
 ```
 
-여기서 targetRef가 중요하다.  
-서버 요청을 통해 리렌더링이 발생하면 targetRef가 변경된다.  
-그리고 IntersectionObserver가 다시 생성된다.  
+posts.length가 변경되면 IntersectionObserver가 다시 생성된다.  
 
 <mark>그럼 예전의 IntersectionObserver는 어떻게 될까?</mark>  
 <mark>당연히 사라지지 않고 그대로 남아있게 된다!</mark>
 
 <mark>따라서 이미 관찰을 끝낸 IntersectionObserver를 제거하는 작업이 필요하다.</mark>  
-unobserve() 또는 disconnect()를 통해서 가능하다. 
+다음과 같이 useEffect의 클린업에서  
+observe가 관찰하는 모든 요소에 대하여 관찰을 중단시킨다. 
 
 ```javascript
-  const onIntersect = useCallback(
-    async ([entry], observer) => {
+  useEffect(() => {
+    let observer;
+    if (targetRef.current) {
+      observer = new IntersectionObserver(onIntersect, {
+        threshold: 0.4,
+      });
+      observer.observe(targetRef.current);
+    }
+    return () => observer && observer.disconnect(); // 추가한 코드
+  }, [posts.length]);
+```
+
+그리고 onIntersect에서도 unobserve를 통해  
+기존 observer에 대한 관찰을 중단시킨다.  
+
+```javascript
+  const onIntersect = async ([entry], observer) => {
       if (entry.isIntersecting && !isLoading && offset < max) {
         observer.unobserve(entry.target); // 추가한 코드
         setIsLoading(true);
         setOffset(offset + 5);
-        const nextPosts = await getPostsPart({
+        const { data: nextPosts } = await getPostsPart({
           offset,
           limit: LIMIT,
-        }).then((res) => res.data);
+        });
         setPosts([...posts, ...nextPosts]);
         setIsLoading(false);
       }
-    },
-    [isLoading, offset, max, posts],
-  );
+    };
+
 ```
 
-관찰을 완료했다면, 해당 observe는 이제 필요없으므로  
-unobserve()를 통해 해당 요소에 대한 관찰을 중단시켰다. 
-
-만약 이 처리가 없다면 해당 observer는 계속해서 요소를 관찰할 것이고,  
-의도치 않은 서버 요청이 발생하게 되고 만다. 
-
-unobserve()를 추가한 뒤에는 무한스크롤이 정상적으로 동작한다. 
+만약 이러한 처리가 없다면 해당 observer는 계속해서 요소를 관찰할 것이고,  
+의도치 않은 서버 요청이 발생하고 만다.  
+클린업 및 unobserve()를 추가한 뒤에는 무한스크롤이 정상적으로 동작한다.  
 
 <video width="60%" controls="controls">
   <source src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/gb2_3.mp4?raw=true" type="video/mp4">

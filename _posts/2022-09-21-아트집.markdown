@@ -3,7 +3,7 @@ layout: post
 title: '버그 해결 - SWR의 캐시 이슈'
 date: 2022-09-21 21:12:52 +0900
 categories: 리액트
-tags: [최종프로젝트, 리액트, 데브코스]
+tags: [최종프로젝트, 리액트, 데브코스, 리팩토링_아트집]
 ---
 
 <img src="https://user-images.githubusercontent.com/80658269/186460505-18b5868c-8ba3-4b76-8f1f-a475dc990f85.png" width="100%" />

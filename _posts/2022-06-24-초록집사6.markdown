@@ -3,7 +3,7 @@ layout: post
 title: '<초록집사> 프로젝트 회고'
 date: 2022-06-24 12:12:52 +0900
 categories: 프로젝트리뷰
-tags: [프로젝트리뷰, 초록집사, 리액트, 데브코스]
+tags: [중간프로젝트, 리액트, 데브코스]
 ---
 
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/greenbutler.png?raw=true" alt="초록집사 표지">
