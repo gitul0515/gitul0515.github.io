@@ -1,0 +1,331 @@
+---
+layout: post
+title: 'SWR의 캐싱과 프리패칭1'
+date: 2022-10-05 12:12:52 +0900
+categories: 리액트
+tags: [중간프로젝트, 리액트, 데브코스, 리팩토링_초록집사]
+---
+  
+## 문제 상황
+나는 초록집사 프로젝트에서   
+‘메인페이지’와 ‘게시물 상세 페이지’를 맡았다.   
+그런데 문제가 한 가지 있었다.   
+그것은, 이 두 페이지에서 사용하는 서버 API의 성능이 다소 느리다는 것이었다.   
+
+### 게시물 목록 조회 API  
+  게시물 목록을 offset과 limit를 통해 부분적으로 조회할 수 있다.   
+  axios를 사용한 호출 함수는 아래와 같다.   
+  
+```jsx
+// 게시물 목록 조회 API
+export const getPostsPart = ({ offset, limit }) => {
+  return request({
+    method: API_METHOD.GET,
+    url: `/posts/channel/${process.env.REACT_APP_CHANNEL_ID}`,
+    params: {
+      offset,
+      limit,
+    },
+  });
+};
+```
+
+나는 한 번에 5개의 게시물을 조회하는데, 이때 약 0.8 ~ 1.3s가 소요된다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/194316056-a9bcb3cd-3284-4df6-bb7f-93d2694aabce.png" width="100%" style="margin-left: 0"/>
+
+### 게시물 상세 조회 API  
+  특정 게시물의 정보를 상세 조회할 수 있는 API이다.   
+  axios를 사용한 호출 함수는 아래와 같다.   
+  
+```jsx
+// 게시물 상세 조회 API
+export const getPostData = (postId) => {
+  return request({
+    method: API_METHOD.GET,
+    url: `/posts/${postId}`,
+  });
+};
+```
+게시물 상세 조회 API는 평균적으로 약 0.3 ~ 1s가 소요된다.   
+
+
+<img src="https://user-images.githubusercontent.com/80658269/194316075-4fc60ce5-fcfa-447b-8bd0-77bf9c81b3ae.png" width="100%" style="margin-left: 0"/>
+
+<img src="https://user-images.githubusercontent.com/80658269/194316092-c6e9738f-b0d2-415d-88b9-3a09fd9024e4.png" width="100%" style="margin-left: 0"/>
+
+API를 통한 데이터의 로딩 시간이 상당히 느리기 때문에   
+화면을 렌더링하는 작업도 그만큼 뒤로 밀리게 된다.   
+특히, 두 API를 사용하는 페이지는   
+**유저의 진입이 빈번하게 발생하는 페이지기 때문에 문제가 심각하다.**   
+앱이 전반적으로 느리다는 인상을 유저에게 심어주게 되는 것이다.   
+아래 영상을 참고해주시기 바란다.   
+
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/194316137-cf2604a8-eb07-4859-8f25-77576ddc2e0e.mp4" type="video/mp4">
+</video>
+
+화면의 빠른 전환이야말로 CSR의 장점인데  
+그 장점을 잃어버리게 되어버리고 마는 것이다….ㅠㅠ  
+  
+보통 이런 상황에서 사용하는 방법은   
+**Skeleton 또는 Spinner UI를 placeholder로 삽입하는 것**이다.   
+그러면 데이터의 로딩 속도는 줄일 수 없을지라도,   
+**유저가 느끼는 체감 시간을 현저하게 낮추어줄 수 있다.**   
+그런 점에서 무척 효과적인 방식이라고 할 수 있다.   
+  
+하지만 그럼에도 불구하고, 데이터의 느린 로딩을 완전히 보완해주지는 못한다.   
+그리고 한편으로, 나는 이런 생각이 들었다.   
+<mark>이 문제를 해결하는 방법이 placeholder 외에는 존재하지 않는 것일까?</mark>   
+<mark>만약 API로 한 번 불러온 데이터를 클라이언트에서</mark>  
+<mark>보관하면서 재사용할 수 있다면, 다시 말해 캐싱(Caching)을 사용한다면</mark>   
+<mark>이 문제를 보완할 수 있지 않을까라는 생각을 하게 되었다.</mark>   
+이것이 내가 SWR의 캐싱 전략을 이 문제에 적용하게 된 배경이다.   
+  
+SWR에 관한 자세한 설명은 이 글에서는 생략하겠다.   
+내가 이전에 작성했던 글 또는 공식 문서를 참고해주시기 바란다.   
+  
+SWR 글: [https://gitul0515.github.io/리액트/2022/08/26/아트집.html](https://gitul0515.github.io/%EB%A6%AC%EC%95%A1%ED%8A%B8/2022/08/26/%EC%95%84%ED%8A%B8%EC%A7%91.html)  
+공식 문서: [https://swr.vercel.app/ko](https://swr.vercel.app/ko)  
+  
+## SWR 설치 및 전역 설정  
+먼저 SWR을 설치해보자.   
+터미널에서 `yarn add swr` 명령어를 통해 간단하게 설치할 수 있다.   
+swr은 전역적으로 옵션을 설정할 수 있다.   
+swr을 편리하게 사용하기 위해 swrOptions라는 파일을 따로 생성해보자.   
+
+```jsx
+// swrOptions.js
+import { instance } from './common';
+
+export const swrOptions = {
+  fetcher: async (url) => {
+    const { data } = await instance.get(url);
+    return data;
+  },
+};
+```
+fetcher는 swr이 url에서 데이터를 가져올 때 사용하는 비동기 함수다.   
+나는 기존에 만들었던 instance라는 axios 객체를 import하여 재사용하였다.   
+API의 baseURL 및 timeout 설정을 그대로 적용하기 위함이었다.   
+
+```jsx
+// common.js
+export const instance = axios.create({
+  timeout: 5000,
+});
+
+instance.defaults.baseURL = process.env.REACT_APP_API_URL;
+```
+그리고 아래와 같이 App.jsx에 SWRConfig를 추가한 뒤에  
+위에서 만든 swrOptions를 넣어주었다.   
+
+```jsx
+// App.jsx
+import { SWRConfig } from 'swr';
+import { swrOptions } from 'utils/apis/swrOptions';
+
+const App = () => {
+  return (
+    <SWRConfig value={swrOptions}> // 추가
+      <ContextProviders>
+        <DefaultTemplate>
+          <Router />
+        </DefaultTemplate>
+      </ContextProviders>
+    </SWRConfig>
+  );
+};
+```
+이제 useSWR을 사용할 경우, fetcher 및 baseUrl을 직접 명시할 필요가 없다.   
+전역적으로 설정한 옵션이 동작하기 때문이다.   
+  
+## SWR로의 마이그레이션  
+이제 문제를 해결해 보자.   
+먼저 현재 상황을 명확하게 파악하는 것이 중요하다.   
+그림으로 다시 나타내면 아래와 같다.   
+  
+<img src="https://user-images.githubusercontent.com/80658269/194316113-7dcf9db4-145f-44ca-b9bb-ed9461fd82e3.png" width="80%" style="margin-left: 0"/>
+  
+메인 페이지에서는 게시물을 5개씩 불러와 무한 스크롤로 연결한다.   
+데이터의 로딩 과정이 약 0.8 ~ 1.3s 소요된다.   
+후술하겠지만, 이 데이터는 업데이트가 자주 발생하는 데이터임을 말해둔다.   
+(좋아요 등록 및 삭제, 게시물 생성, 수정, 삭제 등)  
+이 때문에 문제가 약간 더 복잡해졌다.   
+  
+게시물 상세 페이지에서의 데이터 로딩은 약 0.3 ~ 1s가 소요된다.   
+아주 느린 것은 아니지만, 그래도 보완할 필요가 있다고 생각한다.   
+  
+본격적으로 코드를 보도록 하자.   
+두 페이지에서는 첫 마운트 시에 useEffect를 통해서 데이터를 불러오고 있다.   
+이 로직을 useSWR로 바꿔보도록 하자.     
+먼저 메인 페이지이다.   
+
+```jsx
+// 메인 페이지
+const MainPage = () => {
+
+  useEffect(() => {
+      (async () => {
+        const { data: nextPosts } = await getPostsPart({
+          offset,
+          limit: LIMIT,
+        });
+        setPosts(nextPosts);
+        setMax(nextPosts[0].channel.posts.length);
+        setOffset(offset + LIMIT);
+      })();
+    }, []);
+
+  // 중략...
+}
+```
+useSWR을 사용해서 처음 5개의 데이터를 패칭해온다.   
+데이터가 오면 이것을 setPosts를 통해 posts에 넣어 사용하는 것은 동일하다.   
+
+```jsx
+// 메인 페이지
+import useSWR from 'swr';
+
+const MainPage = () => {
+
+  const { data: initialPosts } = useSWR(
+      `/posts/channel/${process.env.REACT_APP_CHANNEL_ID_TOTAL}?offset=0&limit=5`,
+      );
+
+  useEffect(() => {
+    if (initialPosts) {
+      setPosts([...initialPosts]);
+      setMax(initialPosts[0].channel.posts.length);
+      setOffset(offset + LIMIT);
+    }
+  }, [initialPosts]);
+
+	// 중략...
+}
+```
+
+그럼 SWR은 이제  
+`/posts/channel/${process.env.REACT_APP_CHANNEL_ID_TOTAL}?offset=0&limit=5`라는   
+API key 값을 캐싱한다. 이 key에 해당하는 API 호출이 발생하면   
+SWR은 캐싱한 데이터를 재사용한다.   
+  
+즉 useSWR이 해당 key로 호출되면, 캐싱한 데이터를 먼저 빠르게 보여준 뒤에,  
+SWR은 서버의 업데이트 여부를 확인한다. (유효성 검증)  
+그리고 업데이트가 발생했다면 데이터를 최신으로 갱신해준다.   
+이것이 SWR의 캐싱 전략이다.   
+  
+useSWR을 게시물 상세 페이지에도 적용해보자.   
+
+```jsx
+// 게시물 상세 페이지
+const PostDetailPage = () => {
+	const location = useLocation();
+	useEffect(() => {
+	    const postId = location.pathname.split('/')[3];
+	    (async () => {
+	      const { data: initialPost } = await getPostData(postId);
+	      setPost(initialPost);
+	    })();
+	  }, []);
+
+  // ...중략
+}
+```
+
+```jsx
+// 게시물 상세 페이지
+import useSWR from 'swr';
+
+const PostDetailPage = () => {
+	const location = useLocation();
+	
+	const postId = location.pathname.split('/')[3];
+	const { data: post } = useSWR(`/posts/${postId}`);
+
+  // ... 중략
+}
+```
+마찬가지로 SWR은 이제 `/posts/${postId}`라는 API key 값을 캐싱하여 재사용한다.   
+우선 현재까지의 결과물을 보도록 하자.   
+  
+after
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/194316151-60b9fe87-732b-4399-bff7-7d8c926fc2f0.mp4" type="video/mp4">
+</video>
+
+페이지의 진입 속도가 눈에 띄게 빨라졌다.  
+캐싱된 데이터를 재사용하므로,  
+데이터의 로딩 속도와는 관계없이 즉시 렌더링이 가능하기 때문이다.  
+아래의 before 영상과 비교해주시기 바란다.  
+  
+before
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/194316137-cf2604a8-eb07-4859-8f25-77576ddc2e0e.mp4" type="video/mp4">
+</video>
+
+useSWR을 사용한 것만으로도 괄목할 만한 개선을 이루었지만,   
+아직 이것만으로는 충분하다고 말할 수 없다.   
+아래와 같은 이유들 때문이다.   
+
+## 보완해야 할 점
+
+### 업데이트 시 깜빡임
+상술하였듯이, 게시물 데이터는 업데이트가 자주 발생하는 데이터다.   
+유저가 게시물에 좋아요를 누르거나 취소할 수 있고, 댓글을 작성할 수 있으며,   
+게시물을 추가하거나, 수정하거나, 삭제할 수 있다.   
+  
+물론 SWR은 캐시 데이터를 사용한 뒤, 최신 데이터로 갱신을 해 주므로  
+약 1초(유효성을 검증하고 최신 데이터를 가져오는 시간)가 지난 뒤에는   
+데이터의 업데이트를 모두 반영할 수 있다.   
+그러나 **도중에 깜빡임 현상이 발생한다는 것이 문제이다.**   
+  
+예를 들어, 게시물에 좋아요를 눌렀는데 그것이 반영되지 않고  
+1초 후에 반영이 되면서 깜빡거리는 현상이 발생하는 것이다.   
+예를 들어, 어떤 게시물을 삭제했는데 그것이 반영되지 않고   
+1초 후에 삭제가 되면서 깜빡거리는 현상이 발생한다.   
+사소하지만, 분명히 UX에 좋지 않은 요소라고 할 수 있다.   
+
+이를 막으려면 **SWR의 mutate 함수를 통해 캐시 데이터를 로컬에서 업데이트** 해 
+주어야 한다.  
+다음 글에서 이것을 적용해볼 것이다.   
+
+### 첫 진입 시에는 캐싱 불가
+한 번 들어갔다 나온 페이지는 캐싱 처리가 가능하지만,   
+처음 들어간 페이지는 캐싱이 되지 않은 상태이므로 여전히 속도가 느린 문제가 있다.   
+이를 해결하기 위해서 **SWR의 프리패칭을 적용**해보려고 한다.   
+  
+프리패칭은 사용자가 게시물을 클릭하기 전,   
+<mark>해당 게시물의 데이터를 미리 로드함으로써 속도를 높이는 기술</mark>이다.   
+프리패칭을 사용한다면, 첫 페이지 진입 시에도 즉시 렌더링이 가능할 것이다.   
+그러나 한편으로, 이것은 <mark>장단점이 뚜렷한 기술이라고 생각한다.</mark>   
+잘못 사용하면 불필요한 API를 과도하게 호출함으로써   
+서버의 부담이 가중될 수 있기 때문이다.   
+  
+이러한 단점을 염두에 두고, 다음 글에서 신중하게 적용해보도록 하겠다.   
+
+### useSWRInfinite
+SWR에는 무한스크롤 전용 훅인 useSWRInfinite라는 훅이 존재한다.   
+나의 경우도 무한스크롤을 사용하고 있으므로, 이 훅이 더 적합할 것이다.   
+그러나 리서치 및 직접 사용을 해 본 결과,   
+**useSWRInfinite는 적합하지 않다**는 생각이 들었다.   
+  
+상술하였듯이, 게시물 리스트 데이터는 업데이트가 매우 빈번하다.   
+그러나 **useSWRInfinite는 이러한 가변 데이터에 적합하지 않다.**   
+처음에 불러온 리스트에 대해서만 최신성이 보장되고,   
+이후 불러오는 리스트는 최신성이 보장되지 않기 때문이다.   
+  
+물론 revalidateAll이라는 옵션을 켜면 가능하지만,   
+**아직 최적화가 이루어지지 않은 탓인지**   
+**API가 너무나도 많이 호출되고 속도가 매우 느린 현상이 관찰되었다.**   
+  
+어쩔 수 없이, 나의 무한스크롤에서는 useSWRInfinite를 사용하지 않고   
+**처음 불러오는 5개의 데이터에 대해서만 useSWR을 적용하여 관리**하기로 하였다.   
+상당히 아쉬운 결정이었지만,   
+적합하지 않은 기술을 무리하게 적용할 수는 없다고 생각한다.  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 봐주시기 바랍니다. 
+
