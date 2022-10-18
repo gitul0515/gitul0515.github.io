@@ -3,7 +3,7 @@ layout: post
 title: '바닐라 JS 프로젝트에서 API key 숨기기'
 date: 2022-06-27 11:12:52 +0900
 categories: 자바스크립트
-tags: [개인프로젝트, 자바스크립트]
+tags: [자바스크립트]
 ---
   
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/bookrest/title.png?raw=true" alt="표제 이미지">

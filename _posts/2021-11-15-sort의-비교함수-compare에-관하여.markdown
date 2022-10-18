@@ -3,7 +3,7 @@ layout: post
 title:  "sort()의 비교 함수 compare 정리"
 date:   2021-11-15 11:12:59 +0900
 categories: 자바스크립트
-tags: [자바스크립트 문법]
+tags: [자바스크립트]
 ---
 자바스크립트에서 sort 함수로 숫자 배열을 정렬할 때는 비교 함수 compare를 인자로 전달해야 한다.  
 (객체 배열도 마찬가지. 이건 key에 따라 결과가 달라진다)  

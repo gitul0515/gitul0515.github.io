@@ -3,7 +3,7 @@ layout: post
 title: "[3일차 TIL] 자료구조 기초"
 date: 2022-03-23 12:12:52 +0900
 categories: 데브코스
-tags: [자바스크립트, 자료구조, 알고리즘, 데브코스, TIL]
+tags: [자바스크립트, 자료구조&알고리즘, 데브코스, TIL]
 ---
 
 <img src="https://github.com/gitul0515/gitul0515.github.io/blob/main/_posts/image/TIL.png?raw=true" alt="TIL 이미지">

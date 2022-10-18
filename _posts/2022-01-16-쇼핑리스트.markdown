@@ -3,7 +3,7 @@ layout: post
 title: "'쇼핑리스트' 프로젝트 리뷰"
 date: 2022-01-12 12:12:52 +0900
 categories: 프로젝트리뷰
-tags: [개인프로젝트, HTML/CSS, 자바스크립트]
+tags: [자바스크립트]
 ---
 
 ### 개요

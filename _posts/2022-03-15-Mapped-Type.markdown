@@ -3,7 +3,7 @@ layout: post
 title: "Proxify Type을 사용해 변수 캡슐화하기"
 date: 2022-03-15 12:12:52 +0900
 categories: 자바스크립트
-tags: [자바스크립트, 타입스크립트]
+tags: [자바스크립트]
 ---
 
 ### 맵드 타입 

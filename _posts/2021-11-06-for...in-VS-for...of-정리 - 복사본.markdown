@@ -3,7 +3,7 @@ layout: post
 title:  "for...in & for...of 정리"
 date:   2021-11-06 07:32:59 +0900
 categories: 자바스크립트
-tags: [자바스크립트 문법]
+tags: [자바스크립트]
 ---
 for...in은 '객체'를 순환하고, for...of는 '배열'을 순환한다.
 ### 1. for...in은 객체를 순환한다. 

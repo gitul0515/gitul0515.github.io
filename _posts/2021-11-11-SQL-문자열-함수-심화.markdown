@@ -3,7 +3,7 @@ layout: post
 title:  "SQL 문자열 함수 (심화)"
 date:   2021-11-11 01:12:59 +0900
 categories: 기타
-tags: [SQL, 데이터베이스]
+tags: [기타]
 ---
 SQL 문자열 함수(심화)를 정리하였다.
 
