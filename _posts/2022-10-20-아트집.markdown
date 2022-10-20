@@ -1,0 +1,301 @@
+---
+layout: post
+title: '리액트 폼 성능 최적화1 - 상태 함께두기'
+date: 2022-10-20 21:12:52 +0900
+categories: 리액트
+tags: [최종프로젝트, 리액트, 데브코스, 리팩토링_아트집]
+---
+
+## 성능 저하 문제
+
+후기를 작성 및 수정할 수 있는  
+Form 컴포넌트에서 성능이 저하되는 현상이 관찰되었다.   
+유저가 입력 필드에 글자를 빠르게 입력하면   
+버벅거리는 현상이 발생하면서 몇 초가 지난뒤에야 입력이 반영된다.   
+  
+<video width="60%" controls="controls">
+  <source src="https://user-images.githubusercontent.com/80658269/196989842-57886664-9321-484e-b54e-e62f5509c285.mp4" type="video/mp4">
+</video>
+<br>
+이에 Performance 탭을 통해 성능을 프로파일링해 보았다.   
+내가 수행한 상호작용은 ‘제목’ 입력창을 선택하고   
+‘a’를 연속으로 10번 입력한 뒤, 해당 입력창을 선택 해제하는 것이었다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/196989852-2a3d1dd8-f491-45a6-aca8-cea39d097536.png" width="60%" style="margin-left: 0"/>
+  
+그 결과는 아래와 같다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/196989872-51f08e1f-a017-44ab-99e1-1d199a42b6c3.png" width="80%" style="margin-left: 0"/>
+
+keypress 이벤트를 처리하는데 무려 91.01ms나 걸린 것을 알 수 있다.  
+CPU 성능을 전혀 낮추지 않았음에도 말이다.  
+솔직히 말해서, 이는 심각한 수치다….  
+**이상적인 Frame time이 16ms 이내이며,**   
+**50ms를 넘어가면 Long Task로 간주된다**는 것을 생각해 보자.   
+**자바스크립트의 실행이 그보다 오래걸리면, 유저는 버벅거림을 감지하기 시작한다.**   
+더군다나 Total blocking time이 약 394.19ms로  
+약 0.4s 동안 메인 스레드가 차단되었음을 알 수 있다.   
+이 기간 동안, 자바스크립트 엔진은 해당 이벤트를 처리하는 것 외에는   
+아무것도 할 수 없었던 셈이다.   
+  
+## 원인 분석
+성능 저하의 원인을 추론해보니,   
+**유저가 입력 필드에 글자를 입력할 때마다**   
+**폼 전체가 리렌더링이 되는 것이 원인**이라는 생각이 들었다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/196989877-b9524f3b-7f4c-473d-8177-a398a7f256b8.png" width="50%" style="margin-left: 0"/>
+
+리액트 개발자 도구의 프로파일러를 사용해 다시 검사해보니,  
+폼의 모든 구성요소들이 리렌더링되는 것을 확인할 수 있었다.  
+그렇다, 이것이 원인이었다.   
+
+<img src="https://user-images.githubusercontent.com/80658269/196989888-5f5c3a50-fc78-466f-9b19-f809982fa18a.png" width="70%" style="margin-left: 0"/>
+
+만일 폼의 규모가 작다면,   
+즉 입력 필드가 2~3개이거나 유효성 검사 로직이 없다면   
+전체 리렌더링이 발생해도 그리 큰 문제는 아닐지 모른다.   
+하지만 나의 폼은 입력 필드가 총 6개이며,   
+전시회를 검색해서 포스터를 표시해주거나,   
+사진을 업로드하는 등의 기능도 있기에 규모가 꽤 복잡하다고 할 수 있었다.   
+그렇기에 성능 저하 현상이 나타난 것이고, 이 문제를 해결해야만 했다.   
+  
+**그렇다면 입력 필드 하나와 상호작용함에도**   
+**폼 전체가 리렌더링이 되는 이유는 무엇일까?**   
+우선 폼의 구조를 살펴보도록 하자. 그림으로 나타내면 아래와 같다.   
+
+![Untitled 4](https://user-images.githubusercontent.com/80658269/196989906-076756be-4713-45f0-9223-043bc6b64a8f.png)
+
+주목해서 봐야할 것은 폼과 각 입력 필드이다.   
+**폼의 규모가 지나치게 크고, 수행하는 작업이 많다는 것을 알 수 있다.**   
+(각 필드의 상태 저장 및 관리, 유효성 검사, 폼 데이터 제출, 스타일 로직 등)  
+특히 폼에서 각 필드의 상태를 useState로 관리 및 변경하면서   
+해당 필드에 내려주는 형태를 취하고 있다.   
+예컨대 아래와 같이 말이다.   
+  
+```jsx
+// ReviewEditForm.tsx
+const [title, setTitle] = useState('');
+const [content, setContent] = useState('');
+
+return (
+  // 중략...
+  <TitleInput value={title} onChange={setTitle} wasSubmitted={wasSubmitted} />
+  <ContentTextArea value={content} onChange={setContent} wasSubmitted={wasSubmitted} />
+)
+```
+
+그러므로 **각 입력 필드에서 값이 변경되면**   
+**Form의 state가 변경되어 전체 리렌더링이 발생하는 것이었다.**   
+  
+초기에 이렇게 구현했던 이유는,   
+상태를 부모 컴포넌트(폼)으로 끌어올려서 자식 컴포넌트(입력 필드)를   
+관리하는 것이 구현이 편리하기 때문이다.   
+전형적인 제어 컴포넌트 방식으로 구현한 폼이라고 할 수 있겠다.   
+(리액트의 state에 의해 값이 관리, 변경되는 방식)   
+  
+그러나 **하나의 입력 필드에서만 상호 작용이 발생하는데**   
+**전체 폼이 리렌더링된다는 것은 아무리 생각해도 비효율적이다.**   
+리액트가 최적화를 해준다고는 하나,   
+노드의 변경 여부를 비교하는 비용도 발생하므로, 마냥 무시할 수 없는 비용이다.   
+해당 입력 필드만 리렌더링이 되도록 조치할 필요가 있었다.   
+
+## 해결을 시도한 방법
+이 리렌더링 문제를 해결할 수 있는 최적화 방법에는 무엇이 있을까?   
+나는 총 3가지의 방법을 떠올렸고 차례로 시도해보았다.   
+  
+### 1. 메모이제이션
+첫 번째 시도는 가장 일반적인 방식인 React.memo를 사용하는 것이었다.   
+React.memo로 래핑한 컴포넌트는 props가 변경되지 않을 경우   
+리렌더링 되지 않는다. 부모 컴포넌트가 리렌더링되더라도 말이다.   
+  
+사용법은 간단하다.  
+아래와 같이 메모이제이션할 컴포넌트를 React.memo로 래핑해주면 된다.  
+나의 경우는 입력 필드 및 제출 버튼을 React.memo로 래핑해야 할 것이다.   
+
+```tsx
+export default React.memo(TitleInput);
+```
+  
+그럼 이것으로 끝일까? 물론 그렇지 않다.   
+하위 컴포넌트에 전달하는 props의 값들이   
+의도치 않게 변경되지 않도록 잘 관리해주어야 한다.   
+예컨대 함수를 전달한다면 useCallback을 사용함으로써,   
+객체를 전달하다면 useMemo를 사용함으로써 말이다.   
+  
+그런데 한편으로 이것은,   
+<mark>개발자의 입장에서 코드의 복잡성이 증가하는 것이라고 할 수 있다.</mark>   
+함수 및 객체를 useCallback 및 useMemo로 래핑하면   
+코드의 길이가 늘어날 뿐만 아니라,   
+의존 배열의 값을 신경써야 하는 등 관리해야할 것이 늘어난다.   
+또한, props의 값들이 제대로 보존 또는 변경되는지 일일이 신경써야만 한다.   
+이러한 복잡성 때문에 의도치 않은 버그가 발생할지도 모른다.   
+  
+또한, **이것은 리액트(컴퓨터)의 부담이 증가하는 것이기도 하다.**   
+리액트는 메모이제이션한 값을 따로 저장해야 하고,   
+리렌더링마다 props의 변경을 체크해야만 한다.   
+만약 React.memo를 많이 사용한다면, 이 비용은 결코 무시할 수 없게 될 것이다.   
+  
+이러한 이유로,   
+<mark>나는 메모이제이션이 최선의 방법이 아니라는 생각이 들었고,</mark>   
+<mark>더 비용이 적고, 복잡성이 낮으며, 지속적일 수 있는 방법을 찾게 되었다.</mark>   
+  
+### 2. 디바운스
+두 번째 시도는 디바운스를 사용하는 것이었다.   
+당면한 문제는 유저가 글자를 빠르게 입력할 경우,   
+폼의 리렌더링이 과도하게 발생하여 버벅임이 나타나는 것이다.   
+  
+만약 디바운스를 적용한다면,   
+유저가 입력을 하는 중에는 반응하지 않다가,   
+입력을 완전히 끝낸 뒤에 폼이 반응하게 만들 수 있다.   
+그러면 폼의 리렌더링의 횟수가 획기적으로 감소할 것이다.   
+  
+나는 이 방법을 통해 실제로 리렌더링을 줄였고, 성능을 개선할 수 있었다.   
+이렇게 문제를 해결하고 끝낼 수도 있었지만….나는 조금 아쉬웠다.   
+  
+왜냐하면, **폼 전체의 리렌더링 문제는 해결하지 못하였기 때문이다.**  
+디바운스를 통해, 연속된 입력으로 인한 과부하는 막을 수 있었으나,  
+여전히 폼은 전체 리렌더링이 발생하고 있다.  
+  
+  
+<img src="https://user-images.githubusercontent.com/80658269/196989877-b9524f3b-7f4c-473d-8177-a398a7f256b8.png" width="50%" style="margin-left: 0"/>
+  
+하나의 필드에서 입력이 발생했을 뿐인데,   
+어째서 폼 전체가 리렌더링 되어야만 하는 것일까?   
+만약 폼의 규모가 지금보다 더 커진다면  
+(필드의 개수가 늘어난다거나, 유효성 검사의 로직이 복잡해진다든가)  
+여전히 성능 문제를 낳을 수 있을 것이라는 생각이 들었다.   
+  
+<mark>현재 폼의 구조가 근본적으로 비효율적이며,</mark>   
+<mark>그로 인해 이와 같은 문제가 발생하는 것은 아닐까라는 생각이 들었다.</mark>   
+  
+### 3. 상태 함께두기
+나는 리서치를 통해,   
+**상태 함께두기(state colocation)라는 원칙(또는 기법)을 알게 되었다.**   
+이 원칙의 핵심은 아래와 같다.   
+  
+<mark>“코드를 최대한 그것과 연관있는 곳에 배치시켜라”</mark>  
+<mark>“상태(state)를 그것이 사용되는 컴포넌트에 가깝게 위치시켜라”</mark>  
+  
+이 원칙이 유효한 까닭은  
+**컴포넌트의 상태를 하위 컴포넌트로 위임할 경우,**  
+**리렌더링의 범위가 자연스럽게 줄어들기 때문이다.**  
+이를 통해 **성능 향상을 얻을 수 있다는 것**이 이 원칙의 요지였다.   
+  
+(참고 자료)  
+<a href="https://ideveloper2.dev/blog/2019-10-12--state-colocation-will-make-your-react-app-faster" target="_blank">State Colocation will make your React app faster</a>  
+  
+나는 상태 함께두기의 관점에서,   
+현재 폼의 구조를 다시 분석해 보았다.   
+  
+<img src="https://user-images.githubusercontent.com/80658269/196989917-70396ec1-a3fc-4316-af79-1e9679fe65a9.png" width="80%" style="margin-left: 0"/>  
+  
+폼의 규모가 비대하고, 수행하는 작업이 너무 많다.   
+각 필드의 상태 관리 및 변경, 유효성 검사, 스타일 로직을   
+폼에서 수행해야 할 필요가 있을까?   
+이것들은 **각 필드로 옮기는 것이, 함께 두기(colocation)의 원칙에 맞을 것이다.**   
+가령 아래와 같이 변경할 수 있다.   
+  
+![Untitled 6](https://user-images.githubusercontent.com/80658269/196989929-7bdc2bbc-7bf4-4f84-90c9-847ef6f3d30f.png)
+  
+좋다! **구조가 훨씬 명확하고 깔끔해졌으며,**   
+**각 컴포넌트가 맡은 역할들이 효과적으로 분배되었다.**   
+코드 역시 그러하다.  
+가령 제목(title) 입력 필드를 아래와 같이 구현하였다.  
+주석을 달아서 설명하였다.   
+
+```tsx
+import { Input } from 'antd';
+import { useEffect, useState } from 'react';
+import ErrorMessage, { ERROR_MESSAGE_COMMON } from '../../utils/ErrorMessage';
+
+const MAX_LENGTH = 30;
+const MESSAGE = {
+  ...ERROR_MESSAGE_COMMON,
+  EXCEEDED_MAX_LENGTH: `${MAX_LENGTH}자 이하로 작성해 주세요.`,
+};
+
+interface TitleInputProps {
+  prevTitle?: string;
+  wasSubmitted: boolean;
+}
+
+// 필드에서 자체적으로 state(입력값)과 error(유효성 에러)를 관리한다. 
+// state 또는 error가 변경되면 이 컴포넌트만 리렌더링이 발생할 것이다. 
+const TitleInput = ({ prevTitle, wasSubmitted }: TitleInputProps) => {
+  const [title, setTitle] = useState(prevTitle || '');
+  const [touched, setTouched] = useState(false);
+  const [error, setError] = useState(prevTitle ? MESSAGE.NO_ERROR : MESSAGE.REQUIRED_VALUE);
+  const displayErrorMessage = (wasSubmitted || touched) && !!error; // 폼이 제출되었거나 필드가 터치된 경우만 에러 메시지를 표시
+
+  // 초기값(priveTitle)이 변경될 수 있기에 useEffect로 처리하였다.
+  useEffect(() => {
+    setTitle(prevTitle ? prevTitle : '');
+    setError(prevTitle ? MESSAGE.NO_ERROR : MESSAGE.REQUIRED_VALUE);
+  }, [prevTitle]);
+
+  const handleChange = (value: string) => {
+    setTitle(value);
+    validate(value);
+  };
+
+  // 유효성 검사
+  const validate = (value: string) => {
+    if (!value) {
+      setError(MESSAGE.REQUIRED_VALUE);
+      return;
+    }
+    if (value.length > MAX_LENGTH) {
+      setError(MESSAGE.EXCEEDED_MAX_LENGTH);
+      return;
+    }
+    setError(MESSAGE.NO_ERROR);
+  };
+
+  return (
+    <>
+      <Input
+        placeholder="제목을 입력해주세요"
+        showCount
+        value={title}
+        maxLength={30}
+        onChange={(e) => handleChange(e.target.value)}
+        onBlur={() => setTouched(true)}
+      />
+      <ErrorMessage message={error} visible={displayErrorMessage} />
+    </>
+  );
+};
+
+export default TitleInput;
+```
+
+그렇다. <mark>기존에는 폼에서 관리하던 state와 error를</mark>   
+<mark>해당 입력 필드로 위임하여 리렌더링의 범위를 줄인 것이 핵심이다.</mark>   
+그렇다면 렌더링 성능이 실제로 개선되었을까?   
+하지만 이를 체크하기 이전에,  
+조금은 까다로울 수 있는 문제를 한 가지 해결해야만 한다.   
+  
+그것은, **폼에서 데이터를 제출하려면**   
+**각 입력 필드의 state 및 error를 반드시 알아야만 하는데,**   
+**현재 구조로서는 이것이 어려워졌다는 것**이다.   
+당연하다. 리액트는 단방향 흐름이므로,   
+자식에서 부모 컴포넌트의 state를 전달받기는 쉽지만, 그 반대는 어렵기 때문이다.   
+  
+그러나 물론 불가능한 것은 아니다.   
+여러가지 방법이 존재하지만,   
+**나의 경우는 useImperativeHandle 훅을 사용하여 이 문제를 해결하였다.**   
+다음 글에서 이에 대해서 설명할 예정이다.   
+또한, **내가 작성한 폼의 코드를 전체적으로 설명할 것이며**   
+**실제로 성능이 개선되었는지 Performance 탭의 프로파일링을 통해 확인할 것**이다.  
+많은 기대(?) 부탁드리며, 이번 글은 여기서 마치도록 하겠다.   
+  
+## 참고자료
+
+[(번역) 리액트 폼 성능 개선](https://velog.io/@superlipbalm/improve-the-performance-of-your-react-forms)  
+[State Colocation will make your React app faster](https://kentcdodds.com/blog/state-colocation-will-make-your-react-app-faster)  
+[React Form 컴포넌트 개발기](https://tech.inflab.com/202207-rallit-form-refactoring/colocation/)  
+
+--------------------------------------------------------------------
+
+학습을 진행하면서 작성한 글 입니다.  
+정확하지 않은 지식이 있을 수 있습니다. 참고로만 읽어주시기 바랍니다.   
