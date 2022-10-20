@@ -1,5 +1,5 @@
 ## 기홍의 Github 블로그
-https://gitul0515.github.io
+<a href="https://gitul0515.github.io" target="_blank">https://gitul0515.github.io</a>
 
 이 블로그는 제가 프로그래밍을 공부하면서 <br>
 배운 내용, 특별한 경험, 느낀점을 기록하는 작은 공간입니다. <br>
